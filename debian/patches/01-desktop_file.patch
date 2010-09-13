@@ -1,0 +1,21 @@
+Author: Alessio Treglia <alessio@debian.org>
+Description: Fix desktop file as per spec.
+Forwarded: no
+---
+ gMTP.desktop |    5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+--- gMTP.orig/gMTP.desktop
++++ gMTP/gMTP.desktop
+@@ -1,9 +1,8 @@
+ [Desktop Entry]
+ Version=1.0
+-Encoding=UTF-8
+ Name=gMTP
+ Comment=A simple MTP Client for MP3 Players
+ Exec=gMTP
+-Icon=gMTPicon.png
++Icon=gMTPicon
+ Type=Application
+-Categories=Application;Multimedia;
++Categories=AudioVideo;Audio;

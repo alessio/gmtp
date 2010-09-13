@@ -1,0 +1,5 @@
+gmtp (0.6-1) unstable; urgency=low
+
+  * Initial release. (Closes: #596724)
+
+ -- Alessio Treglia <alessio@debian.org>  Mon, 13 Sep 2010 18:19:44 +0200

@@ -1,0 +1,30 @@
+Source: gmtp
+Section: sound
+Priority: optional
+Maintainer: Alessio Treglia <alessio@debian.org>
+Build-Depends: debhelper (>= 7),
+ pkg-config,
+ libgtk2.0-dev,
+ libglib2.0-dev,
+ libgconf2-dev,
+ libid3tag0-dev,
+ libmtp-dev
+Standards-Version: 3.9.1
+Homepage: http://chewy509.110mb.com/gMTP.html
+Vcs-Git: git://git.debian.org/collab-maint/gmtp.git
+Vcs-Browser: http://git.debian.org/?p=collab-maint/gmtp.git
+
+Package: gmtp
+Architecture: any
+Depends: ${shlibs:Depends},
+ ${misc:Depends}
+Description: simple MP3 player client for MTP based devices
+ gMTP is a simple and light-weight interface to the features provided
+ by libmtp, which allows users to manage the files stored on any MTP
+ music player supported by the libraries, including those with
+ multiple storage devices (e.g. mobile phones).
+ .
+ It doesn't provide complex features such as playlist management,
+ it just makes transferring files from and to devices easy, by
+ allowing users to upload, download and remove files on the device
+ with a fast and easy-to-use graphical interface.

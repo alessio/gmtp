@@ -1,0 +1,17 @@
+Author: Alessio Treglia <alessio@debian.org>
+Description: Add missing #include statement in mtp.c.
+Forwarded: no
+---
+ mtp.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- gMTP.orig/mtp.c
++++ gMTP/mtp.c
+@@ -12,6 +12,7 @@
+ #include <strings.h>
+ #include <id3tag.h>
+ #include <stdio.h>
++#include <string.h>
+ 
+ #include "main.h"
+ #include "callbacks.h"
