@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+	<head>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" media="screen" title="Modern" />
+		<link rel="stylesheet" type="text/css" href="css/header.css" media="print" title="Modern" />
+		<script type="text/javascript" src="css/ui.js"></script>
+		<title>gMTP v0.6 - A simple MP3 Player Client for Solaris 10</title>
+	</head>
+	<body>
+		<div class="noprint">
+			<p class="align_right">
+				<a href="#styles" title="Increase font size" onclick="changeFontSize(1); return false;"><img src="css/fontsizelarger.gif" alt="Increase font size" /></a>
+				<a href="#styles" title="Decrease font size" onclick="changeFontSize(-1); return false;"><img src="css/fontsizesmaller.gif" alt="Decrease font size" /></a>
+				<a href="#styles" title="Toggle font serif" onclick="toggleSerif(); return false;"><img src="css/fontseriftoggle.gif" alt="Toggle font serif" /></a>
+				<a href="#styles" title="Revert styles to default" onclick="revertStyles(); return false;"><img src="css/reset.gif" alt="Revert styles" /></a>
+			</p>
+			<hr />
+		</div>
+		<div id="ContentArea">
+			<h1>gMTP v0.6 - A simple MP3 player client for Sun Solaris 10</h1>
+			<p>
+				Darran Kartaschew (aka Chewy509).<br />
+					Released under the CDDL License. 2009,2010.
+			</p>
+			<h2>A simple MP3 player client for MTP based devices.</h2>
+			<p>
+				Due to Sun Solaris 10 not having a native MTP based MP3 player support application, 
+				I've written my own GUI client for MTP devices. It is very simple, only supporting 
+				upload, download and removal of files as needed. For other needs like playlist support,
+				I suggest you look at Gnomad2 or another MTP client. (Be aware Gnomad2 does need a very recent GTK/Glib
+				version, as well as a few other libraries).
+			</p>
+			<h2>Requirements</h2>
+			<ul>
+				<li>Sun Solaris 10, other UNIX or UNIX-like system (should run on Linux and FreeBSD unmodified, but is untested)</li>
+				<li>GTK+-2.0 (v2.4.9)</li>
+				<li>Glib-2.0 (v2.4.1)</li>
+				<li>GConf-2.0 (v2.6.1)</li>
+				<li>libmtp (v1.0.0) - http://libmtp.sourceforge.net/ </li>
+				<li>libid3tag (v0.15.1b) - http://sourceforge.net/projects/mad/files/ </li>
+				<li>libusb (v0.15)</li>
+			</ul>
+			<h2>Installation</h2>
+			<h3>libmtp</h3>
+			<p>Download the libmtp source code, unpack and run: <code>$ INSTALL=/usr/ucb/install MAKE=gmake ./configure</code></p>
+			<p>Note: If you don't have a libusb.pc file (configure complains about libusb being missing), then you can use this 
+				<a href="libusb.pc.txt">one</a>. Copy to <code>/usr/lib/pkgconfig/libusb.pc</code>.</p>
+			<p>Then normal <code>make</code> and <code>make install</code> routine. </p>
+			<p>Once installed, test the mtp package by connecting your MP3 player, and run <code>mtp-detect</code> from a commandline.
+				If all is well, you should see your device details scroll across the screen.</p>
+			<h3>libid3tag</h3>
+			<p>Download the libid3tag source code, unpack and run: <code>$ INSTALL=/usr/ucb/install MAKE=gmake ./configure</code></p>
+			<p>Then normal <code>make</code> and <code>make install</code> routine. </p>
+			<p>copy <a href="id3tag.pc.txt">id3tag.pc</a> to <code>/usr/local/lib/pkgconfig/id3tag.pc</code></p>
+			<h3>gMTP</h3>
+			<p>Download and unpack the source code, and run the normal <code>make</code> and <code>make install</code> routine.</p>
+			<p>run <code>gMTP</code> to start the appication. Feel free to add a launcher to the JDS menu as needed.</p>
+			<p>Note: For Solaris10/OpenSolaris, the default makefile assumes you have SunStudio 12 installed. If you don't then modify the make file to use <code>gcc</code> instead. All other OSes will use gcc as default.</p>
+			<h2>Downloads</h2>
+			<p>
+				gMTP Source: <a href="gMTP-0.6-i386.tar.gz">gMTP-0.6-i386.tar.gz</a><br />
+				gMTP Solaris 10 Package: <a href="gMTP-0.6-i386.pkg.gz">gMTP-0.6-i386.pkg.gz</a> (Warning: Contains libmtp and libid3tag, please build from source if
+				you already have these installed).
+			</p>
+			<h2>Usage</h2>
+			<p>run <code>gMTP</code>. Use the Toolbar buttons for various functions. Files surrounded by "&lt; .. &gt;" are folders, double click to enter. Double clicking
+			a file, will download it. Use the Preferences to set upload and download paths. (Note: the last upload/download path is saved when you exit the application).
+			Drag'n'Drop support is enabled for uploading files to the device. Simply drop the desired files/folder into gMTP to upload the files/folders to the device.
+			</p>
+			<h2>FAQ</h2>
+			<p>Q. What is MTP?<br />
+			A. MTP = Media Transfer Protocol. MTP has been adopted by most major MP3 and Mobile Phone manufacturers as the
+			method of talking to devices to upload/download files to/from a PC.
+			See <a href="http://en.wikipedia.org/wiki/Media_Transfer_Protocol">Media Transfer Protocol</a> for more information.</p>
+			<p>Q. Why does&#39;t gMTP support my iPod or Creative Nomad player<br />
+			A. These devices do not use MTP for moving data to/from a device. Apple iPod uses it's own custom protocol
+			in additional to USB Mass Storage and Creative devices use NJB.</p>
+			<p>Q. I have a MTP enabled device and it is connected to my PC, but it doesn't get detected by gMTP?<br />
+			A. Most devices are capable of using different modes to talk to your PC, so ensure that the device is in MTP mode.<br />
+			A. Or, libmtp doesn't know about your device or how to handle it correctly. Run <code>$ mtp-detect</code> to see
+			if it can be found.</p>
+			<p>Q. I get asked which storage device to connect to when I connect to my mobile phone?<br />
+			A. Some devices (notably mobile phones), have both internal storage (non-removable) and external storage (removable
+			storage) in the form of a micro-SD card or M2 card, and gMTP will treat these as different storage devices.</p>
+			<p>Q. Does gMTP support Albums and uploading Album Art?<br />
+			A. Yes. Album data is autocreated/updated when you upload a MP3 (or other supported audio file) by using information
+			contained within the audio file, eg. Using the ID3 Tag information in an MP3 file. Once the Album has been created,
+			you can upload the album art via the <code>Edit</code> / <code>Add Album Art</code> menu option.</p>
+			<p>Q. Will this software work on OpenSolaris, Linux, *BSD or other POSIX Operating System<br />
+			A. It should work fine but is untested. </p>
+			<p>Q. What about SPARC, ARM or other non-x86 systems?<br />
+			A. It should work fine but is untested. (If libmtp and libid3tag work fine on your platform, then gMTP should as well).</p>
+			<p>Q. Do I need root access to use gMTP?<br />
+			A. On Solaris 10, in general No. (If you do need root access, then double check your RBAC setup for your user then). On Linux, in general No, as libmtp
+			should have set your udev rules correctly for libmtp known devices.</p>
+			<p>Q. I have uploaded FLAC and/or OGG files to my MP3 player, and they don't show up as tracks on my player?<br />
+			A. I've yet to add in support for FLAC and OGG metadata, so I can give the player the correct information. (Patches welcome).</p>
+			
+
+			<h2>Sreen Shots</h2>
+			<p>
+				<img src="Capture1.png" alt="gMTP screen shot" />
+			</p>
+			<p>Default interface gMTP</p>
+			<p>
+				<img src="Capture2.png" alt="gMTP screen shot" />
+			</p>
+			<p>Device Properties</p>
+			<p>
+				<img src="Capture3.png" alt="gMTP screen shot" />
+			</p>
+			<p>gMTP Preferences</p>
+			<p>
+				<img src="Capture4.png" alt="gMTP screen shot" />
+			</p>
+			<p>Album Art</p>
+			<p>
+				<img src="Capture5.png" alt="gMTP screen shot" />
+			</p>
+			<p>File Upload to Device</p>
+
+		</div>
+		<hr />
+		<div class="noprint">
+			<p class="align_right">
+				<a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml11" alt="Valid XHTML 1.1" height="31" width="88" /></a>
+			</p>
+		</div>
+	</body>
+</html>
+
+

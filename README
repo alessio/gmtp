@@ -1,0 +1,61 @@
+gMTP v0.6
+
+A basic MP3 Player client for Sun Solaris 10.
+
+Supports MTP devices including those with multiple storage devices
+(typically mobile phones). Supports Drag'n'Drop interface for
+upload/download of files.
+
+See INSTALL for build/install instructions.
+
+FAQ
+
+Q. What is MTP?
+A. MTP = Media Transfer Protocol. MTP has been adopted by most major MP3 and 
+   Mobile Phone manufacturers as the method of talking to devices to
+   upload/download files to/from a PC. See
+   http://en.wikipedia.org/wiki/Media_Transfer_Protocol for more information.
+
+Q. Why does't gMTP support my iPod or Creative Nomad player
+A. These devices do not use MTP for moving data to/from a device. Apple iPod 
+   uses it's own custom protocol in additional to USB Mass Storage and Creative
+   devices use NJB.
+
+Q. I have a MTP enabled device and it is connected to my PC, but it doesn't get
+   detected by gMTP?
+A. Most devices are capable of using different modes to talk to your PC, so
+   ensure that the device is in MTP mode.
+A. Or, libmtp doesn't know about your device or how to handle it correctly.
+   Run $ mtp-detect to see if it can be found.
+
+Q. I get asked which storage device to connect to when I connect to my mobile
+   phone?
+A. Some devices (notably mobile phones), have both internal storage
+   (non-removable) and external storage (removable storage) in the form of a
+   micro-SD card or M2 card, and gMTP will treat these as different storage
+   devices.
+
+Q. Will this software work on OpenSolaris, Linux, *BSD or other POSIX Operating
+   System
+A. It should work fine but is largely untested.
+
+Q. What about SPARC, ARM or other non-x86 systems?
+A. It should work fine but is untested. (If libmtp and libid3tag work fine on
+   your platform, then gMTP should as well).
+
+Q. Do I need root access to use gMTP?
+A. On Solaris 10, in general No. (If you do need root access, then double
+   check your RBAC setup for your user then). On Linux, in general No, as libmtp
+   should have set your udev rules correctly.
+
+Q. I have uploaded FLAC and/or OGG files to my MP3 player, and they don't show
+   up as tracks on my player?
+A. I've yet to add in support for FLAC and OGG metadata, so I can give the
+   player the correct information. (Patches welcome).
+
+TODO List
+
+1. id3 tag / metadata support for OGG, FLAC and WMA when adding in files
+   to device. (MP3 metadata already done).
+2. Basic Playlist support. (Still need to think about the best way to do this).
+

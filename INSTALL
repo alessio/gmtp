@@ -1,0 +1,37 @@
+gMTP - a basic MTP client.
+
+Requirements:
+
+gtk+2.0 v2.4+
+Gconf-2.0
+libmtp
+libid3tag
+libusb
+
+Installation.
+
+For most platforms:
+$ make
+# make install
+
+Note: Use 'gmake' on Solaris and *BSD.
+Note: On Solaris 10, you need to logout and back in again once installed.
+  (This is a gconf issue on Solaris 10).
+
+If it doesn't compile, check the top of the Makefile for custom CFLAGS.
+
+Note: Solaris 10 does not ship with a PKGCONFIG file for libusb. One can be
+found in this package.
+Note: libid3tag does not provide a PKGCONFIG file. One can be found in this
+package.
+
+Known to compile with:
+gcc v3.4.3
+gcc v4.5.0
+Sun Studio 12u1
+
+Known to work on:
+Solaris 10 u8
+OpenSolaris 2009.06
+Arch Linux
+

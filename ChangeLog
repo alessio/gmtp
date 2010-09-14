@@ -1,0 +1,67 @@
+-- v0.6 - 23 Jun 2010
+
++ Added abilty to Drag'n'Drop in Folders and have them upload entire folder
+  structure.
+* Fixed compliation issue on Linux based systems.
+* Updated gconf handling.
+* Fixed gconf schema installation. (You need to logout and login on Solaris 10
+  for the schema to be made available to the application after installation).
+
+-- v0.5 - 1 Jun 2010
+
++ Added Tooltips to toolbar buttons.
+* Made default window size now 760px to handle JDS default DPI setting of 96.
+
+-- v0.4 - 12 Jan 2010
+
++ Added right click interace on the main file display area.
++ Added check to see if we are about to overwrite a file on the devices
+  filesystem, and prompt user to overwrite file?
++ Added support for Albums and Album Art. (Albums are created automatically,
+  while art is uploaded by user).
+* Fixed if no lines selected, then display info box to user indicating this
+  on file delete, file download and folder delete operation. (Rather than
+  asking the user to confirm operation on selection and then not doing
+  anything).
+* Cleaned up the find_filetype() function.
+* Fixed column sorting for file size column.
+* Fixed reading MP3 ID3 Tags in relation to the artist. (Now scan all 5 fields
+  that the artist can live in, rather than just the one it should be in).
+
+-- v0.3 - 8 Jan 2010
+
++ gMTP is now relocatable within a filesytem. At startup, it will look at
+  the command used to invoke it, and if an absolute path was used, it will
+  find it's image data from that otherwise will attempt to find itself in
+  the filesystem using the %PATH variable. Just make sure that you copy
+  "../share/gMTP/*" to be relative to the binary if moved, otherwise no
+  pretty icons. You can override any file paths with --datapath option at
+  the CLI. (This was done to allow the SYSV and IPS packages to be
+  relocatable). See main.c (last 2 functions) to see how this is done.
+  If you know a better way that works everywhere, please let me know.
++ Added check to see if we are about to overwrite a file on the hosts
+  filesystem, and prompt user to overwrite file?
++ Added Drag'n'Drop interface (well only drop into gMTP at this time).
+* Changed Toolbar button for connect device description.
+* Fixed process when uploading mp3 to a device to include file metadata
+  as well. eg Artist, Album, Track, etc. (requires libid3tag).
+
+-- v0.2 - 30 Dec 2009
+
++ Added new menu items to mimic toolbar options, eg file upload, file
+  download, etc.
++ Added ability to add and remove folders.
++ Added confirm delete file/folder option when removing files/folder from
+  device.
++ Added ability to change device name.
++ Added in icon for application.
++ Added in SYSV pkg creation in Makefile.
++ Added support for multiple device detection and storage device detection,
+  and selection of device during connection.
++ Updated schema for gconf for new options (confirm remove of file/folders).
++ Updated About Dialog Box.
+
+-- v0.1 - 16  Dec  2009
+
++ Initial version for public. Only does basic items such as upload, download
+  and remove files.

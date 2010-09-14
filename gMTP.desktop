@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=gMTP
+Comment=A simple MTP Client for MP3 Players
+Exec=gMTP
+Icon=gMTPicon.png
+Type=Application
+Categories=Application;Multimedia;
