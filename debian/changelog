@@ -1,3 +1,9 @@
+gmtp (0.6-2) unstable; urgency=low
+
+  * Correct linking order to pass LDFLAGS to the compiler.
+
+ -- Alessio Treglia <alessio@debian.org>  Fri, 05 Nov 2010 11:58:39 +0100
+
 gmtp (0.6-1) unstable; urgency=low
 
   * Initial release. (Closes: #596724)
