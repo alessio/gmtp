@@ -1,6 +1,6 @@
 Author: Alessio Treglia <alessio@debian.org>
 Description:
- Pass LDFLAGS to the linker.
+ Correct linking order to pass LDFLAGS to the linker.
  Set installation prefix to /usr.
  Install data files in /usr/share/gmtp rather than /usr/share/gMTP.
  Show compilation and linking messages.
@@ -10,8 +10,8 @@ Forwarded: not-needed
  Makefile |   58 ++++++++++++++++++++++++++--------------------------------
  1 file changed, 26 insertions(+), 32 deletions(-)
 
---- gMTP.orig/Makefile
-+++ gMTP/Makefile
+--- gmtp.orig/Makefile
++++ gmtp/Makefile
 @@ -1,15 +1,10 @@
  # gMTP Sync tool
  
@@ -45,7 +45,7 @@ Forwarded: not-needed
  gMTP:	$(objects)
 -	@echo "B: gMTP"
 -	@$(CC) -o gMTP $(LD_FLAGS) $(LIBS) $(GTK_LDFLAGS) $(objects)
-+	$(CC) -o gMTP $(LIBS) $(GTK_LDFLAGS) $(LDFLAGS) $(objects)
++	$(CC) $(LDFLAGS) $(objects) $(GTK_LDFLAGS) $(LIBS) -o gMTP
  
  
  .c.o: $(headers)
