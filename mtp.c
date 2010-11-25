@@ -10,8 +10,10 @@
 #include <libgen.h>
 #include <sys/stat.h>
 #include <strings.h>
+#include <string.h>
 #include <id3tag.h>
 #include <stdio.h>
+#include <FLAC/all.h>
 
 #include "main.h"
 #include "callbacks.h"
@@ -19,6 +21,7 @@
 #include "mtp.h"
 #include "prefs.h"
 #include "dnd.h"
+#include "metatag_info.h"
 
 
 // Array with file extensions matched to internal libmtp file types;
@@ -400,7 +403,7 @@ void filesAdd(gchar* filename){
 
     filename_stripped = basename(filename);
     displayProgressBar("File Upload");
-	setProgressFilename(filename_stripped);
+	setProgressFilename(g_strdup(filename_stripped));
 
 	// What we need to do is work what type of file we are sending
     // and either use the general file send, or
@@ -409,7 +412,8 @@ void filesAdd(gchar* filename){
 
     if ((ret == LIBMTP_FILETYPE_MP3) ||
         (ret == LIBMTP_FILETYPE_OGG) ||
-        (ret == LIBMTP_FILETYPE_FLAC) )
+        (ret == LIBMTP_FILETYPE_FLAC) ||
+        (ret == LIBMTP_FILETYPE_WMA ))
     {
         // We have an MP3/Ogg/FLAC file.
         //g_printf("We have a supported audio file with metadata\n");
@@ -420,47 +424,33 @@ void filesAdd(gchar* filename){
         trackfile->filetype = find_filetype (filename_stripped);
         trackfile->parent_id = currentFolderID;
         trackfile->storage_id = DeviceMgr.devicestorage->id;
+        trackfile->album = NULL;
+        trackfile->title = NULL;
+        trackfile->artist = NULL;
+        trackfile->date = NULL;
+        trackfile->genre = NULL;
+        trackfile->tracknumber = 0;
+
         albuminfo = LIBMTP_new_album_t();
         albuminfo->parent_id = currentFolderID;
         albuminfo->storage_id = DeviceMgr.devicestorage->id;
         // Let's collect our metadata from the file, typically id3 tag data.
-        if(ret == LIBMTP_FILETYPE_MP3){
-            // We have an MP3 file, so use id3tag to read the metadata.
-            struct id3_file * id3_file_id = id3_file_open(filename, ID3_FILE_MODE_READONLY);
-            if(id3_file_id != NULL){
-                // We have a valid file, so lets get some data.
-                struct id3_tag* id3_tag_id = id3_file_tag(id3_file_id);
-                // We have our tag data, so now cycle through the fields.
-                trackfile->album = ID3_getFrameText(id3_tag_id, ID3_FRAME_ALBUM);
-                trackfile->title = ID3_getFrameText(id3_tag_id, ID3_FRAME_TITLE);
-                trackfile->artist = ID3_getFrameText(id3_tag_id, ID3_FRAME_ARTIST);
-                trackfile->date = ID3_getFrameText(id3_tag_id, ID3_FRAME_YEAR);
-                trackfile->genre = ID3_getFrameText(id3_tag_id, ID3_FRAME_GENRE);
-                trackfile->tracknumber = atoi(ID3_getFrameText(id3_tag_id, ID3_FRAME_TRACK));
-                // Need below if the default artist field is NULL
-                if(trackfile->artist == NULL)
-                    trackfile->artist = ID3_getFrameText(id3_tag_id, "TPE2");
-                if(trackfile->artist == NULL)
-                    trackfile->artist = ID3_getFrameText(id3_tag_id, "TPE3");
-                if(trackfile->artist == NULL)
-                    trackfile->artist = ID3_getFrameText(id3_tag_id, "TPE4");
-                if(trackfile->artist == NULL)
-                    trackfile->artist = ID3_getFrameText(id3_tag_id, "TCOM");
-                // Need this if using different Year field.
-                if(trackfile->date == NULL)
-                    trackfile->date = ID3_getFrameText(id3_tag_id, "TDRC");
-                // Close our file for reading the fields.
-                id3_file_close(id3_file_id);
-            }
-        } else {
-            // we don't support OGG or FLAC metadata yet?
-            if(ret == LIBMTP_FILETYPE_OGG){
-                // If we have OGG 
+        switch(ret){
+            case LIBMTP_FILETYPE_MP3 :
+                // We have an MP3 file, so use id3tag to read the metadata.
+                get_id3_tags(filename, trackfile);
+                break;
+            case LIBMTP_FILETYPE_OGG:
+                get_ogg_tags(filename, trackfile);
+                break;
+            case LIBMTP_FILETYPE_FLAC:
+                get_flac_tags(filename, trackfile);
+                break;
+            case LIBMTP_FILETYPE_WMA:
+                get_asf_tags(filename, trackfile);
+                break;
+                break;
 
-            } else {
-                // If we have FLAC
-                
-            }
         }
         // Add some data if it's all blank so we don't freak out some players.
         if(trackfile->album == NULL)
@@ -482,10 +472,14 @@ void filesAdd(gchar* filename){
             albuminfo->genre = g_strdup(trackfile->genre);
         }
         // Now send the track
-        ret = LIBMTP_Send_Track_From_File(DeviceMgr.device, filename, trackfile, fileprogress, NULL);
+        //if(ret != LIBMTP_FILETYPE_OGG){
+            ret = LIBMTP_Send_Track_From_File(DeviceMgr.device, filename, trackfile, fileprogress, NULL);
+        //} else {
+        //    ret = LIBMTP_Send_Track_From_File(DeviceMgr.device, filename, trackfile, NULL, NULL);
+        //}
         if (ret != 0) {
             g_print("Error sending track.\n");
-            displayError(g_strconcat("Error sending track to device: <b>", filename, "</b>", NULL));
+            displayError(g_strdup_printf("Error code %d sending track to device: <b>%s</b>", ret, filename, NULL));
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
         }
@@ -650,45 +644,7 @@ void setDeviceName(gchar* devicename){
 	}
 }
 
-gchar * ID3_getFrameText(struct id3_tag *tag, char *frame_name)
-{
-    const id3_ucs4_t *id3_string;
-    struct id3_frame *id3_frame;
-    union id3_field *id3_field;
-    gchar *rtn_string = NULL;
-    enum id3_field_textencoding id3_field_encoding = ID3_FIELD_TEXTENCODING_ISO_8859_1;
 
-    id3_frame = id3_tag_findframe (tag, frame_name, 0);
-    if (id3_frame == NULL)
-        return NULL;
-
-    id3_field = id3_frame_field (id3_frame, 0);
-    if (id3_field && (id3_field_type (id3_field) == ID3_FIELD_TYPE_TEXTENCODING)) {
-        id3_field_encoding = id3_field->number.value;
-    }
-    if (frame_name == ID3_FRAME_COMMENT){
-        id3_field = id3_frame_field (id3_frame, 3);
-    } else {
-        id3_field = id3_frame_field (id3_frame, 1);
-    }
-    if (id3_field == NULL)
-        return NULL;
-    if (frame_name == ID3_FRAME_COMMENT){
-        id3_string = id3_field_getfullstring (id3_field);
-    } else {
-        id3_string = id3_field_getstrings (id3_field, 0);
-    }
-    if (id3_string == NULL)
-        return NULL;
-    if (frame_name == ID3_FRAME_GENRE)
-        id3_string = id3_genre_name (id3_string);
-    if (id3_field_encoding == ID3_FIELD_TEXTENCODING_ISO_8859_1) {
-        rtn_string = (gchar *) id3_ucs4_latin1duplicate (id3_string);
-    } else {
-        rtn_string = (gchar *) id3_ucs4_utf8duplicate (id3_string);
-    }
-    return rtn_string;
-}
 
 gboolean fileExists(gchar* filename){
     // What we have to go is scan the entire file tree looking for
@@ -701,6 +657,8 @@ gboolean fileExists(gchar* filename){
         // Check for matching folder ID and storage ID.
         if((tmpfile->parent_id == currentFolderID) && (tmpfile->storage_id == DeviceMgr.devicestorage->id)){
             // Now test for the file name (do case insensitive cmp for those odd devices);
+//            if(filename == NULL) g_printf("fileExists - filename\n");
+//           if(tmpfile->filename == NULL) g_printf("fileExists - tmpfile->filename\n");
             if(g_ascii_strcasecmp(filename, tmpfile->filename) == 0)
                 return TRUE;
         }

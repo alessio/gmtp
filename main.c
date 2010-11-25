@@ -75,11 +75,11 @@ main (int argc, char *argv[])
 void setFilePaths(int argc, char *argv[]){
     applicationpath = getRuntimePath(argc, argv);
     file_icon_png = g_string_new(applicationpath);
-    file_icon_png = g_string_append(file_icon_png, "/../share/gMTP/icon.png");
+    file_icon_png = g_string_append(file_icon_png, "/../share/gmtp/icon.png");
     file_icon16_png = g_string_new(applicationpath);
-    file_icon16_png = g_string_append(file_icon16_png, "/../share/gMTP/icon-16.png");
+    file_icon16_png = g_string_append(file_icon16_png, "/../share/gmtp/icon-16.png");
     file_about_png = g_string_new(applicationpath);
-    file_about_png = g_string_append(file_about_png, "/../share/gMTP/stock-about-16.png");
+    file_about_png = g_string_append(file_about_png, "/../share/gmtp/stock-about-16.png");
 }
 
 gchar *getRuntimePath(int argc, char *argv[]){

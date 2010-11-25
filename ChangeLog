@@ -1,3 +1,14 @@
+-- v0.7 -
+
++ Added FLAC metadata support (required FLAC 1.2+)
++ Added OggVorbis metadata support (requires vorbis 1.0.1+)
++ Added WMA metadata support.
+* Fixed missing header in mtp.c for some Linux distro's (string.h).
+* Made application and file paths all lower case inline with freedesktop
+  guidelines.
+* Changed *.desktop file inline with freedesktop guidelines.
+* Fixed NULL pointer fault with MP3's that have no TRACKNUMBER tag.
+
 -- v0.6 - 23 Jun 2010
 
 + Added abilty to Drag'n'Drop in Folders and have them upload entire folder

@@ -117,7 +117,7 @@ create_windowMain (void)
 
 	windowMain = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gchar * winTitle;
-	winTitle = g_strconcat(PACKAGE," v", PACKAGE_VERSION, NULL);
+	winTitle = g_strconcat(PACKAGE_TITLE," v", PACKAGE_VERSION, NULL);
 	gtk_window_set_title (GTK_WINDOW (windowMain), (winTitle));
 	gtk_window_set_default_size (GTK_WINDOW (windowMain), 760, 400);
     gtk_window_set_icon_from_file(GTK_WINDOW(windowMain), file_icon_png->str, NULL);
@@ -693,7 +693,6 @@ void __fileDownload(GtkTreeRowReference *Row){
 	fullfilename = g_strndup("", 8192);
 	filename = g_strndup("", 8192);
 	// First of all, lets set the download path.
-	// TODO:    Set download path.
 
 	//g_printf("Download path = %s\n", Preferences.fileSystemDownloadPath->str);
 	// convert the referenece to a path and retrieve the iterator;
@@ -928,7 +927,7 @@ create_windowPreferences (void)
 
 	windowDialog = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gchar * winTitle;
-	winTitle = g_strconcat(PACKAGE," v", PACKAGE_VERSION, " Preferences", NULL);
+	winTitle = g_strconcat(PACKAGE_TITLE," v", PACKAGE_VERSION, " Preferences", NULL);
 	gtk_window_set_title (GTK_WINDOW (windowDialog), winTitle);
 	gtk_window_set_modal(GTK_WINDOW(windowDialog), TRUE);
 	gtk_window_set_transient_for(GTK_WINDOW(windowDialog), GTK_WINDOW(windowMain));
@@ -1597,7 +1596,7 @@ GtkWidget* create_windowProgressDialog (gchar* msg)
 
 	window1 = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gchar * winTitle;
-	winTitle = g_strconcat(PACKAGE," v", PACKAGE_VERSION, NULL);
+	winTitle = g_strconcat(PACKAGE_TITLE," v", PACKAGE_VERSION, NULL);
 	gtk_window_set_title (GTK_WINDOW (window1), winTitle);
 	gtk_window_set_position (GTK_WINDOW (window1), GTK_WIN_POS_CENTER_ON_PARENT);
 	gtk_window_set_modal (GTK_WINDOW (window1), TRUE);
@@ -1650,6 +1649,7 @@ void displayProgressBar (gchar *msg){
 void destroyProgressBar (void){
 	gtk_widget_hide (progressDialog);
 	gtk_widget_destroy (progressDialog);
+    //gtk_object_destroy(GTK_OBJECT(progressDialog));
 	g_free(progressDialog_filename);
 	progressDialog = NULL;
 	progressDialog_Text = NULL;
@@ -1700,14 +1700,14 @@ void displayAbout(void){
     gtk_widget_show(image);
 	gtk_container_add (GTK_CONTAINER (vbox), image);
 
-    version_string = g_strconcat("<span size=\"xx-large\"><b>", PACKAGE," v", PACKAGE_VERSION, "</b></span>", NULL);
+    version_string = g_strconcat("<span size=\"xx-large\"><b>", PACKAGE_TITLE," v", PACKAGE_VERSION, "</b></span>", NULL);
 
     label = gtk_label_new (version_string);
     gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
 	gtk_widget_show(label);
 	gtk_container_add (GTK_CONTAINER (vbox), label);
 
-    label2 = gtk_label_new ("A simple MP3 Player Client for Solaris 10\nand OpenSolaris\n");
+    label2 = gtk_label_new ("A simple MP3 Player Client for Solaris 10\nand other UNIX / UNIX-like systems\n");
     gtk_label_set_use_markup(GTK_LABEL(label2), TRUE);
     gtk_label_set_justify(GTK_LABEL(label2), GTK_JUSTIFY_CENTER);
     //gtk_misc_set_alignment (GTK_MISC (label2), 0, 0.5);
