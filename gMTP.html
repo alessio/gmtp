@@ -6,7 +6,7 @@
 		<link rel="stylesheet" type="text/css" href="css/style.css" media="screen" title="Modern" />
 		<link rel="stylesheet" type="text/css" href="css/header.css" media="print" title="Modern" />
 		<script type="text/javascript" src="css/ui.js"></script>
-		<title>gMTP v0.6 - A simple MP3 Player Client for Solaris 10</title>
+		<title>gMTP v0.7 - A simple MP3 Player Client for Solaris 10</title>
 	</head>
 	<body>
 		<div class="noprint">
@@ -19,28 +19,31 @@
 			<hr />
 		</div>
 		<div id="ContentArea">
-			<h1>gMTP v0.6 - A simple MP3 player client for Sun Solaris 10</h1>
+			<h1>gMTP v0.7 - A simple MP3 player client for Oracle Solaris 10.</h1>
 			<p>
 				Darran Kartaschew (aka Chewy509).<br />
 					Released under the CDDL License. 2009,2010.
 			</p>
 			<h2>A simple MP3 player client for MTP based devices.</h2>
 			<p>
-				Due to Sun Solaris 10 not having a native MTP based MP3 player support application, 
+				Due to Oracle Solaris 10 not having a native MTP based MP3 player support application,
 				I've written my own GUI client for MTP devices. It is very simple, only supporting 
-				upload, download and removal of files as needed. For other needs like playlist support,
-				I suggest you look at Gnomad2 or another MTP client. (Be aware Gnomad2 does need a very recent GTK/Glib
-				version, as well as a few other libraries).
+				upload, download and removal of files as needed. gMTP supports metadata for MP3, FLAC, WMA
+                and OGG audio files, ensuring correct track information on your media player when uploading 
+                audio file. For other needs like ripping from CDs, managing your audio collection, playlist support,
+				I suggest you look at Gnomad2 or another MTP client. (Playlist support however is planned).
 			</p>
 			<h2>Requirements</h2>
 			<ul>
-				<li>Sun Solaris 10, other UNIX or UNIX-like system (should run on Linux and FreeBSD unmodified, but is untested)</li>
+				<li>Oracle Solaris 10, other UNIX or UNIX-like system (should run on GNU/Linux and FreeBSD unmodified)</li>
 				<li>GTK+-2.0 (v2.4.9)</li>
 				<li>Glib-2.0 (v2.4.1)</li>
 				<li>GConf-2.0 (v2.6.1)</li>
 				<li>libmtp (v1.0.0) - http://libmtp.sourceforge.net/ </li>
 				<li>libid3tag (v0.15.1b) - http://sourceforge.net/projects/mad/files/ </li>
 				<li>libusb (v0.15)</li>
+                <li>libvorbis (v1.0.1) - http://www.vorbis.com/ </li>
+                <li>libflac (v1.2+) - http://flac.sourceforge.net/index.html </li>
 			</ul>
 			<h2>Installation</h2>
 			<h3>libmtp</h3>
@@ -54,18 +57,20 @@
 			<p>Download the libid3tag source code, unpack and run: <code>$ INSTALL=/usr/ucb/install MAKE=gmake ./configure</code></p>
 			<p>Then normal <code>make</code> and <code>make install</code> routine. </p>
 			<p>copy <a href="id3tag.pc.txt">id3tag.pc</a> to <code>/usr/local/lib/pkgconfig/id3tag.pc</code></p>
+            <h3>libflac</h3>
+			<p>Download the FLAC source code, unpack and run: <code>$ INSTALL=/usr/ucb/install MAKE=gmake ./configure</code></p>
+			<p>Then normal <code>make</code> and <code>make install</code> routine. </p>
 			<h3>gMTP</h3>
 			<p>Download and unpack the source code, and run the normal <code>make</code> and <code>make install</code> routine.</p>
 			<p>run <code>gMTP</code> to start the appication. Feel free to add a launcher to the JDS menu as needed.</p>
 			<p>Note: For Solaris10/OpenSolaris, the default makefile assumes you have SunStudio 12 installed. If you don't then modify the make file to use <code>gcc</code> instead. All other OSes will use gcc as default.</p>
 			<h2>Downloads</h2>
 			<p>
-				gMTP Source: <a href="gMTP-0.6-i386.tar.gz">gMTP-0.6-i386.tar.gz</a><br />
-				gMTP Solaris 10 Package: <a href="gMTP-0.6-i386.pkg.gz">gMTP-0.6-i386.pkg.gz</a> (Warning: Contains libmtp and libid3tag, please build from source if
-				you already have these installed).
+				gMTP Source: <a href="gMTP-0.7-i386.tar.gz">gMTP-0.7-i386.tar.gz</a><br />
+				gMTP Solaris 10 Package: <a href="gMTP-0.7-i386.pkg.gz">gMTP-0.7-i386.pkg.gz</a> (Warning: Does NOT contain libmtp, libflac or libid3tag).
 			</p>
 			<h2>Usage</h2>
-			<p>run <code>gMTP</code>. Use the Toolbar buttons for various functions. Files surrounded by "&lt; .. &gt;" are folders, double click to enter. Double clicking
+			<p>run <code>gmtp</code>. Use the Toolbar buttons for various functions. Files surrounded by "&lt; .. &gt;" are folders, double click to enter. Double clicking
 			a file, will download it. Use the Preferences to set upload and download paths. (Note: the last upload/download path is saved when you exit the application).
 			Drag'n'Drop support is enabled for uploading files to the device. Simply drop the desired files/folder into gMTP to upload the files/folders to the device.
 			</p>
@@ -89,16 +94,12 @@
 			contained within the audio file, eg. Using the ID3 Tag information in an MP3 file. Once the Album has been created,
 			you can upload the album art via the <code>Edit</code> / <code>Add Album Art</code> menu option.</p>
 			<p>Q. Will this software work on OpenSolaris, Linux, *BSD or other POSIX Operating System<br />
-			A. It should work fine but is untested. </p>
+			A. I have reports that it runs successfully on OpenSolaris, Arch Linux, Debian and Ubuntu. </p>
 			<p>Q. What about SPARC, ARM or other non-x86 systems?<br />
 			A. It should work fine but is untested. (If libmtp and libid3tag work fine on your platform, then gMTP should as well).</p>
 			<p>Q. Do I need root access to use gMTP?<br />
 			A. On Solaris 10, in general No. (If you do need root access, then double check your RBAC setup for your user then). On Linux, in general No, as libmtp
 			should have set your udev rules correctly for libmtp known devices.</p>
-			<p>Q. I have uploaded FLAC and/or OGG files to my MP3 player, and they don't show up as tracks on my player?<br />
-			A. I've yet to add in support for FLAC and OGG metadata, so I can give the player the correct information. (Patches welcome).</p>
-			
-
 			<h2>Sreen Shots</h2>
 			<p>
 				<img src="Capture1.png" alt="gMTP screen shot" />

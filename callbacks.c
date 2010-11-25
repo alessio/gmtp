@@ -234,7 +234,6 @@ void on_PrefsDownloadPath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	GtkWidget *FileDialog;
 	//filename = g_strndup("", 8192);
 	// First of all, lets set the download path.
-	// TODO: Set download path.
 	FileDialog = gtk_file_chooser_dialog_new("Select Path to Download to",
 											 GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 											 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -261,7 +260,6 @@ void on_PrefsUploadPath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	GtkWidget *FileDialog;
 	//filename = g_strndup("", 8192);
 	// First of all, lets set the download path.
-	// TODO: Set download path.
 	FileDialog = gtk_file_chooser_dialog_new("Select Path to Upload From",
 											 GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 											 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,

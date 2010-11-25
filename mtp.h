@@ -47,7 +47,7 @@ LIBMTP_folder_t* getCurrentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t Folder
 LIBMTP_filetype_t find_filetype (const gchar * filename);
 LIBMTP_devicestorage_t* getCurrentDeviceStoragePtr(gint StorageID);
 
-gchar * ID3_getFrameText(struct id3_tag *tag, char *frame_name);
+
 
 #ifdef  __cplusplus
 }

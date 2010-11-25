@@ -2,31 +2,18 @@ i pkginfo
 i postinstall
 d none bin 0755 root root
 d none share 0755 root root
-d none lib 0755 root root
-d none lib/pkgconfig 0755 root root
-d none include 0755 root root
-d none share/gMTP 0755 root root
+d none share/gmtp 0755 root root
 d none share/pixmaps 0755 root root
 d none share/applications 0755 root root
-f none bin/gMTP=gMTP 0755 root root
-f none share/gMTP/icon.png=icon.png 0644 root root
-f none share/gMTP/icon-16.png=icon-16.png 0644 root root
-f none share/gMTP/stock-about-16.png=stock-about-16.png 0644 root root
-f none share/gMTP/README=README 0644 root root
-f none share/gMTP/COPYING=COPYING 0644 root root
-f none share/gMTP/ChangeLog=ChangeLog 0644 root root
-f none share/gMTP/AUTHORS=AUTHORS 0644 root root
-f none share/gMTP/gMTP.schema=gMTP.schema 0644 root root
+f none bin/gmtp=gmtp 0755 root root
+f none share/gmtp/icon.png=icon.png 0644 root root
+f none share/gmtp/icon-16.png=icon-16.png 0644 root root
+f none share/gmtp/stock-about-16.png=stock-about-16.png 0644 root root
+f none share/gmtp/README=README 0644 root root
+f none share/gmtp/COPYING=COPYING 0644 root root
+f none share/gmtp/ChangeLog=ChangeLog 0644 root root
+f none share/gmtp/AUTHORS=AUTHORS 0644 root root
+f none share/gmtp/gMTP.schema=gMTP.schema 0644 root root
 f none share/pixmaps/gMTPicon.png=icon.png 0644 root root
 f none share/applications/gMTP.desktop=gMTP.desktop 0644 root root
-f none lib/libmtp.so.8.3.3=/usr/local/lib/libmtp.so.8.3.3 0755 root root
-s none lib/libmtp.so.8=lib/libmtp.so.8.3.3
-s none lib/libmtp.so=lib/libmtp.so.8
-f none lib/libid3tag.so.0.3.0=/usr/local/lib/libid3tag.so.0.3.0 0755 root root
-s none lib/libid3tag.so.0=lib/libid3tag.so.0.3.0
-s none lib/libid3tag.so=lib/libid3tag.so.0
-f none include/id3tag.h=/usr/local/include/id3tag.h 0644 root root
-f none include/libmtp.h=/usr/local/include/libmtp.h 0644 root root
-f none lib/pkgconfig/id3tag.pc=id3tag.pc 0644 root root
-f none lib/pkgconfig/libusb.pc=libusb.pc 0644 root root
-f none lib/pkgconfig/libmtp.pc=/usr/local/lib/pkgconfig/libmtp.pc 0644 root root
+

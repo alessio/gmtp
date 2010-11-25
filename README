@@ -1,6 +1,6 @@
-gMTP v0.6
+gMTP v0.7
 
-A basic MP3 Player client for Sun Solaris 10.
+A basic MP3 Player client for Oracle Solaris 10.
 
 Supports MTP devices including those with multiple storage devices
 (typically mobile phones). Supports Drag'n'Drop interface for
@@ -37,7 +37,8 @@ A. Some devices (notably mobile phones), have both internal storage
 
 Q. Will this software work on OpenSolaris, Linux, *BSD or other POSIX Operating
    System
-A. It should work fine but is largely untested.
+A. I have reports that it runs successfully on OpenSolaris, Arch Linux, Debian
+   and Ubuntu.
 
 Q. What about SPARC, ARM or other non-x86 systems?
 A. It should work fine but is untested. (If libmtp and libid3tag work fine on
@@ -48,14 +49,9 @@ A. On Solaris 10, in general No. (If you do need root access, then double
    check your RBAC setup for your user then). On Linux, in general No, as libmtp
    should have set your udev rules correctly.
 
-Q. I have uploaded FLAC and/or OGG files to my MP3 player, and they don't show
-   up as tracks on my player?
-A. I've yet to add in support for FLAC and OGG metadata, so I can give the
-   player the correct information. (Patches welcome).
 
 TODO List
 
-1. id3 tag / metadata support for OGG, FLAC and WMA when adding in files
-   to device. (MP3 metadata already done).
-2. Basic Playlist support. (Still need to think about the best way to do this).
+1. Basic Playlist support. (Still need to think about the best way to do this).
+2. More audio file type metadata if requested.
 

@@ -12,8 +12,9 @@
 extern "C" {
 #endif
 
-#define PACKAGE "gMTP"
-#define PACKAGE_VERSION "0.6"
+#define PACKAGE "gmtp"
+#define PACKAGE_TITLE "gMTP"
+#define PACKAGE_VERSION "0.7"
 
 
 #ifdef	__cplusplus
