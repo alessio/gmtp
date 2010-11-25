@@ -1,16 +1,19 @@
-gmtp (0.7-1) UNRELEASED; urgency=low
+gmtp (0.7-1) unstable; urgency=low
 
-  * Imported Upstream version 0.7
+  * Imported Upstream version 0.7.
   * Drop 01-desktop_file.patch, applied upstream.
-  * Refresh patch, partially adopted by upstream.
+  * Refresh 02-makefile.patch, partially adopted by upstream.
   * Drop 03-missing_header.patch, applied upstream.
   * Drop 04-fix_application_path.patch, applied upstream.
   * Rename manpage file as the application name is lower case now.
   * Update gmtp.manpages.
-  * Small improvements to the buildsystem patch.
+  * debian/control:
+    - Build-Depends on libflac-dev,libvorbis-dev.
   * Improve debian/watch file.
 
- -- Alessio Treglia <alessio@debian.org>  Thu, 25 Nov 2010 15:25:27 +0100
+ -- Alessio Treglia <alessio@debian.org>  Thu, 25 Nov 2010 16:07:17 +0100
+
+ -- Alessio Treglia <alessio@debian.org>  Thu, 25 Nov 2010 16:07:06 +0100
 
 gmtp (0.6-2) unstable; urgency=low
 
