@@ -2,12 +2,12 @@ Author: Alessio Treglia <alessio@debian.org>
 Description:
  Set installation prefix to /usr (Debian-specific)
  Set GConf schemas's file extension properly.
- Don't install documentation files (Debian-specific)
+ Don't install documentation files by default (Debian-specific).
 Forwarded: yes
 Last-Update: 2010-11-25
 ---
- Makefile |   10 ++--------
- 1 file changed, 2 insertions(+), 8 deletions(-)
+ Makefile |   18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
 
 --- gmtp.orig/Makefile
 +++ gmtp/Makefile
@@ -20,7 +20,7 @@ Last-Update: 2010-11-25
  VER = 0.7
  # Note: If you update above, please update the config.h and pkginfo file as well.
  
-@@ -51,23 +51,17 @@ install: gmtp
+@@ -51,23 +51,25 @@ install: gmtp
  	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
  	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/applications
  	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/pixmaps
@@ -42,6 +42,14 @@ Last-Update: 2010-11-25
  	mv $(DESTDIR)$(PREFIX)/share/pixmaps/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
 -	GCONF_CONFIG_SOURCE=`$(GCONFTOOL) --get-default-source` $(GCONFTOOL) --makefile-install-rule gMTP.schema
 +	mv $(DESTDIR)$(PREFIX)/share/gconf/schemas/gMTP.schema $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
++
++install-doc:
++	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc
++	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
++	$(INSTALL) -m 644 README $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
++	$(INSTALL) -m 644 COPYING $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
++	$(INSTALL) -m 644 ChangeLog $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
++	$(INSTALL) -m 644 AUTHORS $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
  
  clean:
  	rm -f $(objects) core gmtp *.o *~ $(PKGFILE).gz
