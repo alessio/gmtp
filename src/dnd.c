@@ -1,3 +1,16 @@
+/* 
+*
+*   File: dnd.c
+*   
+*   Copyright (C) 2009-2011 Darran Kartaschew
+*
+*   This file is part of the gMTP package.
+*
+*   gMTP is free software; you can redistribute it and/or modify
+*   it under the terms of the BSD License as included within the
+*   file 'COPYING' located in the root directory
+*
+*/
 /*
         This file contains all the Drag and Drop Functionality for gMTP
  */
@@ -7,12 +20,14 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
+#include <glib/gi18n.h>
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #include <sys/types.h>
 #include <libgen.h>
 #include <string.h>
 #include <id3tag.h>
+#include <libmtp.h>
 
 #include "main.h"
 #include "interface.h"

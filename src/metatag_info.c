@@ -1,15 +1,23 @@
-/*
- * File:   metatag_info.c
- * Author: darran
- *
- * Created on November 11, 2010, 8:54 PM
- */
+/* 
+*
+*   File: metatag_info.c
+*   
+*   Copyright (C) 2009-2011 Darran Kartaschew
+*
+*   This file is part of the gMTP package.
+*
+*   gMTP is free software; you can redistribute it and/or modify
+*   it under the terms of the BSD License as included within the
+*   file 'COPYING' located in the root directory
+*
+*/
 
 #include "config.h"
 
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <glib/gi18n.h>
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #include <libmtp.h>
@@ -29,6 +37,25 @@
 #include "prefs.h"
 #include "dnd.h"
 #include "metatag_info.h"
+
+int mp3_samplerate[3][4] = {
+   {22050,24000,16000,50000},  // MPEG 2.0
+   {44100,48000,32000,50000},  // MPEG 1.0
+   {11025,12000,8000,50000}    // MPEG 2.5
+};
+
+int mp3_bitrate[2][3][15] = {
+  { // MPEG 2.0
+    {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160},      // Layer 3
+    {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160},      // Layer 2
+    {0,32,48,56,64,80,96,112,128,144,160,176,192,224,256}  // Layer 1
+  },
+  { // MPEG 1.0
+    {0,32,40,48,56,64,80,96,112,128,160,192,224,256,320},     // Layer 3
+    {0,32,48,56,64,80,96,112,128,160,192,224,256,320,384},    // Layer 2
+    {0,32,64,96,128,160,192,224,256,288,320,352,384,416,448}  // Layer 1
+  }
+};
 
 gchar * ID3_getFrameText(struct id3_tag *tag, char *frame_name)
 {
@@ -70,8 +97,142 @@ gchar * ID3_getFrameText(struct id3_tag *tag, char *frame_name)
     return rtn_string;
 }
 
+gboolean get_mp3_header(FILE * mp3_file, MP3_header * header_info){
+    uint8_t raw_header[10] = {0,0,0,0,0,0,0,0,0,0};
+    uint32_t framesize = 0;
+    uint32_t id3_footer = 0;
+    uint32_t id3_size = 0;
+
+    if(fread(&raw_header, sizeof(uint8_t)*10, 1, mp3_file) < 1) {
+        header_info->header_sync = 0;
+        return FALSE;
+    }
+    header_info->header_sync = ((raw_header[0]<<4) | ((raw_header[1]&0xE0)>>4));
+
+    // Check for ID3 Tags
+    while(header_info->header_sync != 0xFFE){
+        // We may have ID3 Tag.
+        if(raw_header[0] == 'I' && raw_header[1] == 'D' && raw_header[2] == '3'){
+            // We have a ID3 header...
+            // Now skip it.
+            id3_footer = (raw_header[5] >> 4) & 0x1;
+            id3_size = ((uint32_t)(raw_header[6] << 21) +
+                (uint32_t)(raw_header[7] << 14) +
+                (uint32_t)(raw_header[8] << 7) +
+                (uint32_t)(raw_header[9]));
+            if (id3_footer == 1) {
+                fseek(mp3_file, (id3_size + 10), SEEK_CUR);
+            } else {
+                fseek(mp3_file, (id3_size), SEEK_CUR);
+            }
+            if(fread(&raw_header, sizeof(uint8_t)*10, 1, mp3_file) < 1) {
+                header_info->header_sync = 0;
+                return FALSE;
+            }
+            header_info->header_sync = ((raw_header[0]<<4) | ((raw_header[1]&0xE0)>>4));
+        } else {
+            // Not a valid frame, nor an ID3 frame?
+            header_info->header_sync = 0;
+            return FALSE;
+        }
+    }
+
+    header_info->version = (raw_header[1] >> 3) & 0x3;
+    header_info->layer = (raw_header[1] >> 1) & 0x3;
+    header_info->crc = raw_header[1] & 0x1;
+    header_info->bitrate = (raw_header[2] >> 4) & 0xF;
+    header_info->samplerate = (raw_header[2] >> 2) & 0x3;
+    header_info->padding = (raw_header[2] >>1) & 0x1;
+    header_info->private_bit = (raw_header[2]) & 0x1;
+    header_info->channel_mode = (raw_header[3] >> 6) & 0x3;
+    header_info->mode_extension = (raw_header[3] >> 4) & 0x3;
+    header_info->copyright = (raw_header[3] >> 3) & 0x1;
+    header_info->original = (raw_header[3] >> 2) & 0x1;
+    header_info->emphasis = (raw_header[3]) & 0x3;
+
+    // Sanity checks --
+    if((header_info->header_sync != 0xFFE)
+        || (header_info->version == 0x1)  // Reserved value
+        //|| (header_info->layer == 0x1)    // We only care about layer 3 data
+        || (header_info->bitrate == 0xF)  // Bad value
+        || (header_info->samplerate == 0x3)) {  // Reserved value
+        header_info->header_sync=0;
+        return FALSE;
+    }
+    // We have a valid header, so forward to next possible frame.
+    // FrameSize = 144 * BitRate / (SampleRate + Padding).
+
+    framesize = 144
+        *  mp3_bitrate[header_info->version & 0x1][header_info->layer - 1][header_info->bitrate] * 1000 // Bitrate
+        / ( mp3_samplerate[header_info->version & 0x1][header_info->samplerate]  // Sample Rate
+        + header_info->padding )+ header_info->padding;        // Padding bit
+
+    fseek(mp3_file, (framesize - 10), SEEK_CUR);
+    
+    return TRUE;
+}
+
+void get_mp3_info(gchar *filename, MP3_Info *mp3_struct){
+
+    FILE * mp3_file = NULL;
+    struct stat sb;
+    MP3_header header_info;
+    uint32_t initial_bitrate = 0;
+    uint32_t new_bitrate = 0;
+    uint64_t total_bitrate = 0;
+    uint32_t frames_sampled = 0;
+    uint64_t filesize = 0;
+
+    // Init our struct that has been passed to us, and return defaults even if
+    // things go wrong.
+    mp3_struct->VBR = 1;
+    mp3_struct->bitrate = 0;
+    mp3_struct->channels = 0;
+    mp3_struct->duration = 0;
+
+    mp3_file = fopen(filename, "r");
+    if (mp3_file == NULL)
+        return;
+
+    if ( stat(filename, &sb) == -1 ) {
+		perror("stat");
+        fclose(mp3_file);
+		return;
+	}
+
+	filesize = sb.st_size;
+
+    if(get_mp3_header(mp3_file, &header_info) == TRUE){
+        initial_bitrate = mp3_bitrate[header_info.version & 0x1][header_info.layer - 1][header_info.bitrate];
+        total_bitrate = initial_bitrate;
+        frames_sampled = 1;
+        if(header_info.channel_mode == 0x3) {
+            mp3_struct->channels = 1;
+        } else {
+            mp3_struct->channels = 2;
+        }
+        while ((get_mp3_header(mp3_file, &header_info) == TRUE) && (ftell(mp3_file) < (filesize - 128))){
+            new_bitrate = mp3_bitrate[header_info.version & 0x1][header_info.layer - 1][header_info.bitrate];
+            total_bitrate += new_bitrate;
+            frames_sampled++;
+            if(new_bitrate != initial_bitrate)
+                mp3_struct->VBR = 2;
+        }
+        if(mp3_struct->VBR != 2){
+            mp3_struct->bitrate = initial_bitrate * 1000;
+        } else {
+            mp3_struct->bitrate = (total_bitrate / frames_sampled) * 1000;
+        }
+        //mp3_struct->duration = frames_sampled * 26;
+        mp3_struct->duration = (double)(frames_sampled * (double)(26.00 / 1000)) * 1000;
+        // Each frame lasts for 26ms, so just multiple the number of frames by 26 to get our duration
+    }
+}
+
 void get_id3_tags(gchar *filename, LIBMTP_track_t *trackinformation){
-    gchar * tracknumber = 0;
+    gchar * tracknumber = NULL;
+    gchar * trackduration = NULL;
+    MP3_Info mp3_information;
 
     struct id3_file * id3_file_id = id3_file_open(filename, ID3_FILE_MODE_READONLY);
     
@@ -105,9 +266,25 @@ void get_id3_tags(gchar *filename, LIBMTP_track_t *trackinformation){
         // Need this if using different Year field.
         if(trackinformation->date == NULL)
             trackinformation->date = ID3_getFrameText(id3_tag_id, "TDRC");
+
+        // Get our track duration via ID3 Tag.
+        trackduration = ID3_getFrameText(id3_tag_id, "TLEN");
+        if (trackduration != 0){
+            trackinformation->duration = atoi(trackduration);
+        } else {
+            trackinformation->duration = 0;
+        }
         // Close our file for reading the fields.
         id3_file_close(id3_file_id);
     }
+
+    // Duration, bitrate and other information
+    // This information must be derived by manually decoding the MP3 file.
+    get_mp3_info(filename, &mp3_information);
+    trackinformation->duration = mp3_information.duration;
+    trackinformation->bitrate = mp3_information.bitrate;
+    trackinformation->bitratetype = mp3_information.VBR;
+    trackinformation->nochannels = mp3_information.channels;
 }
 
 gchar * OGG_getFieldText(const vorbis_comment *comments, const char *name){
@@ -144,6 +321,7 @@ gchar * OGG_getFieldText(const vorbis_comment *comments, const char *name){
 
 void get_ogg_tags(gchar *filename, LIBMTP_track_t *trackinformation){
     OggVorbis_File *mov_file = NULL;
+    vorbis_info * mov_info = NULL;
     FILE *mfile;
     vorbis_comment *mov_file_comment = NULL;
     gchar * tracknumber = NULL;
@@ -165,6 +343,7 @@ void get_ogg_tags(gchar *filename, LIBMTP_track_t *trackinformation){
 
     // Get or comment data;
     mov_file_comment = ov_comment(mov_file, -1);
+    mov_info = ov_info(mov_file, -1);
 
     trackinformation->album = OGG_getFieldText(mov_file_comment, "ALBUM");
     trackinformation->title = OGG_getFieldText(mov_file_comment, "TITLE");
@@ -177,7 +356,11 @@ void get_ogg_tags(gchar *filename, LIBMTP_track_t *trackinformation){
     } else {
         trackinformation->tracknumber = 0;
     }
-    
+    // Duration, bitrate and other information
+    trackinformation->duration = (int)ov_time_total(mov_file, -1) * 1000;
+    trackinformation->bitrate = ov_bitrate(mov_file, -1);
+    trackinformation->bitratetype = 2; // VBR
+    trackinformation->nochannels = mov_info->channels;
     ov_clear(mov_file);
      
     return;
@@ -197,11 +380,15 @@ gchar *FLAC_getFieldText(const FLAC__StreamMetadata *tags, const char *name){
 
 void get_flac_tags(gchar *filename, LIBMTP_track_t *trackinformation){
     FLAC__StreamMetadata *tags = NULL;
+    FLAC__StreamMetadata streaminfo;
     gchar * tracknumber = 0;
     
     // Load in our tag information stream
     if(!FLAC__metadata_get_tags(filename, &tags))
         return;
+    if(!FLAC__metadata_get_streaminfo(filename, &streaminfo)) {
+		return;
+	}
     // We have our tag data, get the individual fields.
     trackinformation->album = g_strdup(FLAC_getFieldText(tags, "ALBUM"));
     trackinformation->title = g_strdup(FLAC_getFieldText(tags, "TITLE"));
@@ -215,14 +402,23 @@ void get_flac_tags(gchar *filename, LIBMTP_track_t *trackinformation){
     } else {
         trackinformation->tracknumber = 0;
     }
+
+    // Duration, bitrate and other information
+    trackinformation->duration = (streaminfo.data.stream_info.total_samples / streaminfo.data.stream_info.sample_rate ) * 1000;
+    trackinformation->bitrate = 8.0 * (float)(trackinformation->filesize) / (1000.0 * (float)streaminfo.data.stream_info.total_samples / (float)streaminfo.data.stream_info.sample_rate);
+    trackinformation->bitratetype = 0; // Not used
+    trackinformation->nochannels = streaminfo.data.stream_info.channels;
+
     //trackinformation->tracknumber = atoi(FLAC_getFieldText(tags, "TRACKNUMBER"));
     FLAC__metadata_object_delete(tags);
+    FLAC__metadata_object_delete(&streaminfo);
     return;
 }
 
 void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation){
     FILE *ASF_File;
     GUID Header_GUID ;
+    GUID Stream_GUID ;
     uint32_t Header_Blocks;
     uint64_t Object_Size;
     long ASF_File_Position;
@@ -247,6 +443,13 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation){
     uint64_t Descriptor_Value = 0;
     gchar *Descriptor_Value_Str = NULL;
     gchar *Descriptor_Value_Str_UTF16 = NULL;
+
+    // Audio Object
+    uint16_t Stream_Channels;
+    uint32_t Stream_Bitrate;
+
+    // File Object
+    uint64_t Stream_Duration;
 
 
     ASF_File = fopen(filename, "r");
@@ -356,6 +559,8 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation){
                         case 3: // DWORD
                         case 4: // QWORD
                         case 5: // WORD
+                            if(Descriptor_Value_Length > sizeof(Descriptor_Value))
+                                Descriptor_Value_Length = sizeof(Descriptor_Value);
                             fread(&Descriptor_Value, Descriptor_Value_Length, 1, ASF_File);
                             if((g_ascii_strcasecmp(Descriptor_Name, "WM/Track\0") == 0)){
                                 trackinformation->tracknumber = Descriptor_Value + 1;
@@ -380,13 +585,51 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation){
                 fseek(ASF_File, ASF_File_Position, SEEK_SET);
                 fseek(ASF_File, (Object_Size - sizeof(uint64_t) - sizeof(GUID)), SEEK_CUR);
             } else {
-                // Skip this header;
-                //g_printf("WMA: Unknown GUID - skipping\n");
-                fread(&Object_Size, sizeof(uint64_t), 1, ASF_File);
-                fseek(ASF_File, (Object_Size - sizeof(uint64_t) - sizeof(GUID)), SEEK_CUR);
+                if(memcmp(&Header_GUID, &ASF_Stream_header, sizeof(GUID)) == 0){
+                    // We have an audio header for the track information.
+                    fread(&Object_Size, sizeof(uint64_t), 1, ASF_File);
+                    ASF_File_Position = ftell(ASF_File);
+
+                    // Read in the stream type GUID
+                    fread(&Stream_GUID, sizeof(GUID), 1, ASF_File);
+                    if(memcmp(&Stream_GUID, &ASF_Audio_Media_header, sizeof(GUID)) == 0){
+                        // We have an audio header.
+                        fseek(ASF_File, 38, SEEK_CUR);
+                        // We should be pointing at our audio stream data block.
+                        fseek(ASF_File, sizeof(uint16_t), SEEK_CUR);  // Skip CODEC ID
+                        fread(&Stream_Channels, sizeof(uint16_t), 1, ASF_File);
+                        fseek(ASF_File, 4, SEEK_CUR); // Skip Samples per second
+                        fread(&Stream_Bitrate, sizeof(uint32_t), 1, ASF_File);
+
+                        trackinformation->nochannels = Stream_Channels;
+                        trackinformation->bitrate = Stream_Bitrate * 8;  // This value is in BYTES
+                        trackinformation->bitratetype = 0; // Not used
+                    }
+                    // Set our file position so it's ready to read in the next GUID Header.
+                    fseek(ASF_File, ASF_File_Position, SEEK_SET);
+                    fseek(ASF_File, (Object_Size - sizeof(uint64_t) - sizeof(GUID)), SEEK_CUR);
+                } else {
+                    if(memcmp(&Header_GUID, &ASF_File_Properties_header, sizeof(GUID)) == 0){
+                        // We have a file header for the track information.
+                        fread(&Object_Size, sizeof(uint64_t), 1, ASF_File);
+                        ASF_File_Position = ftell(ASF_File);
+                        // Skip File ID, Filesize, Creation Date and Data Packets Count
+                        fseek(ASF_File, (sizeof(GUID) + (sizeof(uint64_t) * 3)) , SEEK_CUR);
+                        fread(&Stream_Duration, sizeof(uint64_t), 1, ASF_File);
+                        // Convert from 1/100ths nano sec to millisec.
+                        trackinformation->duration = Stream_Duration / 10000;
+
+                        fseek(ASF_File, ASF_File_Position, SEEK_SET);
+                        fseek(ASF_File, (Object_Size - sizeof(uint64_t) - sizeof(GUID)), SEEK_CUR);
+                    } else {
+                    // Skip this header;
+                    //g_printf("WMA: Unknown GUID - skipping\n");
+                        fread(&Object_Size, sizeof(uint64_t), 1, ASF_File);
+                        fseek(ASF_File, (Object_Size - sizeof(uint64_t) - sizeof(GUID)), SEEK_CUR);
+                    }
+                }
             }
         }
-
     }
     fclose(ASF_File);
     return;

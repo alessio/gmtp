@@ -1,9 +1,16 @@
-/*
- * File:   main.h
- * Author: darran
- *
- * Created on October 29, 2009, 5:01 PM
- */
+/* 
+*
+*   File: main.h
+*   
+*   Copyright (C) 2009-2011 Darran Kartaschew
+*
+*   This file is part of the gMTP package.
+*
+*   gMTP is free software; you can redistribute it and/or modify
+*   it under the terms of the BSD License as included within the
+*   file 'COPYING' located in the root directory
+*
+*/
 
 #ifndef _MAIN_H
 #define _MAIN_H
@@ -12,8 +19,6 @@
 extern "C" {
 #endif
 
-#include <libmtp.h>
-    
 typedef struct  {
 	gboolean deviceConnected;
 	gint numrawdevices;
@@ -52,14 +57,19 @@ typedef struct  {
 GtkWidget *windowMain;
 GtkWidget *windowPrefsDialog;
 GtkWidget *windowPropDialog;
+GtkWidget *windowPlaylistDialog;
 GtkWidget *windowStatusBar;
 GtkWidget *toolbuttonConnect;
 GtkWidget *treeviewFiles;
+
+
 
 Device_Struct DeviceMgr;
 
 LIBMTP_file_t   *deviceFiles;
 LIBMTP_folder_t *deviceFolders;
+LIBMTP_track_t *deviceTracks;
+LIBMTP_playlist_t *devicePlayLists;
 uint32_t currentFolderID;         // This is the ID of the current folder....
 
 GString *file_icon_png;

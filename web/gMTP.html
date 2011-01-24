@@ -6,7 +6,7 @@
 		<link rel="stylesheet" type="text/css" href="css/style.css" media="screen" title="Modern" />
 		<link rel="stylesheet" type="text/css" href="css/header.css" media="print" title="Modern" />
 		<script type="text/javascript" src="css/ui.js"></script>
-		<title>gMTP v0.7 - A simple MP3 Player Client for Solaris 10</title>
+		<title>gMTP v0.8 - A simple MP3 Player Client for Solaris 10</title>
 	</head>
 	<body>
 		<div class="noprint">
@@ -19,19 +19,28 @@
 			<hr />
 		</div>
 		<div id="ContentArea">
-			<h1>gMTP v0.7 - A simple MP3 player client for Oracle Solaris 10.</h1>
+			<h1>gMTP v0.8 - A simple MP3 player client for Oracle Solaris 10.</h1>
 			<p>
 				Darran Kartaschew (aka Chewy509).<br />
-					Released under the CDDL License. 2009,2010.
+					Released under the BSD License. 2009-2011.
 			</p>
 			<h2>A simple MP3 player client for MTP based devices.</h2>
 			<p>
 				Due to Oracle Solaris 10 not having a native MTP based MP3 player support application,
-				I've written my own GUI client for MTP devices. It is very simple, only supporting 
-				upload, download and removal of files as needed. gMTP supports metadata for MP3, FLAC, WMA
-                and OGG audio files, ensuring correct track information on your media player when uploading 
-                audio file. For other needs like ripping from CDs, managing your audio collection, playlist support,
-				I suggest you look at Gnomad2 or another MTP client. (Playlist support however is planned).
+				I've written my own GUI client for MTP devices. It supports:
+            </p>
+            <ul>
+                <li>Upload, Download and Removal of files as needed.</li>
+                <li>Drag'n'Drop support for uploading files to the device.</li>
+                <li>Folder Creation and Deletion.</li>
+                <li>Album Art upload.</li>
+                <li>Metadata support for MP3, WMA, OGG and FLAC audio files, ensuring correct track information
+                on your media player when uploading audio files.</li>
+                <li>Device Naming support.</li>
+                <li>Basic creation, editing and deletion of playlists.</li>
+            </ul>
+			<p> For other needs like managing your audio collection, ripping CDs I suggest you look at Gnomad2 or
+            another full featured media application. 
 			</p>
 			<h2>Requirements</h2>
 			<ul>
@@ -45,7 +54,14 @@
                 <li>libvorbis (v1.0.1) - http://www.vorbis.com/ </li>
                 <li>libflac (v1.2+) - http://flac.sourceforge.net/index.html </li>
 			</ul>
-			<h2>Installation</h2>
+            <h2>Installation (Binary)</h2>
+            <h3>Oracle Solaris 10</h3>
+            <p>Download SYSV package below, gunzip it and use 'pkgadd -d gMTP-0.8-i386.pkg' to install.</p>
+            <h3>Debian GNU/Linux</h3>
+            <p>gMTP is available in the unstable (sid) package lists. Use 'apt-get' to install.</p>
+            <h3>Ubuntu</h3>
+            <p>gMTP is available in the universe package lists. se 'apt-get' to install.</p>
+			<h2>Installation (Source)</h2>
 			<h3>libmtp</h3>
 			<p>Download the libmtp source code, unpack and run: <code>$ INSTALL=/usr/ucb/install MAKE=gmake ./configure</code></p>
 			<p>Note: If you don't have a libusb.pc file (configure complains about libusb being missing), then you can use this 
@@ -66,8 +82,8 @@
 			<p>Note: For Solaris10/OpenSolaris, the default makefile assumes you have SunStudio 12 installed. If you don't then modify the make file to use <code>gcc</code> instead. All other OSes will use gcc as default.</p>
 			<h2>Downloads</h2>
 			<p>
-				gMTP Source: <a href="gMTP-0.7-i386.tar.gz">gMTP-0.7-i386.tar.gz</a><br />
-				gMTP Solaris 10 Package: <a href="gMTP-0.7-i386.pkg.gz">gMTP-0.7-i386.pkg.gz</a> (Warning: Does NOT contain libmtp, libflac or libid3tag).
+				gMTP Source: <a href="gmtp-0.8-i386.tar.gz">gMTP-0.8-i386.tar.gz</a><br />
+				gMTP Solaris 10 Package: <a href="gmtp-0.8-i386.pkg.gz">gMTP-0.8-i386.pkg.gz</a> (Warning: Does NOT contain libmtp, libflac or libid3tag).
 			</p>
 			<h2>Usage</h2>
 			<p>run <code>gmtp</code>. Use the Toolbar buttons for various functions. Files surrounded by "&lt; .. &gt;" are folders, double click to enter. Double clicking
@@ -79,7 +95,7 @@
 			A. MTP = Media Transfer Protocol. MTP has been adopted by most major MP3 and Mobile Phone manufacturers as the
 			method of talking to devices to upload/download files to/from a PC.
 			See <a href="http://en.wikipedia.org/wiki/Media_Transfer_Protocol">Media Transfer Protocol</a> for more information.</p>
-			<p>Q. Why does&#39;t gMTP support my iPod or Creative Nomad player<br />
+			<p>Q. Why doesn&#39;t gMTP support my iPod or Creative Nomad player<br />
 			A. These devices do not use MTP for moving data to/from a device. Apple iPod uses it's own custom protocol
 			in additional to USB Mass Storage and Creative devices use NJB.</p>
 			<p>Q. I have a MTP enabled device and it is connected to my PC, but it doesn't get detected by gMTP?<br />
@@ -100,28 +116,53 @@
 			<p>Q. Do I need root access to use gMTP?<br />
 			A. On Solaris 10, in general No. (If you do need root access, then double check your RBAC setup for your user then). On Linux, in general No, as libmtp
 			should have set your udev rules correctly for libmtp known devices.</p>
-			<h2>Sreen Shots</h2>
-			<p>
-				<img src="Capture1.png" alt="gMTP screen shot" />
-			</p>
-			<p>Default interface gMTP</p>
-			<p>
-				<img src="Capture2.png" alt="gMTP screen shot" />
-			</p>
-			<p>Device Properties</p>
-			<p>
-				<img src="Capture3.png" alt="gMTP screen shot" />
-			</p>
-			<p>gMTP Preferences</p>
-			<p>
-				<img src="Capture4.png" alt="gMTP screen shot" />
-			</p>
-			<p>Album Art</p>
-			<p>
-				<img src="Capture5.png" alt="gMTP screen shot" />
-			</p>
-			<p>File Upload to Device</p>
-
+            <p>Q. In the file view or playlist editor, tracks have a length of 0:00?<br />
+            A. The length field displayed is reliant on the track data being set correctly when the audio file was uploaded. Some file transfer
+            utilies do not set this information correctly (and earlier versions of gMTP are also guilty of this). Simply download and re-upload the 
+            audio file using gMTP to correct the track data on the player.</p>
+            <p>Q. I have the same audio file loaded on my device in different formats, but the song duration is different between them.<br />
+            A. WMA, FLAC and OGG all store the song duration in header information, and this is set by the encoder used to create the file. It may be a bug with the encoder?
+            With MP3 files, the track duration is calculated when the file is uploaded, so this information should be correct unless you have a corrupt MP3 file.</p>
+            <p>Q. The translations are pretty awful or just plain wrong, or why don't you have xyz language?<br />
+			A. The initial translations were done using Google Translate services, so accuracy is not 100%. Please email me with corrections to existing translations.
+            If you would like a particular language added, and are happy to assist, please let me know or simply email me with the correct *.po file with the translations for your langauge.</p>
+            <p>Q. I'm using French Canadian (fr_CA.UTF-8) as my locale on Solaris 10, but I don't get French translations?<br />
+            A. This is due to an idiosyncrasy on Solaris 10 and language translations. Either:</p>
+            <ol><li>Copy the gmtp.mo file from /usr/local/share/locale/fr/LC_MESSAGES to /usr/local/share/locale/fr.UTF-8/LC_MESSAGES, and restart gmtp.</li>
+            <li>or, create a symlink fr.UTF-8 pointing to fr in /usr/local/share/locale using 'ln -s fr fr.UTF-8'.</li></ol>
+            <p>French translations should now be present. (Technical information:
+            On Solaris, the gettext() call will only look in the current locale folder as defined by the LC_MESSAGES environment variable and not the base language folder as well for translations, so
+            if the locale is set to 'fr.UTF-8', gettext() will only look in that locale folder and not 'fr' as well - which is what the GNU version
+            of gettext() does). This applies to all languages on Solaris 10. For Linux/FreeBSD uses this should not be an issue as most will use the GNU version of gettext().</p>
+            <p>Q. The column view options do not appear to be working?<br />
+            A. The gconf schema was updated in v0.8. Please update your local schema file.</p>
+			<h2>Screen Shots</h2>
+            <table border="0" >
+                <tr >
+                    <td style="width: 300px;">Default interface gMTP<br />
+                        <a href="Capture1.png"><img src="Capture1_thumb.png" alt="gMTP screen shot" /></a>
+                    </td>
+                    <td style="width: 300px;">Device Properties<br />
+                        <a href="Capture2.png"><img src="Capture2_thumb.png" alt="gMTP screen shot" /></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 300px;">gMTP Preferences<br />
+                        <a href="Capture3.png"><img src="Capture3_thumb.png" alt="gMTP screen shot" /></a>
+                    </td>
+                    <td style="width: 300px;">Album Art<br />
+                        <a href="Capture4.png"><img src="Capture4_thumb.png" alt="gMTP screen shot" /></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 300px;">File Upload to Device<br />
+                        <a href="Capture5.png"><img src="Capture5_thumb.png" alt="gMTP screen shot" /></a>
+                    </td>
+                    <td style="width: 300px;">Playlist Editor<br />
+                        <a href="Capture6.png"><img src="Capture6_thumb.png" alt="gMTP screen shot" /></a>
+                    </td>
+                </tr>
+            </table>
 		</div>
 		<hr />
 		<div class="noprint">
