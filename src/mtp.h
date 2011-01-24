@@ -1,9 +1,16 @@
-/*
- * File:   mtp.h
- * Author: darran
- *
- * Created on October 29, 2009, 5:01 PM
- */
+/* 
+*
+*   File: mtp.h
+*   
+*   Copyright (C) 2009-2011 Darran Kartaschew
+*
+*   This file is part of the gMTP package.
+*
+*   gMTP is free software; you can redistribute it and/or modify
+*   it under the terms of the BSD License as included within the
+*   file 'COPYING' located in the root directory
+*
+*/
 
 #ifndef _MTP_H
 #define _MTP_H
@@ -45,9 +52,15 @@ uint32_t getParentFolderID(LIBMTP_folder_t *tmpfolder, uint32_t currentFolderID)
 LIBMTP_folder_t* getParentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t currentFolderID);
 LIBMTP_folder_t* getCurrentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t FolderID);
 LIBMTP_filetype_t find_filetype (const gchar * filename);
+gchar* find_filetype_ext (LIBMTP_filetype_t filetype);
 LIBMTP_devicestorage_t* getCurrentDeviceStoragePtr(gint StorageID);
 
-
+// Playlist support.
+LIBMTP_playlist_t* getPlaylists(void);
+LIBMTP_track_t* getTracks(void);
+void playlistAdd(gchar* playlistname);
+void playlistDelete(LIBMTP_playlist_t * tmpplaylist);
+void playlistUpdate(LIBMTP_playlist_t * tmpplaylist);
 
 #ifdef  __cplusplus
 }

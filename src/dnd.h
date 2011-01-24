@@ -1,9 +1,16 @@
 /* 
- * File:   dnd.h
- * Author: darran
- *
- * Created on January 7, 2010, 2:36 PM
- */
+*
+*   File: dnd.h
+*   
+*   Copyright (C) 2009-2011 Darran Kartaschew
+*
+*   This file is part of the gMTP package.
+*
+*   gMTP is free software; you can redistribute it and/or modify
+*   it under the terms of the BSD License as included within the
+*   file 'COPYING' located in the root directory
+*
+*/
 
 #ifndef _DND_H
 #define	_DND_H

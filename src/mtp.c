@@ -1,9 +1,23 @@
+/* 
+*
+*   File: mtp.c
+*   
+*   Copyright (C) 2009-2011 Darran Kartaschew
+*
+*   This file is part of the gMTP package.
+*
+*   gMTP is free software; you can redistribute it and/or modify
+*   it under the terms of the BSD License as included within the
+*   file 'COPYING' located in the root directory
+*
+*/
 
 #include "config.h"
 
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <glib/gi18n.h>
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #include <libmtp.h>
@@ -69,8 +83,12 @@ MTP_file_ext_struct file_ext[] = {
     {"jp2", LIBMTP_FILETYPE_JP2 },
     {"jpx", LIBMTP_FILETYPE_JPX },
     {"bin", LIBMTP_FILETYPE_FIRMWARE },
-    {"vcf", LIBMTP_FILETYPE_VCARD3}
+    {"vcf", LIBMTP_FILETYPE_VCARD3},
+    {"alb", LIBMTP_FILETYPE_ALBUM},
+    {"pla", LIBMTP_FILETYPE_PLAYLIST}
 };
+
+static gchar* blank_ext = "";
 
 guint deviceConnect(){
 	gint error;
@@ -81,16 +99,16 @@ guint deviceConnect(){
 		error = LIBMTP_Detect_Raw_Devices(&DeviceMgr.rawdevices, &DeviceMgr.numrawdevices);
 		switch(error) {
 		case LIBMTP_ERROR_NO_DEVICE_ATTACHED:
-			g_print("Detect: No raw devices found.\n");
-			displayError("Detect: No raw devices found.\n");
+			g_fprintf(stderr, _("Detect: No raw devices found.\n"));
+			displayError(_("Detect: No raw devices found.\n"));
 			return MTP_GENERAL_FAILURE;
 		case LIBMTP_ERROR_CONNECTING:
-			g_print("Detect: There has been an error connecting. \n");
-			displayError("Detect: There has been an error connecting. \n");
+			g_fprintf(stderr, _("Detect: There has been an error connecting. \n"));
+			displayError(_("Detect: There has been an error connecting. \n"));
 			return MTP_GENERAL_FAILURE;
 		case LIBMTP_ERROR_MEMORY_ALLOCATION:
-			g_print("Detect: Encountered a Memory Allocation Error. \n");
-			displayError("Detect: Encountered a Memory Allocation Error. \n");
+			g_fprintf(stderr, _("Detect: Encountered a Memory Allocation Error. \n"));
+			displayError(_("Detect: Encountered a Memory Allocation Error. \n"));
 			return MTP_GENERAL_FAILURE;
 		}
 		// We have at least 1 raw device, so we connect to the first device.
@@ -103,8 +121,8 @@ guint deviceConnect(){
             DeviceMgr.rawdeviceID = 0;
         }
 		if (DeviceMgr.device == NULL) {
-			g_print("Detect: Unable to open raw device?\n");
-			displayError("Detect: Unable to open raw device?\n");
+			g_fprintf(stderr, _("Detect: Unable to open raw device?\n"));
+			displayError(_("Detect: Unable to open raw device?\n"));
 			LIBMTP_Dump_Errorstack(DeviceMgr.device);
 			LIBMTP_Clear_Errorstack(DeviceMgr.device);
 			//LIBMTP_Dump_Device_Info(DeviceMgr.device);
@@ -155,12 +173,12 @@ void deviceProperties(){
 	if(DeviceMgr.deviceConnected == TRUE) {
 		// Lets get our information. Let's start with the raw information.
 		if(DeviceMgr.rawdevices[DeviceMgr.rawdeviceID].device_entry.vendor == NULL) {
-			DeviceMgr.Vendor = g_string_new("Unknown");
+			DeviceMgr.Vendor = g_string_new(_("Unknown"));
 		} else {
 			DeviceMgr.Vendor = g_string_new(DeviceMgr.rawdevices[DeviceMgr.rawdeviceID].device_entry.vendor);
 		}
 		if(DeviceMgr.rawdevices[DeviceMgr.rawdeviceID].device_entry.product == NULL) {
-			DeviceMgr.Product = g_string_new("Unknown");
+			DeviceMgr.Product = g_string_new(_("Unknown"));
 		} else {
 			DeviceMgr.Product = g_string_new(DeviceMgr.rawdevices[DeviceMgr.rawdeviceID].device_entry.product);
 		}
@@ -173,7 +191,7 @@ void deviceProperties(){
 		// Nice name:
 		tmp_string = LIBMTP_Get_Friendlyname(DeviceMgr.device);
 		if(tmp_string == NULL) {
-			DeviceMgr.devicename = g_string_new("N/A");
+			DeviceMgr.devicename = g_string_new(_("N/A"));
 		} else {
 			DeviceMgr.devicename = g_string_new(tmp_string);
 			g_free(tmp_string);
@@ -181,7 +199,7 @@ void deviceProperties(){
 		// Sync Partner
 		tmp_string = LIBMTP_Get_Syncpartner(DeviceMgr.device);
 		if(tmp_string == NULL) {
-			DeviceMgr.syncpartner = g_string_new("N/A");
+			DeviceMgr.syncpartner = g_string_new(_("N/A"));
 		} else {
 			DeviceMgr.syncpartner = g_string_new(tmp_string);
 			g_free(tmp_string);
@@ -198,7 +216,7 @@ void deviceProperties(){
 		// Manufacturer Name.
 		tmp_string = LIBMTP_Get_Manufacturername(DeviceMgr.device);
 		if(tmp_string == NULL) {
-			DeviceMgr.manufacturername = g_string_new("N/A");
+			DeviceMgr.manufacturername = g_string_new(_("N/A"));
 		} else {
 			DeviceMgr.manufacturername = g_string_new(tmp_string);
 			g_free(tmp_string);
@@ -206,7 +224,7 @@ void deviceProperties(){
 		// Model Number,
 		tmp_string = LIBMTP_Get_Modelname(DeviceMgr.device);
 		if(tmp_string == NULL) {
-			DeviceMgr.modelname = g_string_new("N/A");
+			DeviceMgr.modelname = g_string_new(_("N/A"));
 		} else {
 			DeviceMgr.modelname = g_string_new(tmp_string);
 			g_free(tmp_string);
@@ -214,7 +232,7 @@ void deviceProperties(){
 		// Serial Number.
 		tmp_string = LIBMTP_Get_Serialnumber(DeviceMgr.device);
 		if(tmp_string == NULL) {
-			DeviceMgr.serialnumber = g_string_new("N/A");
+			DeviceMgr.serialnumber = g_string_new(_("N/A"));
 		} else {
 			DeviceMgr.serialnumber = g_string_new(tmp_string);
 			g_free(tmp_string);
@@ -222,7 +240,7 @@ void deviceProperties(){
 		// Device Version.
 		tmp_string = LIBMTP_Get_Deviceversion(DeviceMgr.device);
 		if(tmp_string == NULL) {
-			DeviceMgr.deviceversion = g_string_new("N/A");
+			DeviceMgr.deviceversion = g_string_new(_("N/A"));
 		} else {
 			DeviceMgr.deviceversion = g_string_new(tmp_string);
 			g_free(tmp_string);
@@ -235,7 +253,7 @@ void deviceProperties(){
 			g_free(tmp_string);
 		} else {
 			// Silently ignore - there may be devices not supporting secure time.
-			DeviceMgr.sectime = g_string_new("N/A");
+			DeviceMgr.sectime = g_string_new(_("N/A"));
 			LIBMTP_Clear_Errorstack(DeviceMgr.device);
 		}
 
@@ -256,7 +274,7 @@ void deviceProperties(){
 
 	} else {
 		// Set to to none.
-		g_print("DevicePropeties: How did I get called?\n");
+		g_fprintf(stderr, _("DevicePropeties: How did I get called?\n"));
 		DeviceMgr.device = NULL;
 	}
 }
@@ -296,18 +314,18 @@ void deviceRescan(){
         }
 		// Update the status bar.
         if(DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE ){
-            g_sprintf(tmp_string, "Connected to %s - %d MB free", DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+            g_sprintf(tmp_string, _("Connected to %s - %d MB free"), DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
         } else {
             if(DeviceMgr.devicestorage->StorageDescription != NULL){
-                g_sprintf(tmp_string, "Connected to %s (%s) - %d MB free", DeviceMgr.devicename->str, DeviceMgr.devicestorage->StorageDescription ,(int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+                g_sprintf(tmp_string, _("Connected to %s (%s) - %d MB free"), DeviceMgr.devicename->str, DeviceMgr.devicestorage->StorageDescription ,(int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
             } else {
-                g_sprintf(tmp_string, "Connected to %s - %d MB free", DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+                g_sprintf(tmp_string, _("Connected to %s - %d MB free"), DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
             }
         }
 		statusBarSet((gchar *)&tmp_string);
 
 	} else {
-		g_print("Rescan: How did I get called?\n");
+		g_fprintf(stderr, _("Rescan: How did I get called?\n"));
 	}
 }
 // Find the ptr to the current storage structure.
@@ -396,13 +414,13 @@ void filesAdd(gchar* filename){
 
 	filesize = sb.st_size;
 	if(filesize > DeviceMgr.devicestorage->FreeSpaceInBytes) {
-		g_printf("Unable to add %s due to insufficient space: filesize = %l, freespace = %l\n", filename, filesize, DeviceMgr.devicestorage->FreeSpaceInBytes);
-		displayError("Unable to add file due to insufficient space");
+		g_fprintf(stderr, _("Unable to add %s due to insufficient space: filesize = %lu, freespace = %lu\n"), filename, filesize, DeviceMgr.devicestorage->FreeSpaceInBytes);
+		displayError(_("Unable to add file due to insufficient space"));
 		return;
 	}
 
     filename_stripped = basename(filename);
-    displayProgressBar("File Upload");
+    displayProgressBar(_("File Upload"));
 	setProgressFilename(g_strdup(filename_stripped));
 
 	// What we need to do is work what type of file we are sending
@@ -449,7 +467,7 @@ void filesAdd(gchar* filename){
             case LIBMTP_FILETYPE_WMA:
                 get_asf_tags(filename, trackfile);
                 break;
-                break;
+                //break;
 
         }
         // Add some data if it's all blank so we don't freak out some players.
@@ -458,11 +476,11 @@ void filesAdd(gchar* filename){
         if(trackfile->title == NULL)
             trackfile->title = g_strdup(filename_stripped);
         if(trackfile->artist == NULL)
-            trackfile->artist = g_strdup("<Unknown>");
+            trackfile->artist = g_strdup(_("<Unknown>"));
         if(trackfile->date == NULL)
-            trackfile->date = g_strdup("<Unknown>");
+            trackfile->date = g_strdup(_(""));
         if(trackfile->genre == NULL)
-            trackfile->genre = g_strdup("<Unknown>");
+            trackfile->genre = g_strdup(_("<Unknown>"));
 
         // Update our album info, if we actually have an album.
         if(trackfile->album != NULL){
@@ -478,8 +496,8 @@ void filesAdd(gchar* filename){
         //    ret = LIBMTP_Send_Track_From_File(DeviceMgr.device, filename, trackfile, NULL, NULL);
         //}
         if (ret != 0) {
-            g_print("Error sending track.\n");
-            displayError(g_strdup_printf("Error code %d sending track to device: <b>%s</b>", ret, filename, NULL));
+            g_fprintf(stderr, _("Error sending track.\n"));
+            displayError(g_strdup_printf(_("Error code %d sending track to device: <b>%s</b>"), ret, filename, NULL));
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
         }
@@ -500,8 +518,8 @@ void filesAdd(gchar* filename){
 
         ret = LIBMTP_Send_File_From_File(DeviceMgr.device, filename, genfile, fileprogress, NULL);
         if (ret != 0) {
-            g_printf("Error sending file %s.\n", filename);
-            displayError(g_strconcat("Error sending file: <b>", filename, "</b>", NULL));
+            g_fprintf(stderr, _("Error sending file %s.\n"), filename);
+            displayError(g_strconcat(_("Error sending file:"), " <b>", filename, "</b>", NULL));
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
         }
@@ -526,8 +544,8 @@ void filesDelete(gchar* filename, uint32_t objectID){
 	if (ret != 0) {
 		LIBMTP_Dump_Errorstack(DeviceMgr.device);
 		LIBMTP_Clear_Errorstack(DeviceMgr.device);
-		g_printf("\nFailed to delete file %s\n", filename);
-		displayError(g_strconcat("Failed to delete file <b>", filename, "</b>", NULL));
+		g_fprintf(stderr, _("\nFailed to delete file %s\n"), filename);
+		displayError(g_strconcat(_("Failed to delete file"), " <b>", filename, "</b>", NULL));
 	}
 }
 
@@ -535,14 +553,14 @@ void filesDownload(gchar* filename, uint32_t objectID){
 	gchar* fullfilename;
 	fullfilename = g_strndup("", 8192);
 	//g_print("You selected filesDownload\n");
-	displayProgressBar("File download");
+	displayProgressBar(_("File download"));
 	setProgressFilename(filename);
 	// Download the file based on the objectID.
 	g_sprintf(fullfilename, "%s/%s", Preferences.fileSystemDownloadPath->str, filename);
 	//g_printf("Getting %d to %s (%s)\n", objectID, fullfilename, filename);
 	if (LIBMTP_Get_File_To_File(DeviceMgr.device, objectID, fullfilename, fileprogress, NULL) != 0 ) {
-		printf("\nError getting file from MTP device.\n");
-		displayError("Error getting file from MTP device.");
+		g_fprintf(stderr,_("\nError getting file from MTP device.\n"));
+		displayError(_("Error getting file from MTP device."));
 		LIBMTP_Dump_Errorstack(DeviceMgr.device);
 		LIBMTP_Clear_Errorstack(DeviceMgr.device);
 	}
@@ -553,8 +571,8 @@ void filesDownload(gchar* filename, uint32_t objectID){
 guint32 folderAdd (gchar* foldername){
 	guint32 res = LIBMTP_Create_Folder(DeviceMgr.device, foldername, currentFolderID, DeviceMgr.devicestorage->id);
 	if (res == 0) {
-		g_printf("Folder creation failed: %s\n", foldername);
-		displayError(g_strconcat("Folder creation failed: <b>", foldername, "</b>", NULL));
+		g_fprintf(stderr, _("Folder creation failed: %s\n"), foldername);
+		displayError(g_strconcat(_("Folder creation failed:"), " <b>", foldername, "</b>", NULL));
 		LIBMTP_Dump_Errorstack(DeviceMgr.device);
 		LIBMTP_Clear_Errorstack(DeviceMgr.device);
 	} else {
@@ -582,7 +600,7 @@ void folderDelete (LIBMTP_folder_t* folderptr, guint level){
 	// Now do self.
 	guint res = LIBMTP_Delete_Object(DeviceMgr.device, folderptr->folder_id);
 	if (res != 0) {
-		g_printf("Couldn't delete folder %s (%x)\n",folderptr->name,folderptr->folder_id);
+		g_fprintf(stderr, _("Couldn't delete folder %s (%x)\n"),folderptr->name,folderptr->folder_id);
 		LIBMTP_Dump_Errorstack(DeviceMgr.device);
 		LIBMTP_Clear_Errorstack(DeviceMgr.device);
 	}
@@ -628,19 +646,32 @@ LIBMTP_filetype_t find_filetype (const gchar * filename) {
 	return filetype;
 }
 
+/* Get the file extension  based on filetype */
+gchar* find_filetype_ext (LIBMTP_filetype_t filetype) {
+    gint i;
+    gint j = sizeof(file_ext) / sizeof (MTP_file_ext_struct);
+
+    for(i = 0; i < j; i++){
+        if(filetype ==  file_ext[i].file_type){
+            return file_ext[i].file_extension;
+        }
+    }
+    return blank_ext;
+}
+
 void setDeviceName(gchar* devicename){
     gint res = 0;
     if(DeviceMgr.deviceConnected == TRUE){
         if(devicename != NULL)
             res = LIBMTP_Set_Friendlyname(DeviceMgr.device, devicename);
         if (res != 0) {
-            g_printf("Error: Couldn't set device name to %s\n",devicename);
+            g_fprintf(stderr, _("Error: Couldn't set device name to %s\n"),devicename);
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
         }
     } else {
 		// Set to to none.
-		g_print("setDeviceName: How did I get called?\n");
+		g_fprintf(stderr, _("setDeviceName: How did I get called?\n"));
 	}
 }
 
@@ -697,7 +728,7 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo){
         tracks = (uint32_t *)malloc((found_album->no_tracks+1) * sizeof(uint32_t));
         //g_printf("Album found: updating \"%s\"\n", found_album->name);
         if (!tracks) {
-            g_printf("Failed memory allocation in albumAddTrackToAlbum()\n");
+            g_fprintf(stderr, _("ERROR: Failed memory allocation in albumAddTrackToAlbum()\n"));
             return;
         }
         found_album->no_tracks++;
@@ -729,7 +760,8 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo){
         ret = LIBMTP_Create_New_Album(DeviceMgr.device, albuminfo);
     }
     if (ret != 0) {
-        g_print("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n");
+        displayError(_("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
+        g_fprintf(stderr, _("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
     }
@@ -751,12 +783,12 @@ void albumAddArt(guint32 album_id, gchar* filename){
     filesize = (uint64_t) statbuff.st_size;
     imagedata = g_malloc(filesize * sizeof(uint8_t));
     if (imagedata == NULL) {
-        g_printf("Failed memory allocation in albumAddArt()\n");
+        g_fprintf(stderr, _("ERROR: Failed memory allocation in albumAddArt()\n"));
         return;
     }
     fd = fopen(filename, "r");
     if (fd == NULL) {
-        g_printf("Couldn't open image file %s\n",filename);
+        g_fprintf(stderr, _("Couldn't open image file %s\n"),filename);
         g_free(imagedata);
         return;
     } else {
@@ -773,9 +805,65 @@ void albumAddArt(guint32 album_id, gchar* filename){
 
     ret = LIBMTP_Send_Representative_Sample(DeviceMgr.device, album_id, albumart);
     if (ret != 0) {
-        g_printf("Error: Couldn't send album art\n");
+        g_fprintf(stderr, _("Couldn't send album art\n"));
+        displayError(_("Couldn't send album art\n"));
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
     }
     g_free(imagedata);
+}
+
+LIBMTP_playlist_t* getPlaylists(void){
+    devicePlayLists = LIBMTP_Get_Playlist_List(DeviceMgr.device);
+    if (devicePlayLists == NULL) {
+        LIBMTP_Dump_Errorstack(DeviceMgr.device);
+        LIBMTP_Clear_Errorstack(DeviceMgr.device);
+    }
+    return devicePlayLists;
+}
+
+LIBMTP_track_t* getTracks(void){
+    deviceTracks = LIBMTP_Get_Tracklisting_With_Callback(DeviceMgr.device, NULL, NULL);
+    if (deviceTracks == NULL) {
+        LIBMTP_Dump_Errorstack(DeviceMgr.device);
+        LIBMTP_Clear_Errorstack(DeviceMgr.device);
+    }
+    return deviceTracks;
+}
+
+void playlistAdd(gchar* playlistname){
+
+    LIBMTP_playlist_t *playlist = LIBMTP_new_playlist_t();
+
+    playlist->name = g_strdup(playlistname);
+    playlist->no_tracks = 0;
+    playlist->tracks = NULL;
+    playlist->parent_id = DeviceMgr.device->default_playlist_folder;
+    playlist->storage_id = DeviceMgr.devicestorage->id;
+
+    gint ret = LIBMTP_Create_New_Playlist(DeviceMgr.device,playlist);
+
+    if (ret != 0) {
+        displayError(_("Couldn't create playlist object\n"));
+        LIBMTP_Dump_Errorstack(DeviceMgr.device);
+        LIBMTP_Clear_Errorstack(DeviceMgr.device);
+    }
+}
+
+void playlistDelete(LIBMTP_playlist_t * tmpplaylist){
+    guint res = LIBMTP_Delete_Object(DeviceMgr.device, tmpplaylist->playlist_id);
+    if (res != 0) {
+        displayError(_("Deleting playlist failed?\n"));
+        LIBMTP_Dump_Errorstack(DeviceMgr.device);
+        LIBMTP_Clear_Errorstack(DeviceMgr.device);
+    }
+}
+
+void playlistUpdate(LIBMTP_playlist_t * tmpplaylist){
+    guint res = LIBMTP_Update_Playlist(DeviceMgr.device, tmpplaylist);
+    if (res != 0) {
+        displayError(_("Updating playlist failed?\n"));
+        LIBMTP_Dump_Errorstack(DeviceMgr.device);
+        LIBMTP_Clear_Errorstack(DeviceMgr.device);
+    }
 }

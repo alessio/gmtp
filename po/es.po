@@ -1,0 +1,546 @@
+domain "gmtp"
+# File:mtp.c, line:544
+msgid  "\nError getting file from MTP device.\n"
+msgstr "\nError al obtener el fichero de dispositivo MTP.\n"
+# File:mtp.c, line:529
+msgid  "\nFailed to delete file %s\n"
+msgstr "\nNo se pudo eliminar el archivo %s\n"
+# File:interface.c, line:1922
+msgid  "   %s %s : (%04x:%04x) @ bus %d, dev %d"
+msgstr "   %s %s : (%04x:%04x) @ bus %d, dev %d"
+# File:interface.c, line:1601
+msgid  " : %d MB (free) / %d MB (total)"
+msgstr " : %d MB (gratis) / %d MB (total)"
+# File:interface.c, line:2241
+msgid  " Playlists"
+msgstr " Lista de reproducción"
+# File:interface.c, line:982
+msgid  " Preferences"
+msgstr " Preferencias"
+# File:interface.c, line:1226
+msgid  " Properties"
+msgstr " Propiedades"
+# File:interface.c, line:1587
+msgid  "%d MB (free) / %d MB (total)"
+msgstr "%d MB (gratis) / %d MB (total)"
+# File:interface.c, line:1723
+msgid  "%lluKB of %lluKB (%d%%)"
+msgstr "%lluKB de %lluKB (%d%%)"
+# File:interface.c, line:1721
+msgid  "%s - %lluKB of %lluKB (%d%%)"
+msgstr "%s - %lluKB de %lluKB (%d%%)"
+# File:mtp.c, line:461
+msgid  "<Unknown>"
+msgstr "<Desconocida>"
+# File:interface.c, line:1665
+msgid  "<b><big>"
+msgstr "<b><big>"
+# File:interface.c, line:1346
+msgid  "<b>Battery Level:</b>"
+msgstr "<b>De nivel de batería:</b>"
+# File:interface.c, line:1501
+msgid  "<b>Bus Location:</b>"
+msgstr "<b>Autobús Ubicación:</b>"
+# File:interface.c, line:1492
+msgid  "<b>Device Number:</b>"
+msgstr "<b>Número de dispositivo:</b>"
+# File:interface.c, line:1328
+msgid  "<b>Device Version:</b>"
+msgstr "<b>Versión del dispositivo:</b>"
+# File:interface.c, line:1009
+msgid  "<b>Device</b>"
+msgstr "<b>Dispositivo:</b>"
+# File:interface.c, line:1041
+msgid  "<b>File Operations</b>"
+msgstr "<b>Operaciones con archivos:</b>"
+# File:interface.c, line:1111
+msgid  "<b>Filepaths on PC</b>"
+msgstr "<b>Rutas de archivos en el PC:</b>"
+# File:interface.c, line:1433
+msgid  "<b>MTP Device Properties</b>"
+msgstr "<b>Propiedades del dispositivo MTP:</b>"
+# File:interface.c, line:1337
+msgid  "<b>Manufacturer:</b>"
+msgstr "<b>Fabricante:</b>"
+# File:interface.c, line:1310
+msgid  "<b>Model Number:</b>"
+msgstr "<b>Número de modelo:</b>"
+# File:interface.c, line:1259
+msgid  "<b>Name:</b>"
+msgstr "<b>Nombre:</b>"
+# File:interface.c, line:1483
+msgid  "<b>Product ID:</b>"
+msgstr "<b>Identificación de producto:</b>"
+# File:interface.c, line:1465
+msgid  "<b>Product:</b>"
+msgstr "<b>Producto:</b>"
+# File:interface.c, line:1551
+msgid  "<b>Raw Device Information</b>"
+msgstr "<b>Prima la información del dispositivo:</b>"
+# File:interface.c, line:1386
+msgid  "<b>Secure Time:</b>"
+msgstr "<b>Asegure Tiempo:</b>"
+# File:interface.c, line:1319
+msgid  "<b>Serial Number:</b>"
+msgstr "<b>Número de serie:</b>"
+# File:interface.c, line:1355
+msgid  "<b>Storage:</b>"
+msgstr "<b>Almacenamiento:</b>"
+# File:interface.c, line:1371
+msgid  "<b>Supported Formats:</b>"
+msgstr "<b>Formatos:</b>"
+# File:interface.c, line:1395
+msgid  "<b>Sync Partner:</b>"
+msgstr "<b>Sincronización Partner:</b>"
+# File:interface.c, line:1474
+msgid  "<b>Vendor ID:</b>"
+msgstr "<b>Vendor ID:</b>"
+# File:interface.c, line:1456
+msgid  "<b>Vendor:</b>"
+msgstr "<b>Proveedor:</b>"
+# File:interface.c, line:1767
+msgid  "<small>Copyright 2009-2011, Darran Kartaschew\nReleased under the BSD Licence</small>\n"
+msgstr "<small>Copyright 2009-2011, Darran Kartaschew\nDistribuido bajo la BSD Licence</small>\n"
+# File:interface.c, line:1759
+msgid  "A simple MP3 Player Client for Solaris 10\nand other UNIX / UNIX-like systems\n"
+msgstr "Un sencillo reproductor de mp3 de cliente para\nSolaris 10 y otros sistemas UNIX / similar a UNIX\n"
+# File:interface.c, line:1737
+msgid  "About gMTP"
+msgstr "Acerca de gMTP"
+# File:interface.c, line:308
+msgid  "Add"
+msgstr "Agregar"
+# File:interface.c, line:249
+msgid  "Add Album Art"
+msgstr "Añadir Album Art"
+# File:interface.c, line:2358
+msgid  "Add File"
+msgstr "Agregar archivo"
+# File:interface.c, line:179
+msgid  "Add Files"
+msgstr "Agregar archivos"
+# File:interface.c, line:311
+msgid  "Add Files to your device."
+msgstr "Agregar archivos a su dispositivo."
+# File:interface.c, line:2273
+msgid  "Add New Playlist"
+msgstr "Añadir nueva lista de reproducción"
+# File:interface.c, line:311
+msgid  "Add a varity of Files to your device in the current folder."
+msgstr "Añadir una variedad de archivos en el dispositivo  en la carpeta actual."
+# File:interface.c, line:344
+msgid  "Add and Modify Playlists."
+msgstr "Añadir y modificar las listas de reproducción."
+# File:interface.c, line:2344
+msgid  "Add file to playlist"
+msgstr "Agregar archivo a la lista"
+# File:interface.c, line:2522
+msgid  "Album"
+msgstr "Álbum"
+# File:interface.c, line:334
+msgid  "Album Art"
+msgstr "Album Art"
+# File:interface.c, line:2038
+msgid  "Album:"
+msgstr "Álbum:"
+# File:interface.c, line:1060
+msgid  "Always show Download Path?"
+msgstr "Siempre mostrar el camino de descarga?"
+# File:callbacks.c, line:111
+msgid  "Are you sure you want to delete these files?"
+msgstr "¿Está seguro que desea eliminar estos archivos?"
+# File:callbacks.c, line:342
+msgid  "Are you sure you want to delete this folder (and all contents)?"
+msgstr "¿Está seguro que quiere borrar esta carpeta (y todo su contenido)?"
+# File:interface.c, line:2512
+msgid  "Artist"
+msgstr "Artista"
+# File:interface.c, line:1005
+msgid  "Attempt to connect to Device on startup"
+msgstr "Intenta conectarse a dispositivos en el arranque"
+# File:interface.c, line:241
+msgid  "Change Device Name"
+msgstr "Cambio de nombre de dispositivo"
+# File:callbacks.c, line:112
+msgid  "Confirm Delete"
+msgstr "Confirmar eliminación"
+# File:interface.c, line:1033
+msgid  "Confirm File/Folder Delete"
+msgstr "Archivo Confirmar / eliminación de carpetas"
+# File:callbacks.c, line:165
+msgid  "Connect"
+msgstr "Conectar"
+# File:callbacks.c, line:170
+msgid  "Connect Device"
+msgstr "Conecte el dispositivo"
+# File:interface.c, line:1897
+msgid  "Connect to which device?"
+msgstr "Conectar con el dispositivo?"
+# File:interface.c, line:1957
+msgid  "Connect to which storage device?"
+msgstr "Conectar con el dispositivo de almacenamiento?"
+# File:interface.c, line:299
+msgid  "Connect/Disconnect to your device."
+msgstr "Conectar / desconectar el dispositivo."
+# File:callbacks.c, line:47
+msgid  "Connected to %s (%s) - %d MB free"
+msgstr "Conectado a %s (%s) - %d MB de espacio libre"
+# File:callbacks.c, line:44
+msgid  "Connected to %s - %d MB free"
+msgstr "Conectado a %s - %d MB de espacio libre"
+# File:mtp.c, line:816
+msgid  "Couldn't create playlist object\n"
+msgstr "No se pudo crear el objeto lista de reproducción\n"
+# File:mtp.c, line:585
+msgid  "Couldn't delete folder %s (%x)\n"
+msgstr "No se puede eliminar la carpeta %s (%x)\n"
+# File:mtp.c, line:760
+msgid  "Couldn't open image file %s\n"
+msgstr "No se pudo abrir archivo de imagen %s\n"
+# File:mtp.c, line:777
+msgid  "Couldn't send album art\n"
+msgstr "No se pudo enviar el álbum de arte\n"
+# File:interface.c, line:199
+msgid  "Create Folder"
+msgstr "Crear carpeta"
+# File:interface.c, line:2259
+msgid  "Current Playlist: "
+msgstr "Actual lista de reproducción: "
+# File:interface.c, line:2309
+msgid  "Del"
+msgstr "Del"
+# File:interface.c, line:2379
+msgid  "Del File"
+msgstr "Eliminar archivos"
+# File:interface.c, line:315
+msgid  "Delete"
+msgstr "Eliminar"
+# File:interface.c, line:185
+msgid  "Delete Files"
+msgstr "Eliminar archivos"
+# File:interface.c, line:318
+msgid  "Delete Files/Folders from your device."
+msgstr "Eliminar archivos / carpetas desde el dispositivo."
+# File:interface.c, line:206
+msgid  "Delete Folder"
+msgstr "Eliminar carpeta"
+# File:mtp.c, line:825
+msgid  "Deleting playlist failed?\n"
+msgstr "Borrar lista de temas no?\n"
+# File:mtp.c, line:92
+msgid  "Detect: Encountered a Memory Allocation Error. \n"
+msgstr "Detección: Se ha encontrado un error de asignación de  memoria. \n"
+# File:mtp.c, line:84
+msgid  "Detect: No raw devices found.\n"
+msgstr "Detectar: No hay dispositivos en bruto que se encuentran.\n"
+# File:mtp.c, line:88
+msgid  "Detect: There has been an error connecting. \n"
+msgstr "Detección: Se ha producido un error de conexión.\n"
+# File:mtp.c, line:106
+msgid  "Detect: Unable to open raw device?\n"
+msgstr "Detectar: No se puede abrir el dispositivo de primas?\n"
+# File:interface.c, line:2326
+msgid  "Device Audio Tracks"
+msgstr "Dispositivo de audio temas"
+# File:interface.c, line:1861
+msgid  "Device Name:"
+msgstr "Nombre del dispositivo:"
+# File:interface.c, line:222
+msgid  "Device Properties"
+msgstr "Propiedades del dispositivo"
+# File:interface.c, line:1908
+msgid  "Device:"
+msgstr "Dispositivo:"
+# File:mtp.c, line:259
+msgid  "DevicePropeties: How did I get called?\n"
+msgstr "DevicePropeties: ¿Cómo me llaman?\n"
+# File:callbacks.c, line:146
+msgid  "Disconnect"
+msgstr "Desconectar"
+# File:callbacks.c, line:161
+msgid  "Disconnect Device"
+msgstr "Desconecte el dispositivo"
+# File:interface.c, line:322
+msgid  "Download"
+msgstr "Descargar"
+# File:interface.c, line:191
+msgid  "Download Files"
+msgstr "Descargar archivos"
+# File:interface.c, line:325
+msgid  "Download Files from your device to your Host PC."
+msgstr "Descargar archivos desde el dispositivo al PC host."
+# File:interface.c, line:1071
+msgid  "Download Path:"
+msgstr "Descargar Ruta de acceso:"
+# File:interface.c, line:325
+msgid  "Download files from your device to your PC. Default Download path is set in the prefernces dialog."
+msgstr "Descarga de archivos desde el dispositivo a su PC. Descargar ruta predeterminada se establece en el cuadro de diálogo prefernces"
+# File:interface.c, line:2550
+msgid  "Duration"
+msgstr "Duración"
+# File:mtp.c, line:755
+msgid  "ERROR: Failed memory allocation in albumAddArt()\n"
+msgstr "ERROR: Error de asignación de memoria en albumAddArt()\n"
+# File:mtp.c, line:700
+msgid  "ERROR: Failed memory allocation in albumAddTrackToAlbum()\n"
+msgstr "ERROR: Error de asignación de memoria en albumAddTrackToAlbum()\n"
+# File:interface.c, line:255
+msgid  "Edit Playlist(s)"
+msgstr "Editar lista de reproducción(s)"
+# File:interface.c, line:1784
+msgid  "Error"
+msgstr "Error"
+# File:mtp.c, line:482
+msgid  "Error code %d sending track to device: <b>%s</b>"
+msgstr "Error de código %d pista enviar al dispositivo: <b>%s</b>"
+# File:mtp.c, line:732
+msgid  "Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"
+msgstr "Error al crear o actualizar álbum.\n (Esto puede ser debido a que el dispositivo no es compatible con discos.)\n"
+# File:mtp.c, line:545
+msgid  "Error getting file from MTP device."
+msgstr "Error al obtener el fichero de dispositivo MTP."
+# File:mtp.c, line:503
+msgid  "Error sending file %s.\n"
+msgstr "Error al enviar el archivo %s.\n"
+# File:mtp.c, line:504
+msgid  "Error sending file:"
+msgstr "Error al enviar el archivo:"
+# File:mtp.c, line:481
+msgid  "Error sending track.\n"
+msgstr "Error al enviar el tema.\n"
+# File:mtp.c, line:637
+msgid  "Error: Couldn't set device name to %s\n"
+msgstr "Error: No se pudo establecer el nombre del dispositivo para %s\n"
+# File:mtp.c, line:530
+msgid  "Failed to delete file"
+msgstr "No se pudo eliminar el archivo"
+# File:interface.c, line:2004
+msgid  "File <b>%s</b> already exists in target folder.\nDo you want to:"
+msgstr "Archivo <b>%s</b> ya existe en la carpeta de destino. ¿Desea:"
+# File:mtp.c, line:405
+msgid  "File Upload"
+msgstr "Carga de archivos"
+# File:mtp.c, line:538
+msgid  "File download"
+msgstr "Descarga de archivos"
+# File:interface.c, line:604
+msgid  "FileSize Hidden"
+msgstr "Tamaño del archivo oculto"
+# File:interface.c, line:568
+msgid  "Filename"
+msgstr "Nombre de archivo"
+# File:interface.c, line:2073
+msgid  "Filename:"
+msgstr "Nombre del archivo:"
+# File:interface.c, line:1817
+msgid  "Folder Name:"
+msgstr "Nombre de la carpeta:"
+# File:mtp.c, line:557
+msgid  "Folder creation failed:"
+msgstr "La creación de carpetas no:"
+# File:mtp.c, line:556
+msgid  "Folder creation failed: %s\n"
+msgstr "La creación de carpetas no: %s\n"
+# File:interface.c, line:864
+msgid  "I don't know how to delete a parent folder reference?\n"
+msgstr "No sé cómo eliminar una referencia carpeta principal?\n"
+# File:interface.c, line:1796
+msgid  "Information"
+msgstr "Información"
+# File:interface.c, line:2415
+msgid  "Move selected file down in the playlist"
+msgstr "Mover archivo seleccionado  en la lista de temas"
+# File:interface.c, line:2410
+msgid  "Move selected file up in the playlist"
+msgstr "Mover archivo seleccionado  en la lista de temas"
+# File:callbacks.c, line:367
+msgid  "N/A"
+msgstr "N/A"
+# File:interface.c, line:1805
+msgid  "New Folder"
+msgstr "Nueva carpeta"
+# File:interface.c, line:2714
+msgid  "New Playlist"
+msgstr "Nueva lista de reproducción"
+# File:interface.c, line:2054
+msgid  "No Albums available to set Album Art with. Either:\n1. You have no music files uploaded?\n2. Your device does not support Albums?\n3. Previous applications used to upload files do not autocreate albums for you or support the metadata for those files in order to create the albums for you?\n"
+msgstr "No hay álbumes disponibles para crear carátulas con. O bien:\n1. Usted no tiene archivos de música  subido?\n2. Su dispositivo no es compatible con  Picasa?\n3. Solicitudes anteriores para subir archivos no autocreate álbumes para usted o apoyar a los metadatos de los archivos a fin de crear los discos para usted?\n"
+# File:callbacks.c, line:167
+msgid  "No device attached"
+msgstr "No hay ningún dispositivo  conectado"
+# File:callbacks.c, line:99
+msgid  "No files/folders selected?"
+msgstr "No hay archivos / carpetas seleccionadas?"
+# File:interface.c, line:2566
+msgid  "Num"
+msgstr "Número"
+# File:interface.c, line:588
+msgid  "Object ID"
+msgstr "ID del objeto"
+# File:interface.c, line:2008
+msgid  "Overwrite"
+msgstr "Sobrescribir"
+# File:interface.c, line:2009
+msgid  "Overwrite All"
+msgstr "Sobrescribir todos"
+# File:interface.c, line:318
+msgid  "Permanently remove files/folders from your device. Note: Albums are stored as *.alb files."
+msgstr "Permanente eliminar los archivos  / carpetas desde el dispositivo. Nota: Los álbumes se guardan como archivos *. alb."
+# File:interface.c, line:2392
+msgid  "Playlist Audio Tracks"
+msgstr "Lista pistas de audio"
+# File:interface.c, line:2726
+msgid  "Playlist Name:"
+msgstr "Lista Nombre:"
+# File:interface.c, line:341
+msgid  "Playlists"
+msgstr "Listas de reproducción"
+# File:interface.c, line:367
+msgid  "Preferences"
+msgstr "Preferencias"
+# File:interface.c, line:1037
+msgid  "Prompt if to Overwrite file if already exists"
+msgstr "Preguntar si el archivo para sobrescribir si ya existe"
+# File:interface.c, line:360
+msgid  "Properties"
+msgstr "Propiedades"
+# File:interface.c, line:2011
+msgid  "Question: Confirm Overwrite of Existing File?"
+msgstr "Pregunta: Confirmar la sobrescritura  del archivo existente?"
+# File:interface.c, line:379
+msgid  "Quit"
+msgstr "Salir"
+# File:interface.c, line:382
+msgid  "Quit gMTP."
+msgstr "Salir gMTP."
+# File:interface.c, line:348
+msgid  "Refresh"
+msgstr "Actualizar"
+# File:interface.c, line:216
+msgid  "Refresh Device"
+msgstr "Actualizar dispositivo"
+# File:interface.c, line:351
+msgid  "Refresh File/Folder listing."
+msgstr "Actualizar Archivo / lista de carpetas."
+# File:interface.c, line:2295
+msgid  "Remove Current Selected Playlist"
+msgstr "Borrar lista de reproducción seleccionada  actual"
+# File:interface.c, line:2365
+msgid  "Remove file from playlist"
+msgstr "Eliminar el archivo de lista de reproducción"
+# File:mtp.c, line:310
+msgid  "Rescan: How did I get called?\n"
+msgstr "Volver a explorar: ¿Cómo me llaman?\n"
+# File:callbacks.c, line:418
+msgid  "Select Album Art File"
+msgstr "Album Art Seleccione Archivo"
+# File:interface.c, line:624
+msgid  "Select Files to Add"
+msgstr "Seleccione los archivos  para agregar"
+# File:interface.c, line:711
+msgid  "Select Path to Download"
+msgstr "Seleccionar ruta para descargar"
+# File:callbacks.c, line:238
+msgid  "Select Path to Download to"
+msgstr "Seleccionar ruta para descargar a"
+# File:callbacks.c, line:264
+msgid  "Select Path to Upload From"
+msgstr "Seleccionar ruta para subir de"
+# File:interface.c, line:578
+msgid  "Size"
+msgstr "Tamaño"
+# File:interface.c, line:2006
+msgid  "Skip"
+msgstr "Omitir"
+# File:interface.c, line:2007
+msgid  "Skip All"
+msgstr "Omitir todo"
+# File:interface.c, line:1968
+msgid  "Storage Device:"
+msgstr "Dispositivo de almacenamiento:"
+# File:interface.c, line:2540
+msgid  "Track"
+msgstr "Pista"
+# File:mtp.c, line:399
+msgid  "Unable to add %s due to insufficient space: filesize = %l, freespace = %l\n"
+msgstr "No se puede añadir %s debido a la falta de espacio: %l = tamaño del archivo, %l = espacio libre\n"
+# File:mtp.c, line:400
+msgid  "Unable to add file due to insufficient space"
+msgstr "No se puede agregar el archivo debido a la falta de espacio"
+# File:mtp.c, line:158
+msgid  "Unknown"
+msgstr "Desconocida"
+# File:interface.c, line:1930
+msgid  "Unknown : %04x:%04x @ bus %d, dev %d"
+msgstr "Desconocida: %04x:%04x @ bus %d, dev %d"
+# File:interface.c, line:1981
+msgid  "Unknown id: %d, %l MB"
+msgstr "Desconocida id: %d, %l MB"
+# File:mtp.c, line:834
+msgid  "Updating playlist failed?\n"
+msgstr "Actualizar lista de temas no?\n"
+# File:interface.c, line:2957
+msgid  "Updating playlist failed? 'realloc in savePlayList'\n"
+msgstr "Actualizar lista de temas no? 'realloc en savePlayList'\n"
+# File:interface.c, line:1078
+msgid  "Upload Path:"
+msgstr "Subir Ruta de acceso:"
+# File:interface.c, line:337
+msgid  "Upload a JPG file and assign it as Album Art."
+msgstr "Subir un archivo JPG y asignarlo como Album Art."
+# File:interface.c, line:337
+msgid  "Upload an image file as Album Art."
+msgstr "Subir un archivo de imagen como carátula del álbum."
+# File:interface.c, line:363
+msgid  "View Device Properties."
+msgstr "Propiedades de la vista de dispositivos."
+# File:interface.c, line:370
+msgid  "View/Change gMTP Preferences."
+msgstr "Ver / Cambiar preferencias gMTP."
+# File:prefs.c, line:57
+msgid  "WARNING: gconf schema invalid, reverting to defaults. Please ensure schema is loaded in gconf database.\n"
+msgstr "ADVERTENCIA: El esquema de GConf no válido, volviendo a los valores predeterminados. Por favor, asegúrese de esquema se carga en base de datos de GConf.\n"
+# File:prefs.c, line:76
+msgid  "WARNING: gconf schema invalid, unable to save! Please ensure schema is loaded in gconf database.\n"
+msgstr "ADVERTENCIA: El esquema de GConf inválida, incapaz de guardar! Por favor, asegúrese de esquema se carga en base de datos de GConf.\n"
+# File:prefs.c, line:127
+msgid  "WARNING: gconf_callback_func() failed - we got a callback for a key thats not ours?\n"
+msgstr "ADVERTENCIA: gconf_callback_func () no - tenemos una devolución de llamada de eso no es nuestra clave?\n"
+# File:interface.c, line:274
+msgid  "_About"
+msgstr "_Acerca de"
+# File:interface.c, line:234
+msgid  "_Edit"
+msgstr "_Editar"
+# File:interface.c, line:160
+msgid  "_File"
+msgstr "A_rchivo"
+# File:interface.c, line:267
+msgid  "_Help"
+msgstr "A_yuda"
+# File:interface.c, line:1673
+msgid  "file = ( x / x ) x %"
+msgstr "archivo = ( x / x ) x %"
+# File:dnd.c, line:83
+msgid  "file://"
+msgstr "file://"
+# File:interface.c, line:2956
+msgid  "realloc in savePlayList failed\n"
+msgstr "realloc en savePlayList no\n"
+# File:mtp.c, line:643
+msgid  "setDeviceName: How did I get called?\n"
+msgstr "setDeviceName: ¿Cómo me llaman?\n"
+msgid "File Type"
+msgstr "Tipo de Archivo"
+msgid "Track Name"
+msgstr "Nombre de pista"
+msgid "Year"
+msgstr "Año"
+msgid "_View"
+msgstr "_Ver"
+msgid "File Size"
+msgstr "Tamaño del archivo"
+msgid "Track Number"
+msgstr "Número de pista"
+msgid "Genre"
+msgstr "Género"

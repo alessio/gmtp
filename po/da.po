@@ -1,0 +1,546 @@
+domain "gmtp"
+# File:mtp.c, line:544
+msgid  "\nError getting file from MTP device.\n"
+msgstr "\nFejl ved hentning af filen fra MTP enhed.\n"
+# File:mtp.c, line:529
+msgid  "\nFailed to delete file %s\n"
+msgstr "\nKunne ikke slette fil %s\n"
+# File:interface.c, line:1922
+msgid  "   %s %s : (%04x:%04x) @ bus %d, dev %d"
+msgstr "   %s %s : (%04x:%04x) @ bus %d, dev %d"
+# File:interface.c, line:1601
+msgid  " : %d MB (free) / %d MB (total)"
+msgstr " : %d MB (gratis) / %d MB (samlede)"
+# File:interface.c, line:2241
+msgid  " Playlists"
+msgstr " Afspilningslister"
+# File:interface.c, line:982
+msgid  " Preferences"
+msgstr " Indstillinger"
+# File:interface.c, line:1226
+msgid  " Properties"
+msgstr " Egenskaber"
+# File:interface.c, line:1587
+msgid  "%d MB (free) / %d MB (total)"
+msgstr "%d MB (gratis) / %d MB (samlede)"
+# File:interface.c, line:1723
+msgid  "%lluKB of %lluKB (%d%%)"
+msgstr "%lluKB af %lluKB (%d%%)"
+# File:interface.c, line:1721
+msgid  "%s - %lluKB of %lluKB (%d%%)"
+msgstr "%s - %lluKB af %lluKB (%d%%)"
+# File:mtp.c, line:461
+msgid  "<Unknown>"
+msgstr "<Ukendt>"
+# File:interface.c, line:1665
+msgid  "<b><big>"
+msgstr "<b><big>"
+# File:interface.c, line:1346
+msgid  "<b>Battery Level:</b>"
+msgstr "<b>Batterilevel:</b>"
+# File:interface.c, line:1501
+msgid  "<b>Bus Location:</b>"
+msgstr "<b>Bus Beliggenhed:</b>"
+# File:interface.c, line:1492
+msgid  "<b>Device Number:</b>"
+msgstr "<b>Enhed nummer:</b>"
+# File:interface.c, line:1328
+msgid  "<b>Device Version:</b>"
+msgstr "<b>Enhed version:</b>"
+# File:interface.c, line:1009
+msgid  "<b>Device</b>"
+msgstr "<b>Enhed</b>"
+# File:interface.c, line:1041
+msgid  "<b>File Operations</b>"
+msgstr "<b>Filhandlinger</b>"
+# File:interface.c, line:1111
+msgid  "<b>Filepaths on PC</b>"
+msgstr "<b>Filstier på PC</b>"
+# File:interface.c, line:1433
+msgid  "<b>MTP Device Properties</b>"
+msgstr "<b>MTP enhed egenskaber</b>"
+# File:interface.c, line:1337
+msgid  "<b>Manufacturer:</b>"
+msgstr "<b>Producent:</b>"
+# File:interface.c, line:1310
+msgid  "<b>Model Number:</b>"
+msgstr "<b>Model nummer:</b>"
+# File:interface.c, line:1259
+msgid  "<b>Name:</b>"
+msgstr "<b>Navn:</b>"
+# File:interface.c, line:1483
+msgid  "<b>Product ID:</b>"
+msgstr "<b>Produkt-ID:</b>"
+# File:interface.c, line:1465
+msgid  "<b>Product:</b>"
+msgstr "<b>Produkt:</b>"
+# File:interface.c, line:1551
+msgid  "<b>Raw Device Information</b>"
+msgstr "<b>Rå enhedsoplysninger</b>"
+# File:interface.c, line:1386
+msgid  "<b>Secure Time:</b>"
+msgstr "<b>Sikker Tid:</b>"
+# File:interface.c, line:1319
+msgid  "<b>Serial Number:</b>"
+msgstr "<b>Serienummer:</b>"
+# File:interface.c, line:1355
+msgid  "<b>Storage:</b>"
+msgstr "<b>Opbevaring:</b>"
+# File:interface.c, line:1371
+msgid  "<b>Supported Formats:</b>"
+msgstr "<b>Understøttede formater:</b>"
+# File:interface.c, line:1395
+msgid  "<b>Sync Partner:</b>"
+msgstr "<b>Synkronisering partner:</b>"
+# File:interface.c, line:1474
+msgid  "<b>Vendor ID:</b>"
+msgstr "<b>Leverandør-id:</b>"
+# File:interface.c, line:1456
+msgid  "<b>Vendor:</b>"
+msgstr "<b>Leverandør:</b>"
+# File:interface.c, line:1767
+msgid  "<small>Copyright 2009-2011, Darran Kartaschew\nReleased under the BSD Licence</small>\n"
+msgstr "<small>Copyright 2009-2011, Darran Kartaschew\nUdgivet under BSD Licence</small>\n"
+# File:interface.c, line:1759
+msgid  "A simple MP3 Player Client for Solaris 10\nand other UNIX / UNIX-like systems\n"
+msgstr "En simpel MP3-afspiller Client til Solaris 10\nog andre UNIX / UNIX-lignende systemer\n"
+# File:interface.c, line:1737
+msgid  "About gMTP"
+msgstr "Om gMTP"
+# File:interface.c, line:308
+msgid  "Add"
+msgstr "Tilføj"
+# File:interface.c, line:249
+msgid  "Add Album Art"
+msgstr "Tilføj albumcover"
+# File:interface.c, line:2358
+msgid  "Add File"
+msgstr "Tilføj fil"
+# File:interface.c, line:179
+msgid  "Add Files"
+msgstr "Tilføj filer"
+# File:interface.c, line:311
+msgid  "Add Files to your device."
+msgstr "Tilføj filer til enheden."
+# File:interface.c, line:2273
+msgid  "Add New Playlist"
+msgstr "Tilføj Ny afspilningsliste"
+# File:interface.c, line:311
+msgid  "Add a varity of Files to your device in the current folder."
+msgstr "Tilføj en række filer til din enhed i den nuværende mappe."
+# File:interface.c, line:344
+msgid  "Add and Modify Playlists."
+msgstr "Tilføj og rediger afspilningslister."
+# File:interface.c, line:2344
+msgid  "Add file to playlist"
+msgstr "Tilføj afspilningslisten "
+# File:interface.c, line:2522
+msgid  "Album"
+msgstr "Album"
+# File:interface.c, line:334
+msgid  "Album Art"
+msgstr "Albumcover"
+# File:interface.c, line:2038
+msgid  "Album:"
+msgstr "Album:"
+# File:interface.c, line:1060
+msgid  "Always show Download Path?"
+msgstr "Vis altid download sti?"
+# File:callbacks.c, line:111
+msgid  "Are you sure you want to delete these files?"
+msgstr "Er du sikker på du vil slette disse filer?"
+# File:callbacks.c, line:342
+msgid  "Are you sure you want to delete this folder (and all contents)?"
+msgstr "Er du sikker på du vil slette denne mappe (og hele indholdet)?"
+# File:interface.c, line:2512
+msgid  "Artist"
+msgstr "Kunstner"
+# File:interface.c, line:1005
+msgid  "Attempt to connect to Device on startup"
+msgstr "Forsøg at oprette forbindelse til enheden ved opstart"
+# File:interface.c, line:241
+msgid  "Change Device Name"
+msgstr "Skift Enhedsnavn"
+# File:callbacks.c, line:112
+msgid  "Confirm Delete"
+msgstr "Bekræft sletning"
+# File:interface.c, line:1033
+msgid  "Confirm File/Folder Delete"
+msgstr "Bekræft fil / mappe Slet"
+# File:callbacks.c, line:165
+msgid  "Connect"
+msgstr "Tilslut"
+# File:callbacks.c, line:170
+msgid  "Connect Device"
+msgstr "Tilslut enheden"
+# File:interface.c, line:1897
+msgid  "Connect to which device?"
+msgstr "Tilslut til hvilken enhed?"
+# File:interface.c, line:1957
+msgid  "Connect to which storage device?"
+msgstr "Tilslut som lagerenhed?"
+# File:interface.c, line:299
+msgid  "Connect/Disconnect to your device."
+msgstr "Tilslut / Afbryd til enheden."
+# File:callbacks.c, line:47
+msgid  "Connected to %s (%s) - %d MB free"
+msgstr "Forbundet til %s (%s) - %d MB fri"
+# File:callbacks.c, line:44
+msgid  "Connected to %s - %d MB free"
+msgstr "Forbundet til %s - %d MB fri"
+# File:mtp.c, line:816
+msgid  "Couldn't create playlist object\n"
+msgstr "Kunne ikke oprette afspilningsliste objekt\n"
+# File:mtp.c, line:585
+msgid  "Couldn't delete folder %s (%x)\n"
+msgstr "Kunne ikke slette mappe %s (%x)\n"
+# File:mtp.c, line:760
+msgid  "Couldn't open image file %s\n"
+msgstr "Kunne ikke åbne billedfil %s\n"
+# File:mtp.c, line:777
+msgid  "Couldn't send album art\n"
+msgstr "Kunne ikke sende albumcover\n"
+# File:interface.c, line:199
+msgid  "Create Folder"
+msgstr "Opret mappe"
+# File:interface.c, line:2259
+msgid  "Current Playlist: "
+msgstr "Nuværende spilleliste: "
+# File:interface.c, line:2309
+msgid  "Del"
+msgstr "Slet"
+# File:interface.c, line:2379
+msgid  "Del File"
+msgstr "Slet fil"
+# File:interface.c, line:315
+msgid  "Delete"
+msgstr "Slet"
+# File:interface.c, line:185
+msgid  "Delete Files"
+msgstr "Slette filer"
+# File:interface.c, line:318
+msgid  "Delete Files/Folders from your device."
+msgstr "Slet filer / mapper fra enheden."
+# File:interface.c, line:206
+msgid  "Delete Folder"
+msgstr "Slet mappe"
+# File:mtp.c, line:825
+msgid  "Deleting playlist failed?\n"
+msgstr "Sletning afspilningsliste  mislykkedes?\n"
+# File:mtp.c, line:92
+msgid  "Detect: Encountered a Memory Allocation Error. \n"
+msgstr "Detect: Der opstod en Memory Fordeling Fejl. \n"
+# File:mtp.c, line:84
+msgid  "Detect: No raw devices found.\n"
+msgstr "Detect: Ingen rå enheder fundet.\n"
+# File:mtp.c, line:88
+msgid  "Detect: There has been an error connecting. \n"
+msgstr "Detect: Der har været en fejl forbinder.\n"
+# File:mtp.c, line:106
+msgid  "Detect: Unable to open raw device?\n"
+msgstr "Detect: Kan ikke åbne rå enhed?\n"
+# File:interface.c, line:2326
+msgid  "Device Audio Tracks"
+msgstr "Enhed lydspor"
+# File:interface.c, line:1861
+msgid  "Device Name:"
+msgstr "Enhedens navn:"
+# File:interface.c, line:222
+msgid  "Device Properties"
+msgstr "Enhed Egenskaber"
+# File:interface.c, line:1908
+msgid  "Device:"
+msgstr "Enhed:"
+# File:mtp.c, line:259
+msgid  "DevicePropeties: How did I get called?\n"
+msgstr "DevicePropeties: Hvordan fik jeg hedder?\n"
+# File:callbacks.c, line:146
+msgid  "Disconnect"
+msgstr "Afbryd"
+# File:callbacks.c, line:161
+msgid  "Disconnect Device"
+msgstr "Afbryd enhed"
+# File:interface.c, line:322
+msgid  "Download"
+msgstr "Download"
+# File:interface.c, line:191
+msgid  "Download Files"
+msgstr "Download filer"
+# File:interface.c, line:325
+msgid  "Download Files from your device to your Host PC."
+msgstr "Download filer fra enheden til din Host PC."
+# File:interface.c, line:1071
+msgid  "Download Path:"
+msgstr "Download-sti:"
+# File:interface.c, line:325
+msgid  "Download files from your device to your PC. Default Download path is set in the prefernces dialog."
+msgstr "Downloade filer fra din enhed til din  pc. Standard Download sti er fastsat i prefernces dialogen."
+# File:interface.c, line:2550
+msgid  "Duration"
+msgstr "Varighed"
+# File:mtp.c, line:755
+msgid  "ERROR: Failed memory allocation in albumAddArt()\n"
+msgstr "FEJL: Kunne ikke hukommelse tildeling i albumAddArt ()\n"
+# File:mtp.c, line:700
+msgid  "ERROR: Failed memory allocation in albumAddTrackToAlbum()\n"
+msgstr "FEJL: Kunne ikke hukommelse tildeling i albumAddTrackToAlbum  ()\n"
+# File:interface.c, line:255
+msgid  "Edit Playlist(s)"
+msgstr "Rediger afspilningsliste(r)"
+# File:interface.c, line:1784
+msgid  "Error"
+msgstr "Fejl"
+# File:mtp.c, line:482
+msgid  "Error code %d sending track to device: <b>%s</b>"
+msgstr "Fejlkode %d sendes spor til enheden: <b>%s</b>"
+# File:mtp.c, line:732
+msgid  "Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"
+msgstr "Fejl ved oprettelse eller opdatering album.\n(Dette kunne skyldes, at enheden ikke understøtter album.)\n"
+# File:mtp.c, line:545
+msgid  "Error getting file from MTP device."
+msgstr "Fejl ved hentning af filen fra MTP enhed."
+# File:mtp.c, line:503
+msgid  "Error sending file %s.\n"
+msgstr "Fejl ved afsendelse af filen %s.\n"
+# File:mtp.c, line:504
+msgid  "Error sending file:"
+msgstr "Fejl ved afsendelse af fil:"
+# File:mtp.c, line:481
+msgid  "Error sending track.\n"
+msgstr "Fejl under afsendelse spor.\n"
+# File:mtp.c, line:637
+msgid  "Error: Couldn't set device name to %s\n"
+msgstr "Fejl: Kunne ikke sætte enheden navn til %s\n"
+# File:mtp.c, line:530
+msgid  "Failed to delete file"
+msgstr "Kunne ikke slette fil"
+# File:interface.c, line:2004
+msgid  "File <b>%s</b> already exists in target folder.\nDo you want to:"
+msgstr "Fil <b>%s</b> eksisterer allerede i destinationsmappen. Ønsker du at:"
+# File:mtp.c, line:405
+msgid  "File Upload"
+msgstr "Fil Upload"
+# File:mtp.c, line:538
+msgid  "File download"
+msgstr "Fil download"
+# File:interface.c, line:604
+msgid  "FileSize Hidden"
+msgstr "FileSize Hidden"
+# File:interface.c, line:568
+msgid  "Filename"
+msgstr "Filnavn"
+# File:interface.c, line:2073
+msgid  "Filename:"
+msgstr "Filnavn:"
+# File:interface.c, line:1817
+msgid  "Folder Name:"
+msgstr "Mappe Navn:"
+# File:mtp.c, line:557
+msgid  "Folder creation failed:"
+msgstr "Oprettelse af mapper mislykkedes:"
+# File:mtp.c, line:556
+msgid  "Folder creation failed: %s\n"
+msgstr "Oprettelse af mapper mislykkedes: %s\n"
+# File:interface.c, line:864
+msgid  "I don't know how to delete a parent folder reference?\n"
+msgstr "Jeg ved ikke, hvordan man sletter en overordnet mappe reference?\n"
+# File:interface.c, line:1796
+msgid  "Information"
+msgstr "Informationer"
+# File:interface.c, line:2415
+msgid  "Move selected file down in the playlist"
+msgstr "Flyt valgte fil ned i spillelisten"
+# File:interface.c, line:2410
+msgid  "Move selected file up in the playlist"
+msgstr "Flyt valgte fil op i spillelisten"
+# File:callbacks.c, line:367
+msgid  "N/A"
+msgstr "ikke relevant"
+# File:interface.c, line:1805
+msgid  "New Folder"
+msgstr "Ny Mappe"
+# File:interface.c, line:2714
+msgid  "New Playlist"
+msgstr "Ny spilleliste"
+# File:interface.c, line:2054
+msgid  "No Albums available to set Album Art with. Either:\n1. You have no music files uploaded?\n2. Your device does not support Albums?\n3. Previous applications used to upload files do not autocreate albums for you or support the metadata for those files in order to create the albums for you?\n"
+msgstr "Ingen Albums rådighed for at indstille Album Art med. Enten:\n1. Du har ingen musikfiler uploadet?\n2. Enheden understøtter ikke albums?\n3. Tidligere programmer, der bruges til at uploade filer ikke autocreate album for dig eller støtter metadata for disse filer for at skabe  album for  dig?\n"
+# File:callbacks.c, line:167
+msgid  "No device attached"
+msgstr "Ingen tilsluttede enhed"
+# File:callbacks.c, line:99
+msgid  "No files/folders selected?"
+msgstr "Ingen filer / mapper valgt?"
+# File:interface.c, line:2566
+msgid  "Num"
+msgstr "Nummer"
+# File:interface.c, line:588
+msgid  "Object ID"
+msgstr "Object ID"
+# File:interface.c, line:2008
+msgid  "Overwrite"
+msgstr "Overskriv"
+# File:interface.c, line:2009
+msgid  "Overwrite All"
+msgstr "Overskriv alle"
+# File:interface.c, line:318
+msgid  "Permanently remove files/folders from your device. Note: Albums are stored as *.alb files."
+msgstr "Permanent fjerne filer / mapper fra enheden. Bemærk: Albums gemmes som *. alb-filer."
+# File:interface.c, line:2392
+msgid  "Playlist Audio Tracks"
+msgstr "Afspilningsliste lydspor"
+# File:interface.c, line:2726
+msgid  "Playlist Name:"
+msgstr "Afspilningsliste Navn:"
+# File:interface.c, line:341
+msgid  "Playlists"
+msgstr "Afspilningslister"
+# File:interface.c, line:367
+msgid  "Preferences"
+msgstr "Indstillinger"
+# File:interface.c, line:1037
+msgid  "Prompt if to Overwrite file if already exists"
+msgstr "Spørg hvis du vil overskrive filen, hvis der allerede eksisterer"
+# File:interface.c, line:360
+msgid  "Properties"
+msgstr "Egenskaber"
+# File:interface.c, line:2011
+msgid  "Question: Confirm Overwrite of Existing File?"
+msgstr "Spørgsmål: Bekræft Overskriv af eksisterende fil?"
+# File:interface.c, line:379
+msgid  "Quit"
+msgstr "Afslut"
+# File:interface.c, line:382
+msgid  "Quit gMTP."
+msgstr "Afslut gMTP."
+# File:interface.c, line:348
+msgid  "Refresh"
+msgstr "Genopfriske"
+# File:interface.c, line:216
+msgid  "Refresh Device"
+msgstr "Genopfriske enhed"
+# File:interface.c, line:351
+msgid  "Refresh File/Folder listing."
+msgstr "Genopfriske fil / Mappe notering."
+# File:interface.c, line:2295
+msgid  "Remove Current Selected Playlist"
+msgstr "Fjern aktuelt valgte spilleliste"
+# File:interface.c, line:2365
+msgid  "Remove file from playlist"
+msgstr "Fjern fil fra afspilningslisten"
+# File:mtp.c, line:310
+msgid  "Rescan: How did I get called?\n"
+msgstr "Genskan: Hvordan fik jeg hedder?\n"
+# File:callbacks.c, line:418
+msgid  "Select Album Art File"
+msgstr "Vælg albumcover fil"
+# File:interface.c, line:624
+msgid  "Select Files to Add"
+msgstr "Vælge filer at tilføje"
+# File:interface.c, line:711
+msgid  "Select Path to Download"
+msgstr "Vælg sti til Download"
+# File:callbacks.c, line:238
+msgid  "Select Path to Download to"
+msgstr "Vælg Sti til Download til"
+# File:callbacks.c, line:264
+msgid  "Select Path to Upload From"
+msgstr "Vælg sti til Upload Fra"
+# File:interface.c, line:578
+msgid  "Size"
+msgstr "Størrelse"
+# File:interface.c, line:2006
+msgid  "Skip"
+msgstr "Spring"
+# File:interface.c, line:2007
+msgid  "Skip All"
+msgstr "Spring Alle"
+# File:interface.c, line:1968
+msgid  "Storage Device:"
+msgstr "Lagerenhed:"
+# File:interface.c, line:2540
+msgid  "Track"
+msgstr "Spor"
+# File:mtp.c, line:399
+msgid  "Unable to add %s due to insufficient space: filesize = %lu, freespace = %lu\n"
+msgstr "Kan ikke tilføje %s på grund af utilstrækkelig plads: Filstørrelse = %lu, ledig plads = %lu\n"
+# File:mtp.c, line:400
+msgid  "Unable to add file due to insufficient space"
+msgstr "Kunne ikke tilføje filen på grund af utilstrækkelig plads"
+# File:mtp.c, line:158
+msgid  "Unknown"
+msgstr "Ukendt"
+# File:interface.c, line:1930
+msgid  "Unknown : %04x:%04x @ bus %d, dev %d"
+msgstr "Ukendt : %04x:%04x @ bus %d, dev %d"
+# File:interface.c, line:1981
+msgid  "Unknown id: %d, %lu MB"
+msgstr "Ukendt ID: %d, %lu MB"
+# File:mtp.c, line:834
+msgid  "Updating playlist failed?\n"
+msgstr "Opdatering afspilningsliste  mislykkedes?\n"
+# File:interface.c, line:2957
+msgid  "Updating playlist failed? 'realloc in savePlayList'\n"
+msgstr "Opdatering afspilningsliste mislykkedes? 'realloc i savePlayList'\n"
+# File:interface.c, line:1078
+msgid  "Upload Path:"
+msgstr "Upload Sti:"
+# File:interface.c, line:337
+msgid  "Upload a JPG file and assign it as Album Art."
+msgstr "Upload en JPG-fil og tildele den som albumcover."
+# File:interface.c, line:337
+msgid  "Upload an image file as Album Art."
+msgstr "Upload en billedfil som albumcover."
+# File:interface.c, line:363
+msgid  "View Device Properties."
+msgstr "Se Enhed Egenskaber."
+# File:interface.c, line:370
+msgid  "View/Change gMTP Preferences."
+msgstr "Se / Ændre gMTP indstillinger."
+# File:prefs.c, line:57
+msgid  "WARNING: gconf schema invalid, reverting to defaults. Please ensure schema is loaded in gconf database.\n"
+msgstr "ADVARSEL: GConf skema ugyldig, vender tilbage til standardindstillinger. Du sikre skema er lagt i GConf database.\n"
+# File:prefs.c, line:76
+msgid  "WARNING: gconf schema invalid, unable to save! Please ensure schema is loaded in gconf database.\n"
+msgstr "ADVARSEL: GConf skema ugyldig, ude af stand til at redde! Du sikre skema er lagt i GConf database.\n"
+# File:prefs.c, line:127
+msgid  "WARNING: gconf_callback_func() failed - we got a callback for a key thats not ours?\n"
+msgstr "ADVARSEL: gconf_callback_func () mislykkedes - vi fik en tilbagekaldsanmodning  for en nøgle thats ikke vores?\n"
+# File:interface.c, line:274
+msgid  "_About"
+msgstr "_Om"
+# File:interface.c, line:234
+msgid  "_Edit"
+msgstr "_Rediger"
+# File:interface.c, line:160
+msgid  "_File"
+msgstr "_Fil"
+# File:interface.c, line:267
+msgid  "_Help"
+msgstr "_Hjælp"
+# File:interface.c, line:1673
+msgid  "file = ( x / x ) x %"
+msgstr "file = ( x / x ) x %"
+# File:dnd.c, line:83
+msgid  "file://"
+msgstr "file://"
+# File:interface.c, line:2956
+msgid  "realloc in savePlayList failed\n"
+msgstr "realloc i savePlayList  mislykkedes\n"
+# File:mtp.c, line:643
+msgid  "setDeviceName: How did I get called?\n"
+msgstr "setDeviceName: Hvordan fik jeg hedder?\n"
+msgid "File Type"
+msgstr "Filtype"
+msgid "Track Name"
+msgstr "Spor Navn"
+msgid "Year"
+msgstr "År"
+msgid "_View"
+msgstr "_Vis"
+msgid "File Size"
+msgstr "Filstørrelse"
+msgid "Track Number"
+msgstr "Spornummer"
+msgid "Genre"
+msgstr "Genren"

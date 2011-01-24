@@ -1,8 +1,23 @@
+/* 
+*
+*   File: callbacks.c
+*   
+*   Copyright (C) 2009-2011 Darran Kartaschew
+*
+*   This file is part of the gMTP package.
+*
+*   gMTP is free software; you can redistribute it and/or modify
+*   it under the terms of the BSD License as included within the
+*   file 'COPYING' located in the root directory
+*
+*/
+
 
 #include "config.h"
 
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <glib/gi18n.h>
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #include <gtk/gtk.h>
@@ -40,12 +55,12 @@ void on_deviceProperties_activate       (GtkMenuItem     *menuitem,
 	deviceProperties(); // We confirm our device properties, this should setup the device structure information we use below.
 	//g_sprintf(tmp_string, "Connected to %s - %d MB free", DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
 	if(DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE ){
-        g_sprintf(tmp_string, "Connected to %s - %d MB free", DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+        g_sprintf(tmp_string, _("Connected to %s - %d MB free"), DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
     } else {
         if(DeviceMgr.devicestorage->StorageDescription != NULL){
-            g_sprintf(tmp_string, "Connected to %s (%s) - %d MB free", DeviceMgr.devicename->str, DeviceMgr.devicestorage->StorageDescription ,(int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+            g_sprintf(tmp_string, _("Connected to %s (%s) - %d MB free"), DeviceMgr.devicename->str, DeviceMgr.devicestorage->StorageDescription ,(int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
         } else {
-            g_sprintf(tmp_string, "Connected to %s - %d MB free", DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+            g_sprintf(tmp_string, _("Connected to %s - %d MB free"), DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
         }
     }
     statusBarSet((gchar *)&tmp_string);
@@ -95,7 +110,7 @@ void on_filesDelete_activate (GtkMenuItem     *menuitem,
 	GtkWidget *dialog;
     // Let's check to see if we have anything selected in our treeview?
     if(fileListGetSelection() == NULL){
-        displayInformation("No files/folders selected?");
+        displayInformation(_("No files/folders selected?"));
         return;
     }
 	// Now we prompt to confirm delete?
@@ -107,8 +122,8 @@ void on_filesDelete_activate (GtkMenuItem     *menuitem,
 										 GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 										 GTK_MESSAGE_WARNING,
 										 GTK_BUTTONS_YES_NO,
-										 "Are you sure you want to delete these files?");
-		gtk_window_set_title(GTK_WINDOW (dialog), "Confirm Delete");
+										 _("Are you sure you want to delete these files?"));
+		gtk_window_set_title(GTK_WINDOW (dialog), _("Confirm Delete"));
 		gint result = gtk_dialog_run (GTK_DIALOG (dialog));
 		//g_printf("Delete Result = %d\n", result);
 		if(result == GTK_RESPONSE_YES)
@@ -123,10 +138,10 @@ void on_filesDownload_activate (GtkMenuItem     *menuitem,
 	//filesDownload((gchar*)NULL);
     // Let's check to see if we have anything selected in our treeview?
     if(fileListGetSelection() == NULL){
-        displayInformation("No files/folders selected?");
+        displayInformation(_("No files/folders selected?"));
         return;
     }
-	gboolean result = fileListDownload(fileListGetSelection());
+	fileListDownload(fileListGetSelection());
 	//g_printf("Download result was %d\n", result);
 }
 
@@ -135,38 +150,38 @@ void on_deviceConnect_activate (GtkMenuItem     *menuitem,
 {
 	gchar tmp_string[1024];
 	GtkWidget *menuText;
-	guint result = deviceConnect();
+	deviceConnect();
 	//g_printf("Device connect/disconnect code = %d\n", result);
 	// Update our label to indicate current condition.
 	if(DeviceMgr.deviceConnected == TRUE) {
 		// Set up our properties.
 		deviceProperties();
 		deviceRescan();
-		gtk_tool_button_set_label(GTK_TOOL_BUTTON (toolbuttonConnect), "Disconnect" );
+		gtk_tool_button_set_label(GTK_TOOL_BUTTON (toolbuttonConnect), _("Disconnect") );
 		// Now update the status bar;
 		//g_sprintf(tmp_string, "Connected to %s - %d MB free", DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
 		if(DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE ){
-            g_sprintf(tmp_string, "Connected to %s - %d MB free", DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+            g_sprintf(tmp_string, _("Connected to %s - %d MB free"), DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
         } else {
             if(DeviceMgr.devicestorage->StorageDescription != NULL){
-                g_sprintf(tmp_string, "Connected to %s (%s) - %d MB free", DeviceMgr.devicename->str, DeviceMgr.devicestorage->StorageDescription ,(int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+                g_sprintf(tmp_string, _("Connected to %s (%s) - %d MB free"), DeviceMgr.devicename->str, DeviceMgr.devicestorage->StorageDescription ,(int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
             } else {
-                g_sprintf(tmp_string, "Connected to %s - %d MB free", DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
+                g_sprintf(tmp_string, _("Connected to %s - %d MB free"), DeviceMgr.devicename->str, (int)( DeviceMgr.devicestorage->FreeSpaceInBytes  / 1048576 ));
             }
         }
         statusBarSet((gchar *)&tmp_string);
 		// Now update the filemenu;
 		menuText = gtk_bin_get_child(GTK_BIN(fileConnect));
-		gtk_label_set_text(GTK_LABEL(menuText), "Disconnect Device");
+		gtk_label_set_text(GTK_LABEL(menuText), _("Disconnect Device"));
         gmtp_drag_dest_set(windowMain);
 	} else {
 		
-        gtk_tool_button_set_label(GTK_TOOL_BUTTON  (toolbuttonConnect), "Connect" );
+        gtk_tool_button_set_label(GTK_TOOL_BUTTON  (toolbuttonConnect), _("Connect") );
 		// Now update the status bar;
-		statusBarSet("No device attached");
+		statusBarSet(_("No device attached"));
 		// Now update the filemenu;
 		menuText = gtk_bin_get_child(GTK_BIN(fileConnect));
-		gtk_label_set_text(GTK_LABEL(menuText), "Connect Device");
+		gtk_label_set_text(GTK_LABEL(menuText), _("Connect Device"));
 		// Now update the file list area.
 		fileListClear();
         gtk_drag_dest_unset(windowMain);
@@ -234,7 +249,7 @@ void on_PrefsDownloadPath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	GtkWidget *FileDialog;
 	//filename = g_strndup("", 8192);
 	// First of all, lets set the download path.
-	FileDialog = gtk_file_chooser_dialog_new("Select Path to Download to",
+	FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Download to"),
 											 GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 											 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 											 GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -260,7 +275,7 @@ void on_PrefsUploadPath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	GtkWidget *FileDialog;
 	//filename = g_strndup("", 8192);
 	// First of all, lets set the download path.
-	FileDialog = gtk_file_chooser_dialog_new("Select Path to Upload From",
+	FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Upload From"),
 											 GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 											 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 											 GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -325,7 +340,7 @@ void on_fileRemoveFolder_activate (GtkMenuItem *menuitem, gpointer user_data)
 	GtkWidget *dialog;
     // Let's check to see if we have anything selected in our treeview?
     if(fileListGetSelection() == NULL){
-        displayInformation("No files/folders selected?");
+        displayInformation(_("No files/folders selected?"));
         return;
     }
 
@@ -338,8 +353,8 @@ void on_fileRemoveFolder_activate (GtkMenuItem *menuitem, gpointer user_data)
 										 GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 										 GTK_MESSAGE_WARNING,
 										 GTK_BUTTONS_YES_NO,
-										 "Are you sure you want to delete this folder (and all contents)?");
-		gtk_window_set_title(GTK_WINDOW (dialog), "Confirm Delete");
+										 _("Are you sure you want to delete this folder (and all contents)?"));
+		gtk_window_set_title(GTK_WINDOW (dialog), _("Confirm Delete"));
 		gint result = gtk_dialog_run (GTK_DIALOG (dialog));
 		//g_printf("Delete Result = %d\n", result);
 		if(result == GTK_RESPONSE_YES)
@@ -363,7 +378,7 @@ void on_editDeviceName_activate (GtkMenuItem *menuitem, gpointer user_data)
 		g_free(devicename);
         tmp_string = LIBMTP_Get_Friendlyname(DeviceMgr.device);
 		if(tmp_string == NULL) {
-			DeviceMgr.devicename = g_string_new("N/A");
+			DeviceMgr.devicename = g_string_new(_("N/A"));
 		} else {
 			DeviceMgr.devicename = g_string_new(tmp_string);
 			g_free(tmp_string);
@@ -405,12 +420,16 @@ void on_editAddAlbumArt_activate (GtkMenuItem *menuitem, gpointer user_data){
     }
 }
 
+void on_editPlaylist_activate (GtkMenuItem *menuitem, gpointer user_data){
+    displayPlaylistDialog();
+}
+
 void on_buttonFilePath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	// What we do here is display a find folder dialog, and save the resulting folder into the text wigdet and preferences item.
 	//gchar *filename;
 	gchar *savepath;
 	GtkWidget *FileDialog;
-	FileDialog = gtk_file_chooser_dialog_new("Select Album Art File",
+	FileDialog = gtk_file_chooser_dialog_new(_("Select Album Art File"),
 											 GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_OPEN,
 											 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 											 GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -422,4 +441,113 @@ void on_buttonFilePath_activate (GtkMenuItem *menuitem, gpointer user_data){
         gtk_entry_set_text(GTK_ENTRY(AlbumArtFilename), g_strdup(savepath));
 	}
 	gtk_widget_destroy (FileDialog);
+}
+
+// Playlist Callbacks.
+
+void on_quitPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data)
+{
+    // Save our current selected playlist!
+    if(devicePlayLists != NULL)
+        playlist_SavePlaylist(playlist_number);
+	// Kill our window
+    gtk_widget_hide (windowPlaylistDialog);
+	gtk_widget_destroy (windowPlaylistDialog);
+	windowPlaylistDialog = NULL;
+    // Do a device rescan to show the new playlists in the file window
+    deviceRescan();
+}
+
+void on_Playlist_NewPlaylistButton_activate (GtkMenuItem *menuitem, gpointer user_data){
+    //g_printf("Clicked on new playlist button\n");
+    gchar *playlistname;
+	playlistname = displayPlaylistNewDialog();
+	if(playlistname != NULL) {
+		// Add in playlist to MTP device.
+		playlistAdd(playlistname);
+        // Refresh our playlist information.
+        devicePlayLists = getPlaylists();
+        gtk_list_store_clear(GTK_LIST_STORE(playlist_PL_List));
+        // Add it to our combobox
+        gtk_combo_box_append_text(GTK_COMBO_BOX(comboboxentry_playlist), g_strdup(playlistname) );
+        g_free(playlistname);
+        
+        // Set the active combobox item.
+        comboboxentry_playlist_entries++;
+        playlist_number = comboboxentry_playlist_entries - 1;
+        gtk_combo_box_set_active(GTK_COMBO_BOX(comboboxentry_playlist), comboboxentry_playlist_entries - 1);
+        SetPlaylistButtonState(TRUE);
+        setPlaylistField(playlist_number);
+    }
+}
+
+void on_Playlist_DelPlaylistButton_activate (GtkMenuItem *menuitem, gpointer user_data){
+    
+    gint PlayListID = gtk_combo_box_get_active(GTK_COMBO_BOX(comboboxentry_playlist));
+
+    if(PlayListID != -1){
+        // We have something selected so lets do the dance.
+        LIBMTP_playlist_t* tmpplaylist = devicePlayLists;
+        if(PlayListID > 0){
+            while(PlayListID--)
+                if(tmpplaylist->next != NULL)
+                    tmpplaylist = tmpplaylist->next;
+        }
+        // We should be in the correct playlist LIBMTP structure.
+        playlistDelete(tmpplaylist);
+        // Clear the PL list view box
+        gtk_list_store_clear(GTK_LIST_STORE(playlist_PL_List));
+        // Rebuild the playlist structure and combobox.
+        devicePlayLists = getPlaylists();
+        setPlayListComboBox();
+    }
+
+}
+
+
+void on_Playlist_DelFileButton_activate(GtkMenuItem *menuitem, gpointer user_data){
+    //g_printf("Clicked on del file in playlist button\n");
+    if(playlist_PL_ListGetSelection() == NULL)
+        return;
+	playlist_PL_ListRemove(playlist_PL_ListGetSelection());
+}
+
+void on_Playlist_AddFileButton_activate(GtkMenuItem *menuitem, gpointer user_data){
+    //g_printf("Clicked on add file in playlist button\n");
+    if(playlist_TrackList_GetSelection() == NULL)
+        return;
+	playlist_TrackList_Add(playlist_TrackList_GetSelection());
+}
+
+void on_Playlist_FileUpButton_activate(GtkMenuItem *menuitem, gpointer user_data){
+    playlist_move_files(-1);
+}
+
+void on_Playlist_FileDownButton_activate(GtkMenuItem *menuitem, gpointer user_data){
+    playlist_move_files(1);
+}
+
+void on_Playlist_Combobox_activate(GtkComboBox *combobox, gpointer user_data){
+    playlist_SavePlaylist(playlist_number);
+    playlist_number = gtk_combo_box_get_active(GTK_COMBO_BOX(comboboxentry_playlist));
+    setPlaylistField(playlist_number);
+}
+
+void on_view_activate (GtkMenuItem *menuitem, gpointer user_data){
+    gchar *gconf_path = NULL;
+    gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem));
+    if ((void *)menuitem == (void *)menu_view_filesize) gconf_path = g_strdup("/apps/gMTP/viewFileSize");
+    if ((void *)menuitem == (void *)menu_view_filetype) gconf_path = g_strdup("/apps/gMTP/viewFileType");
+    if ((void *)menuitem == (void *)menu_view_track_number) gconf_path = g_strdup("/apps/gMTP/viewTrackNumber");
+    if ((void *)menuitem == (void *)menu_view_title) gconf_path = g_strdup("/apps/gMTP/viewTitle");
+    if ((void *)menuitem == (void *)menu_view_artist) gconf_path = g_strdup("/apps/gMTP/viewArtist");
+    if ((void *)menuitem == (void *)menu_view_album) gconf_path = g_strdup("/apps/gMTP/viewAlbum");
+    if ((void *)menuitem == (void *)menu_view_year) gconf_path = g_strdup("/apps/gMTP/viewYear");
+    if ((void *)menuitem == (void *)menu_view_genre) gconf_path = g_strdup("/apps/gMTP/viewGenre");
+    if ((void *)menuitem == (void *)menu_view_duration) gconf_path = g_strdup("/apps/gMTP/viewDuration");
+
+    if((gconfconnect != NULL) && (gconf_path != NULL)){
+        gconf_client_set_bool (gconfconnect, gconf_path, state, NULL);
+        g_free(gconf_path);
+    }
 }

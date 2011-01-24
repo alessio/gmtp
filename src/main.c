@@ -1,12 +1,28 @@
-/*
-
- */
+/* 
+*
+*   File: main.c
+*   
+*   Copyright (C) 2009-2011 Darran Kartaschew
+*
+*   This file is part of the gMTP package.
+*
+*   gMTP is free software; you can redistribute it and/or modify
+*   it under the terms of the BSD License as included within the
+*   file 'COPYING' located in the root directory
+*
+*/
 
 #include "config.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <libintl.h>
+#include <locale.h>
 
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
+#include <glib/gi18n.h>
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #include <libmtp.h>
@@ -25,6 +41,7 @@
 GtkWidget *windowMain;
 GtkWidget *windowPrefsDialog;
 GtkWidget *windowPropDialog;
+GtkWidget *windowPlaylistDialog;
 GtkWidget *windowStatusBar;
 GtkWidget *toolbuttonConnect;
 GtkWidget *treeviewFiles;
@@ -33,6 +50,8 @@ Device_Struct DeviceMgr;
 
 LIBMTP_file_t   *deviceFiles;
 LIBMTP_folder_t *deviceFolders;
+LIBMTP_track_t *deviceTracks;
+LIBMTP_playlist_t *devicePlayLists;
 uint32_t currentFolderID;
 
 gchar *applicationpath = NULL;
@@ -43,22 +62,30 @@ GString *file_about_png;
 int
 main (int argc, char *argv[])
 {
-	gtk_set_locale ();
+    setFilePaths(argc, argv);
+
+    gtk_set_locale ();
 	gtk_init (&argc, &argv);
 
-    setFilePaths(argc, argv);
+    #ifdef ENABLE_NLS
+        //setlocale(LC_ALL, "");  // This is done in gtk_set_locale();
+        bindtextdomain (PACKAGE, g_strconcat(applicationpath, "/../share/locale", NULL));
+        //bindtextdomain (PACKAGE, "/usr/local/share/locale");
+        bind_textdomain_codeset (PACKAGE, "UTF-8");
+        textdomain (PACKAGE);
+    #endif
 
 	LIBMTP_Init();
 
-	windowMain = create_windowMain ();
+   	windowMain = create_windowMain ();
 	gtk_widget_show (windowMain);
 
 	//Set default state for application
 	DeviceMgr.deviceConnected = FALSE;
-	statusBarSet("No device attached");
+	statusBarSet(_("No device attached"));
 	SetToolbarButtonState(DeviceMgr.deviceConnected);
 
-	setupPreferences();
+    setupPreferences();
 
 	// If preference is to auto-connect then attempt to do so.
 	if(Preferences.attemptDeviceConnectOnStart == TRUE)

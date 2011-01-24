@@ -1,4 +1,4 @@
-gMTP - a basic MTP client.
+gMTP - a basic MP3 player client.
 
 Requirements:
 
@@ -23,9 +23,9 @@ Note: On Solaris 10, you need to logout and back in again once installed.
 If it doesn't compile, check the top of the Makefile for custom CFLAGS.
 
 Note: Solaris 10 does not ship with a PKGCONFIG file for libusb. One can be
-found in this package.
+found in this package in the 'misc' directory.
 Note: libid3tag does not provide a PKGCONFIG file. One can be found in this
-package.
+package in the 'misc' directory.
 
 Known to compile with:
 gcc v3.4.3
@@ -37,4 +37,4 @@ Solaris 10 u8
 OpenSolaris 2009.06
 Arch Linux
 Ubuntu 10.04
-
+Debian Sid

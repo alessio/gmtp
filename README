@@ -1,4 +1,4 @@
-gMTP v0.7
+gMTP v0.8
 
 A basic MP3 Player client for Oracle Solaris 10.
 
@@ -16,7 +16,7 @@ A. MTP = Media Transfer Protocol. MTP has been adopted by most major MP3 and
    upload/download files to/from a PC. See
    http://en.wikipedia.org/wiki/Media_Transfer_Protocol for more information.
 
-Q. Why does't gMTP support my iPod or Creative Nomad player
+Q. Why doesn't gMTP support my iPod or Creative Nomad player?
 A. These devices do not use MTP for moving data to/from a device. Apple iPod 
    uses it's own custom protocol in additional to USB Mass Storage and Creative
    devices use NJB.
@@ -24,19 +24,26 @@ A. These devices do not use MTP for moving data to/from a device. Apple iPod
 Q. I have a MTP enabled device and it is connected to my PC, but it doesn't get
    detected by gMTP?
 A. Most devices are capable of using different modes to talk to your PC, so
-   ensure that the device is in MTP mode.
-A. Or, libmtp doesn't know about your device or how to handle it correctly.
-   Run $ mtp-detect to see if it can be found.
+   ensure that the device is in MTP mode.<br />
+A. Or, libmtp doesn't know about your device or how to handle it correctly. 
+   Run '$ mtp-detect' to see if it can be found.
 
 Q. I get asked which storage device to connect to when I connect to my mobile
    phone?
-A. Some devices (notably mobile phones), have both internal storage
+A. Some devices (notably mobile phones), have both internal storage 
    (non-removable) and external storage (removable storage) in the form of a
    micro-SD card or M2 card, and gMTP will treat these as different storage
    devices.
 
-Q. Will this software work on OpenSolaris, Linux, *BSD or other POSIX Operating
-   System
+Q. Does gMTP support Albums and uploading Album Art?
+A. Yes. Album data is autocreated/updated when you upload a MP3 (or other 
+   supported audio file) by using information contained within the audio file,
+   eg. Using the ID3 Tag information in an MP3 file. Once the Album has been
+   created, you can upload the album art via the 'Edit / Add Album Art' menu
+   option.
+
+Q. Will this software work on OpenSolaris, Linux, *BSD or other POSIX Operating 
+   System?
 A. I have reports that it runs successfully on OpenSolaris, Arch Linux, Debian
    and Ubuntu.
 
@@ -45,13 +52,57 @@ A. It should work fine but is untested. (If libmtp and libid3tag work fine on
    your platform, then gMTP should as well).
 
 Q. Do I need root access to use gMTP?
-A. On Solaris 10, in general No. (If you do need root access, then double
-   check your RBAC setup for your user then). On Linux, in general No, as libmtp
-   should have set your udev rules correctly.
+A. On Solaris 10, in general No. (If you do need root access, then double check
+   your RBAC setup for your user then). On Linux, in general No, as libmtp
+   should have set your udev rules correctly for libmtp known devices.
 
+Q. In the file view or playlist editor, tracks have a length of 0:00?
+A. The length field displayed is reliant on the track data being set correctly
+   when the audio file was uploaded. Some file transfer utilies do not set this
+   information correctly (and earlier versions of gMTP are also guilty of this).
+   Simply download and re-upload the audio file using gMTP to correct the track
+   data on the player.
+
+Q. I have the same audio file loaded on my device in different formats, but the 
+   song duration is different between them?
+A. WMA, FLAC and OGG all store the song duration in header information, and
+   this is set by the encoder used to create the file. It may be a bug with the
+   encoder? With MP3 files, the track duration is calculated when the file is
+   uploaded, so this information should be correct unless you have a corrupt
+   MP3 file.
+
+Q. The translations are pretty awful or just plain wrong, or why don't you have
+   xyz language?
+A. The initial translations were done using Google Translate services, so
+   accuracy is not 100%. Please email me with corrections to existing
+   translations. If you would like a particular language added, and are happy
+   to assist, please let me know or simply email me with the correct *.po file
+   with the translations for your langauge.
+
+Q. I'm using French Canadian (fr_CA.UTF-8) as my locale on Solaris 10, but I
+   don't get French translations?
+A. This is due to an idiosyncrasy on Solaris 10 and language translations.
+   Either:
+   1. Copy the gmtp.mo file from /usr/local/share/locale/fr/LC_MESSAGES to
+   /usr/local/share/locale/fr.UTF-8/LC_MESSAGES, and restart gmtp.
+   2. or, create a symlink fr.UTF-8 pointing to fr in /usr/local/share/locale
+   using 'ln -s fr fr.UTF-8'.
+
+   French translations should now be present. (Technical information: On
+   Solaris, the gettext() call will only look in the current locale folder as
+   defined by the LC_MESSAGES environment variable and not the base language
+   folder as well for translations, so if the locale is set to 'fr.UTF-8',
+   gettext() will only look in that locale folder and not 'fr' as well - which
+   is what the GNU version of gettext() does). This applies to all languages
+   on Solaris 10. For Linux/FreeBSD uses this should not be an issue as most
+   will use the GNU version of gettext().
+
+Q. The column view options do not appear to be working?
+A. The gconf schema was updated in v0.8. Please update your local schema
+   file.
 
 TODO List
 
-1. Basic Playlist support. (Still need to think about the best way to do this).
-2. More audio file type metadata if requested.
+1. Bugfixes as needed.
+2. Further translations.
 

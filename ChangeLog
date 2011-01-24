@@ -1,4 +1,27 @@
--- v0.7 -
+-- v0.8 -23 Jan 2011
+
++ Licence change from CDDL to BSD. Updated all source files to include
+  licence notice.
++ Added basic playlist support.
++ "make install" no longer installation documentation, use "make install-doc"
+  instead. (As requested for inclusion in some Linux distributions).
++ Multilingual support in UI - currently English, French, German, Spanish,
+  Italian and Danish Translations.
++ Add in additional columns in main view to show audio file information.
+  Columns shown can be selected using the 'View' menu.
++ Updated gconf schema file.
+* Restructured directory setup for source code.
+* Fixed Makefile build option for some Linux systems that use "--as-needed"
+  flag.
+* Changed extension of GConf schema file to be inline with GConf documentation.
+* Fixed possible buffer overflow in WMA metatag code. (This would be result of
+  malformed header object fields).
+* Ensured all errors to console are displayed to stderr.
+* Fixed track length metadata for all file audio file types.
+* Fixed sorting of columns for filename, so that folders are always first/last.
+
+
+-- v0.7 - 25 Nov 2010
 
 + Added FLAC metadata support (required FLAC 1.2+)
 + Added OggVorbis metadata support (requires vorbis 1.0.1+)
