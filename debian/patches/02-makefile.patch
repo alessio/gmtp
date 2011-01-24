@@ -1,15 +1,13 @@
 Author: Alessio Treglia <alessio@debian.org>
 Description:
- Set installation prefix to /usr (Debian-specific).
- Fix linking order to fix FTBFS with --as-needed flag.
- Correct GConf schemas's file extension.
+ Override PREFIX if unset.
+ Correct GConf schemas' filename.
  Avoid calling gconftool, dh_gconf works fine (Debian-specific).
- Don't install documentation files by default (Debian-specific).
 Forwarded: yes
-Last-Update: 2010-11-25
+Last-Update: 2011-01-24
 ---
- Makefile |   20 +++++++++++---------
- 1 file changed, 11 insertions(+), 9 deletions(-)
+ Makefile |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 --- gmtp.orig/Makefile
 +++ gmtp/Makefile
@@ -18,49 +16,16 @@ Last-Update: 2010-11-25
  
  PKG_NAME = gmtp
 -PREFIX = /usr/local
-+PREFIX = /usr
- VER = 0.7
++PREFIX ?= /usr/local
+ VER = 0.8
  # Note: If you update above, please update the config.h and pkginfo file as well.
  
-@@ -37,7 +37,7 @@ objects = main.o mtp.o interface.o callb
- headers = main.h mtp.h interface.h callbacks.h prefs.h dnd.h metatag_info.h config.h
+@@ -126,7 +126,7 @@ install: gmtp $(catalogues)
+ 	cp po/it.mo $(DESTDIR)$(PREFIX)/share/locale/it/LC_MESSAGES/gmtp.mo
+ 	cp po/da.mo $(DESTDIR)$(PREFIX)/share/locale/da/LC_MESSAGES/gmtp.mo
+ 	cp po/de.mo $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES/gmtp.mo
+-	GCONF_CONFIG_SOURCE=`$(GCONFTOOL) --get-default-source` $(GCONFTOOL) --makefile-install-rule misc/gMTP.schemas
++	mv $(DESTDIR)$(PREFIX)/share/gconf/schemas/gMTP.schemas $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
  
- gmtp:	$(objects)
--	$(CC) -o gmtp $(LDFLAGS) $(GTK_LDFLAGS)  $(LIBS)  $(objects)
-+	$(CC) -o gmtp $(LDFLAGS) $(objects) $(GTK_LDFLAGS) $(LIBS)
- 
- 
- .c.o: $(headers)
-@@ -51,23 +51,25 @@ install: gmtp
- 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
- 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/applications
- 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/pixmaps
--	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc
--	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
- 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/gconf
- 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/gconf/schemas
- 	$(INSTALL) -m 755 gmtp $(DESTDIR)$(PREFIX)/bin
- 	$(INSTALL) -m 644 icon.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
- 	$(INSTALL) -m 644 icon-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
- 	$(INSTALL) -m 644 stock-about-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
--	$(INSTALL) -m 644 README $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
--	$(INSTALL) -m 644 COPYING $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
--	$(INSTALL) -m 644 ChangeLog $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
--	$(INSTALL) -m 644 AUTHORS $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
- 	$(INSTALL) -m 644 gMTP.desktop $(DESTDIR)$(PREFIX)/share/applications
- 	$(INSTALL) -m 644 icon.png $(DESTDIR)$(PREFIX)/share/pixmaps
- 	$(INSTALL) -m 644 gMTP.schema $(DESTDIR)$(PREFIX)/share/gconf/schemas
- 	mv $(DESTDIR)$(PREFIX)/share/pixmaps/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
--	GCONF_CONFIG_SOURCE=`$(GCONFTOOL) --get-default-source` $(GCONFTOOL) --makefile-install-rule gMTP.schema
-+	mv $(DESTDIR)$(PREFIX)/share/gconf/schemas/gMTP.schema $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
-+
-+install-doc:
-+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc
-+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
-+	$(INSTALL) -m 644 README $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
-+	$(INSTALL) -m 644 COPYING $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
-+	$(INSTALL) -m 644 ChangeLog $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
-+	$(INSTALL) -m 644 AUTHORS $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
- 
- clean:
- 	rm -f $(objects) core gmtp *.o *~ $(PKGFILE).gz
+ install-doc:
+ 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc
