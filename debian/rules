@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 LDFLAGS+=-Wl,--as-needed
+export PREFIX=/usr
 
 %:
 	dh $@ -Smakefile
