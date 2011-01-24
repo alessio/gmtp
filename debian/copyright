@@ -1,8 +1,9 @@
-Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
-Name: gMTP
-Maintainer: Darran Kartaschew <chewy509@mailcity.com>
+Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=162
+Upstream-Name: gMTP
+Upstream-Contact: Darran Kartaschew <chewy509@mailcity.com>
 Source: http://chewy509.110mb.com/gMTP.html
 
+Files: *
 Copyright: 2009-2010, Darran Kartaschew <chewy509@mailcity.com>
 License: CDDL
 X-Comment: Common Development and Distribution License version 1.0
@@ -267,10 +268,10 @@ Copyright: 2009, Victor Castillejo <perfectska04@gmail.com>
            2002-2008, Andreas Nilsson <nisses.mail@home.se>
            2002-2008, Jakub Steiner <jimmac@novell.com>
 License: GPL-2
-X-Comment: The icon is also included in the gnome-colors-common package.
+Comment: The icon is also included in the gnome-colors-common package.
 
 Files: ./debian/*
-Copyright: 2009-2010, Alessio Treglia <quadrispro@ubuntu.com>
+Copyright: 2009-2011, Alessio Treglia <alessio@debian.org>
 License: GPL-2
 
 License: GPL-2
@@ -287,5 +288,5 @@ License: GPL-2
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-X-Comment: On Debian systems the full text of the GNU General Public
+Comment: On Debian systems the full text of the GNU General Public
  License can be found in the `/usr/share/common-licenses/GPL-2' file.
