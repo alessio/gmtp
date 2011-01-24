@@ -6,8 +6,8 @@ Description:
 Forwarded: yes
 Last-Update: 2011-01-24
 ---
- Makefile |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ Makefile |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
 --- gmtp.orig/Makefile
 +++ gmtp/Makefile
@@ -20,12 +20,15 @@ Last-Update: 2011-01-24
  VER = 0.8
  # Note: If you update above, please update the config.h and pkginfo file as well.
  
-@@ -126,7 +126,7 @@ install: gmtp $(catalogues)
+@@ -126,7 +126,10 @@ install: gmtp $(catalogues)
  	cp po/it.mo $(DESTDIR)$(PREFIX)/share/locale/it/LC_MESSAGES/gmtp.mo
  	cp po/da.mo $(DESTDIR)$(PREFIX)/share/locale/da/LC_MESSAGES/gmtp.mo
  	cp po/de.mo $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES/gmtp.mo
 -	GCONF_CONFIG_SOURCE=`$(GCONFTOOL) --get-default-source` $(GCONFTOOL) --makefile-install-rule misc/gMTP.schemas
 +	mv $(DESTDIR)$(PREFIX)/share/gconf/schemas/gMTP.schemas $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
++
++register-gconf-schemas: install
++	GCONF_CONFIG_SOURCE=`$(GCONFTOOL) --get-default-source` $(GCONFTOOL) --makefile-install-rule misc/gmtp.schemas
  
  install-doc:
  	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc
