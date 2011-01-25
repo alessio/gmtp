@@ -15,6 +15,7 @@ Installation.
 For most platforms:
 $ make
 # make install
+# make register-gconf-schemas
 
 Note: Use 'gmake' on Solaris and *BSD.
 Note: On Solaris 10, you need to logout and back in again once installed.

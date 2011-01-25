@@ -1,8 +1,8 @@
 # gMTP Sync tool
 
 PKG_NAME = gmtp
-PREFIX = /usr/local
-VER = 0.8
+PREFIX ?= /usr/local
+VER = 0.8.1
 # Note: If you update above, please update the config.h and pkginfo file as well.
 
 PKG = gmtp
@@ -126,7 +126,10 @@ install: gmtp $(catalogues)
 	cp po/it.mo $(DESTDIR)$(PREFIX)/share/locale/it/LC_MESSAGES/gmtp.mo
 	cp po/da.mo $(DESTDIR)$(PREFIX)/share/locale/da/LC_MESSAGES/gmtp.mo
 	cp po/de.mo $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES/gmtp.mo
-	GCONF_CONFIG_SOURCE=`$(GCONFTOOL) --get-default-source` $(GCONFTOOL) --makefile-install-rule misc/gMTP.schemas
+	mv $(DESTDIR)$(PREFIX)/share/gconf/schemas/gMTP.schemas $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
+
+register-gconf-schemas: install
+	GCONF_CONFIG_SOURCE=`$(GCONFTOOL) --get-default-source` $(GCONFTOOL) --makefile-install-rule $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
 
 install-doc:
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc
@@ -135,6 +138,26 @@ install-doc:
 	$(INSTALL) -m 644 COPYING $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
 	$(INSTALL) -m 644 ChangeLog $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
 	$(INSTALL) -m 644 AUTHORS $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
+
+uninstall:
+	rm $(DESTDIR)$(PREFIX)/bin/gmtp
+	rm $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/icon.png
+	rm $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/icon-16.png
+	rm $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/stock-about-16.png
+	rm $(DESTDIR)$(PREFIX)/share/applications/gMTP.desktop
+	rm $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
+	rm $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
+	rm $(DESTDIR)$(PREFIX)/share/locale/es/LC_MESSAGES/gmtp.mo
+	rm $(DESTDIR)$(PREFIX)/share/locale/fr/LC_MESSAGES/gmtp.mo
+	rm $(DESTDIR)$(PREFIX)/share/locale/it/LC_MESSAGES/gmtp.mo
+	rm $(DESTDIR)$(PREFIX)/share/locale/da/LC_MESSAGES/gmtp.mo
+	rm $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES/gmtp.mo
+
+uninstall-doc:
+	rm $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)/README
+	rm $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)/COPYING
+	rm $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)/ChangeLog
+	rm $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)/AUTHORS
 
 clean:
 	rm -f $(objects) core gmtp src/*.o src/*~ $(PKGFILE).gz po/*.mo po/*~
