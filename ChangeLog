@@ -1,3 +1,8 @@
+-- v0.8.1 - 25 Jan 2011
+
+* Update Italian Translation - thanks to Francesca Ciceri !
+* Modify Makefile for separate GConf schema installation.
+
 -- v0.8 -23 Jan 2011
 
 + Licence change from CDDL to BSD. Updated all source files to include
