@@ -1,3 +1,12 @@
+gmtp (0.8.1-1) unstable; urgency=low
+
+  * New upstream release:
+    - Update Italian Translation - thanks to Francesca Ciceri.
+    - Modify Makefile for separate GConf schema installation.
+  * Drop patches, applied upstream.
+
+ -- Alessio Treglia <alessio@debian.org>  Tue, 25 Jan 2011 19:46:39 +0100
+
 gmtp (0.8-1) unstable; urgency=low
 
   * New upstream release.
