@@ -179,7 +179,9 @@ GtkWidget *fileRescan;
 GtkWidget *editDeviceName;
 GtkWidget *editAddAlbumArt;
 GtkWidget *contextMenu;
-GtkTooltips *tooltipsToolbar;
+#if GMTP_USE_GTK2
+    GtkTooltips *tooltipsToolbar;
+#endif
 
 // Columns in main file view;
 GtkTreeViewColumn *column_Size;

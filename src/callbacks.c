@@ -18,8 +18,12 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#include <gconf/gconf.h>
-#include <gconf/gconf-client.h>
+#if GMTP_USE_GTK2
+    #include <gconf/gconf.h>
+    #include <gconf/gconf-client.h>
+#else
+    #include <gio/gio.h>
+#endif
 #include <gtk/gtk.h>
 #include <libmtp.h>
 #include <id3tag.h>
@@ -36,8 +40,11 @@ on_quit1_activate                      (GtkMenuItem     *menuitem,
 										gpointer user_data)
 {
 	savePreferences();
-
-	gtk_exit(0);
+    #if GMTP_USE_GTK2
+        gtk_exit(0);
+    #else
+        exit(0);
+    #endif
 }
 
 void
@@ -217,37 +224,59 @@ on_quitPrefs_activate                  (GtkMenuItem     *menuitem,
 void on_PrefsDevice_activate (GtkMenuItem *menuitem, gpointer user_data){
 	gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonDeviceConnect));
 	//Preferences.attemptDeviceConnectOnStart = state;
+    #if GMTP_USE_GTK2
     if(gconfconnect != NULL)
         gconf_client_set_bool (gconfconnect, "/apps/gMTP/autoconnectdevice", state, NULL);
+    #else
+    if(gsettings_connect != NULL)
+        g_settings_set_boolean(gsettings_connect, "autoconnectdevice", state);
+    g_settings_sync();
+    #endif
 }
 
 void on_PrefsConfirmDelete_activate (GtkMenuItem *menuitem, gpointer user_data){
 	gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmFileOp));
 	//Preferences.confirm_file_delete_op = state;
+    #if GMTP_USE_GTK2
     if(gconfconnect != NULL)
         gconf_client_set_bool (gconfconnect, "/apps/gMTP/confirmFileDelete", state, NULL);
+    #else
+    if(gsettings_connect != NULL)
+        g_settings_set_boolean(gsettings_connect, "confirmfiledelete", state);
+    g_settings_sync();
+    #endif
 }
 
 void on_PrefsAskDownload_activate (GtkMenuItem *menuitem, gpointer user_data){
 	gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonDownloadPath));
 	//Preferences.ask_download_path = state;
+    #if GMTP_USE_GTK2
     if(gconfconnect != NULL)
         gconf_client_set_bool (gconfconnect, "/apps/gMTP/promptDownloadPath", state, NULL);
+    #else
+    if(gsettings_connect != NULL)
+        g_settings_set_boolean(gsettings_connect, "promptdownloadpath", state);
+    g_settings_sync();
+    #endif
 }
 
 void on_PrefsConfirmOverWriteFileOp_activate(GtkMenuItem *menuitem, gpointer user_data){
 	gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmOverWriteFileOp));
 	//Preferences.prompt_overwrite_file_op = state;
+    #if GMTP_USE_GTK2
     if(gconfconnect != NULL)
         gconf_client_set_bool (gconfconnect, "/apps/gMTP/promptOverwriteFile", state, NULL);
+    #else
+    if(gsettings_connect != NULL)
+        g_settings_set_boolean(gsettings_connect, "promptoverwritefile", state);
+    g_settings_sync();
+    #endif
 }
 
 void on_PrefsDownloadPath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	// What we do here is display a find folder dialog, and save the resulting folder into the text wigdet and preferences item.
-	//gchar *filename;
-	gchar *savepath;
+	gchar *savepath = NULL;
 	GtkWidget *FileDialog;
-	//filename = g_strndup("", 8192);
 	// First of all, lets set the download path.
 	FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Download to"),
 											 GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -258,23 +287,24 @@ void on_PrefsDownloadPath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	if (gtk_dialog_run (GTK_DIALOG (FileDialog)) == GTK_RESPONSE_ACCEPT) {
 		savepath = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (FileDialog));
 		// Save our download path.
-		//Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, savepath);
+        #if GMTP_USE_GTK2
         if(gconfconnect != NULL)
             gconf_client_set_string(gconfconnect, "/apps/gMTP/DownloadPath", savepath, NULL);
-		//gtk_entry_set_text(GTK_ENTRY(entryDownloadPath), savepath);
-		//g_free (filename);
+        #else
+        if(gsettings_connect != NULL)
+            g_settings_set_string(gsettings_connect, "downloadpath", savepath);
+        g_settings_sync();
+        #endif
+		g_free (savepath);
 	}
 	gtk_widget_destroy (FileDialog);
-	//g_printf("Download path = %s\n", Preferences.fileSystemDownloadPath->str);
 }
 
 void on_PrefsUploadPath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	// What we do here is display a find folder dialog, and save the resulting folder into the text wigdet and preferences item.
-	//gchar *filename;
-	gchar *savepath;
+	gchar *savepath = NULL;
 	GtkWidget *FileDialog;
-	//filename = g_strndup("", 8192);
-	// First of all, lets set the download path.
+	// First of all, lets set the upload path.
 	FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Upload From"),
 											 GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 											 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -284,25 +314,29 @@ void on_PrefsUploadPath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	if (gtk_dialog_run (GTK_DIALOG (FileDialog)) == GTK_RESPONSE_ACCEPT) {
 		savepath = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (FileDialog));
 		// Save our download path.
-		//Preferences.fileSystemUploadPath = g_string_assign(Preferences.fileSystemUploadPath, savepath);
+        #if GMTP_USE_GTK2
         if(gconfconnect != NULL)
             gconf_client_set_string(gconfconnect, "/apps/gMTP/UploadPath", savepath, NULL);
-		//gtk_entry_set_text(GTK_ENTRY(entryUploadPath), savepath);
-		//g_free (filename);
+        #else
+        if(gsettings_connect != NULL)
+            g_settings_set_string(gsettings_connect, "uploadpath", savepath);
+        g_settings_sync();
+        #endif
+		g_free(savepath);
 	}
 	gtk_widget_destroy (FileDialog);
-	//g_printf("Upload path = %s\n", Preferences.fileSystemUploadPath->str);
 }
 
 void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data){
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 
-	gchar *filename;
+	gchar *filename = NULL;
 	gboolean isFolder;
 	uint32_t objectID;
 
-	filename = g_strndup("", 8192);
+    // Allocate space for the string to be stored.
+	//filename = g_malloc0(8192);
 	model = gtk_tree_view_get_model(treeview);
 	if(gtk_tree_model_get_iter(model, &iter, path)) {
 		gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME, &filename, COL_FILEID, &objectID, -1);
@@ -321,7 +355,7 @@ void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewC
 
 void on_fileNewFolder_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
-	gchar *foldername;
+	gchar *foldername = NULL;
 	//g_print("You selected New Folder\n");
 
 	foldername = displayFolderNewDialog();
@@ -367,8 +401,8 @@ void on_fileRemoveFolder_activate (GtkMenuItem *menuitem, gpointer user_data)
 
 void on_editDeviceName_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
-	gchar *devicename;
-    gchar *tmp_string;
+	gchar *devicename = NULL;
+    gchar *tmp_string = NULL;
 
 	devicename = displayChangeDeviceNameDialog(DeviceMgr.devicename->str);
 	if(devicename != NULL) {
@@ -411,12 +445,15 @@ gboolean on_windowMainContextMenu_activate (GtkWidget *widget, GdkEvent *event){
 
 void on_editAddAlbumArt_activate (GtkMenuItem *menuitem, gpointer user_data){
 
-    Album_Struct* albumart;
+    Album_Struct* albumart = NULL;
 
     albumart = displayAddAlbumArtDialog();
     if(albumart != NULL){
         albumAddArt(albumart->album_id, albumart->filename);
+
+        // Free our memory allocations
         g_free(albumart->filename);
+        g_free(albumart);
     }
 }
 
@@ -427,7 +464,7 @@ void on_editPlaylist_activate (GtkMenuItem *menuitem, gpointer user_data){
 void on_buttonFilePath_activate (GtkMenuItem *menuitem, gpointer user_data){
 	// What we do here is display a find folder dialog, and save the resulting folder into the text wigdet and preferences item.
 	//gchar *filename;
-	gchar *savepath;
+	gchar *savepath = NULL;
 	GtkWidget *FileDialog;
 	FileDialog = gtk_file_chooser_dialog_new(_("Select Album Art File"),
 											 GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -439,6 +476,7 @@ void on_buttonFilePath_activate (GtkMenuItem *menuitem, gpointer user_data){
 		savepath = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (FileDialog));
 		// Save our download path.
         gtk_entry_set_text(GTK_ENTRY(AlbumArtFilename), g_strdup(savepath));
+        g_free(savepath);
 	}
 	gtk_widget_destroy (FileDialog);
 }
@@ -460,7 +498,12 @@ void on_quitPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data)
 
 void on_Playlist_NewPlaylistButton_activate (GtkMenuItem *menuitem, gpointer user_data){
     //g_printf("Clicked on new playlist button\n");
-    gchar *playlistname;
+    gchar *playlistname  = NULL;
+
+    // Save our current selected playlist!
+    if(devicePlayLists != NULL)
+        playlist_SavePlaylist(playlist_number);
+    
 	playlistname = displayPlaylistNewDialog();
 	if(playlistname != NULL) {
 		// Add in playlist to MTP device.
@@ -534,6 +577,7 @@ void on_Playlist_Combobox_activate(GtkComboBox *combobox, gpointer user_data){
 }
 
 void on_view_activate (GtkMenuItem *menuitem, gpointer user_data){
+    #if GMTP_USE_GTK2
     gchar *gconf_path = NULL;
     gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem));
     if ((void *)menuitem == (void *)menu_view_filesize) gconf_path = g_strdup("/apps/gMTP/viewFileSize");
@@ -550,4 +594,23 @@ void on_view_activate (GtkMenuItem *menuitem, gpointer user_data){
         gconf_client_set_bool (gconfconnect, gconf_path, state, NULL);
         g_free(gconf_path);
     }
+    #else
+    gchar *gsetting_path = NULL;
+    gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem));
+    if ((void *)menuitem == (void *)menu_view_filesize) gsetting_path = g_strdup("viewfilesize");
+    if ((void *)menuitem == (void *)menu_view_filetype) gsetting_path = g_strdup("viewfiletype");
+    if ((void *)menuitem == (void *)menu_view_track_number) gsetting_path = g_strdup("viewtracknumber");
+    if ((void *)menuitem == (void *)menu_view_title) gsetting_path = g_strdup("viewtitle");
+    if ((void *)menuitem == (void *)menu_view_artist) gsetting_path = g_strdup("viewartist");
+    if ((void *)menuitem == (void *)menu_view_album) gsetting_path = g_strdup("viewalbum");
+    if ((void *)menuitem == (void *)menu_view_year) gsetting_path = g_strdup("viewyear");
+    if ((void *)menuitem == (void *)menu_view_genre) gsetting_path = g_strdup("viewgenre");
+    if ((void *)menuitem == (void *)menu_view_duration) gsetting_path = g_strdup("viewduration");
+
+    if((gsettings_connect != NULL) && (gsetting_path != NULL)){
+        g_settings_set_boolean (gsettings_connect, gsetting_path, state);
+        g_settings_sync();
+        g_free(gsetting_path);
+    }
+    #endif
 }

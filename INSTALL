@@ -2,8 +2,8 @@ gMTP - a basic MP3 player client.
 
 Requirements:
 
-gtk+2.0 v2.4+
-Gconf-2.0
+gtk+2.0 v2.4+ OR gtk+3.0
+Gconf-2.0 OR GSettings (for GNOME 3.0).
 libmtp
 libid3tag
 libusb
@@ -12,7 +12,7 @@ libvorbis v1.0.1+
 
 Installation.
 
-For most platforms:
+For most currnet platforms (GTK2 + GConf):
 $ make
 # make install
 # make register-gconf-schemas
@@ -20,6 +20,12 @@ $ make
 Note: Use 'gmake' on Solaris and *BSD.
 Note: On Solaris 10, you need to logout and back in again once installed.
   (This is a gconf issue on Solaris 10).
+
+EXPERIMENTAL:
+For GNOME 3.0 based platforms (GTK3 + GSettings):
+$ make gtk3
+# make install-gtk3
+# make register-gsettings-schemas
 
 If it doesn't compile, check the top of the Makefile for custom CFLAGS.
 

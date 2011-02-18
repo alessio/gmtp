@@ -2,7 +2,7 @@
 
 PKG_NAME = gmtp
 PREFIX ?= /usr/local
-VER = 0.8.1
+VER = 0.9
 # Note: If you update above, please update the config.h and pkginfo file as well.
 
 PKG = gmtp
@@ -15,12 +15,12 @@ UNAME = $(shell uname)
 # See what OS we are, and set things for Solaris, otherwise use a default
 # that should work.
 ifeq ($(UNAME), SunOS)
-CC = cc
+CC ?= cc
 INSTALL = /usr/ucb/install -c
 MSGFMT = /usr/bin/msgfmt --strict
 LDFLAGS += -L/usr/sfw/lib -R/usr/sfw/lib
 else
-CC = gcc
+CC ?= gcc
 INSTALL = install -c
 MSGFMT = msgfmt
 endif
@@ -28,7 +28,7 @@ endif
 GCONFTOOL = gconftool-2
 TAR = tar
 
-CFLAGS += -c -g
+CFLAGS += -c -g -O
 LDFLAGS += 
 LIBS +=
 
@@ -36,6 +36,13 @@ LIBS +=
 
 GTK_CFLAGS = `pkg-config --cflags gtk+-2.0 gconf-2.0 libmtp id3tag flac vorbisfile`
 GTK_LDFLAGS = `pkg-config --libs gtk+-2.0 gconf-2.0 libmtp id3tag flac vorbisfile`
+
+ifeq ($(MAKECMDGOALS),gtk3)
+GTK_CFLAGS = `pkg-config --cflags gtk+-3.0 gio-2.0 libmtp id3tag flac vorbisfile`
+GTK_LDFLAGS = `pkg-config --libs gtk+-3.0 gio-2.0 libmtp id3tag flac vorbisfile`
+#CFLAGS += -DGMTP_USE_GTK3 -DGTK_DISABLE_SINGLE_INCLUDES -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DGSEAL_ENABLE
+CFLAGS += -DGMTP_USE_GTK3
+endif
 
 objects = src/main.o src/mtp.o src/interface.o src/callbacks.o src/prefs.o src/dnd.o src/metatag_info.o
 headers = src/main.h src/mtp.h src/interface.h src/callbacks.h src/prefs.h src/dnd.h src/metatag_info.h src/config.h
@@ -45,6 +52,14 @@ POFILES = po/es.po po/it.po po/fr.po po/da.po po/de.po
 
 
 all:	gmtp $(catalogues)
+
+# GTK3 build
+
+gtk3:	gmtp $(catalogues)
+
+# GTK2 build
+
+gtk2:	gmtp $(catalogues)
 
 # Main executable
 
@@ -131,6 +146,43 @@ install: gmtp $(catalogues)
 register-gconf-schemas: install
 	GCONF_CONFIG_SOURCE=`$(GCONFTOOL) --get-default-source` $(GCONFTOOL) --makefile-install-rule $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
 
+install-gtk3: gmtp $(catalogues)
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/applications
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/pixmaps
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/glib-2.0
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/glib-2.0/schemas
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/es
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/it
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/fr
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/da
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/de
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/es/LC_MESSAGES
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/it/LC_MESSAGES
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/fr/LC_MESSAGES
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/da/LC_MESSAGES
+	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES
+	$(INSTALL) -m 755 gmtp $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/icon-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/stock-about-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 misc/gMTP.desktop $(DESTDIR)$(PREFIX)/share/applications
+	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps
+	mv $(DESTDIR)$(PREFIX)/share/pixmaps/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
+	cp po/es.mo $(DESTDIR)$(PREFIX)/share/locale/es/LC_MESSAGES/gmtp.mo
+	cp po/fr.mo $(DESTDIR)$(PREFIX)/share/locale/fr/LC_MESSAGES/gmtp.mo
+	cp po/it.mo $(DESTDIR)$(PREFIX)/share/locale/it/LC_MESSAGES/gmtp.mo
+	cp po/da.mo $(DESTDIR)$(PREFIX)/share/locale/da/LC_MESSAGES/gmtp.mo
+	cp po/de.mo $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES/gmtp.mo
+
+register-gsettings-schemas: install-gtk3
+	$(INSTALL) -m 644 misc/org.gnome.gmtp.gschema.xml $(DESTDIR)$(PREFIX)/share/glib-2.0/schemas
+	glib-compile-schemas $(DESTDIR)$(PREFIX)/share/glib-2.0/schemas
+
 install-doc:
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
@@ -140,18 +192,19 @@ install-doc:
 	$(INSTALL) -m 644 AUTHORS $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)
 
 uninstall:
-	rm $(DESTDIR)$(PREFIX)/bin/gmtp
-	rm $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/icon.png
-	rm $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/icon-16.png
-	rm $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/stock-about-16.png
-	rm $(DESTDIR)$(PREFIX)/share/applications/gMTP.desktop
-	rm $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
-	rm $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
-	rm $(DESTDIR)$(PREFIX)/share/locale/es/LC_MESSAGES/gmtp.mo
-	rm $(DESTDIR)$(PREFIX)/share/locale/fr/LC_MESSAGES/gmtp.mo
-	rm $(DESTDIR)$(PREFIX)/share/locale/it/LC_MESSAGES/gmtp.mo
-	rm $(DESTDIR)$(PREFIX)/share/locale/da/LC_MESSAGES/gmtp.mo
-	rm $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES/gmtp.mo
+	rm -f $(DESTDIR)$(PREFIX)/bin/gmtp
+	rm -f  $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/icon.png
+	rm -f  $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/icon-16.png
+	rm -f  $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/stock-about-16.png
+	rm -f  $(DESTDIR)$(PREFIX)/share/applications/gMTP.desktop
+	rm -f  $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
+	rm -f  $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas
+	rm -f  $(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/org.gnome.gMTP.gschema.xml
+	rm -f  $(DESTDIR)$(PREFIX)/share/locale/es/LC_MESSAGES/gmtp.mo
+	rm -f  $(DESTDIR)$(PREFIX)/share/locale/fr/LC_MESSAGES/gmtp.mo
+	rm -f  $(DESTDIR)$(PREFIX)/share/locale/it/LC_MESSAGES/gmtp.mo
+	rm -f  $(DESTDIR)$(PREFIX)/share/locale/da/LC_MESSAGES/gmtp.mo
+	rm -f  $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES/gmtp.mo
 
 uninstall-doc:
 	rm $(DESTDIR)$(PREFIX)/share/doc/$(PKG_NAME)/README

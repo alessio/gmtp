@@ -1,3 +1,10 @@
+-- v0.9 -
++ Add experimental GNOME 3.0 support. Use 'gmake gtk3' to build using GTK3 and
+  GSettings instead of GTK2 and GConf.
+* Fix some minor memleaks in mtp.c
+* Add in check for album name only when looking for an album when updating
+  album info.
+
 -- v0.8.1 - 25 Jan 2011
 
 * Update Italian Translation - thanks to Francesca Ciceri !

@@ -38,13 +38,19 @@ typedef struct  {
 } Preferences_Struct;
 
 Preferences_Struct Preferences;
-GConfClient *gconfconnect;
+
 
 void setupPreferences();
 gboolean loadPreferences();
 gboolean savePreferences();
 
-void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data);
+#if GMTP_USE_GTK2
+    GConfClient *gconfconnect;
+    void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data);
+#else
+    GSettings *gsettings_connect;
+    void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data);
+#endif
 
 #ifdef  __cplusplus
 }
