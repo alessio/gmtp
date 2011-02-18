@@ -18,8 +18,12 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#include <gconf/gconf.h>
-#include <gconf/gconf-client.h>
+#if GMTP_USE_GTK2
+    #include <gconf/gconf.h>
+    #include <gconf/gconf-client.h>
+#else
+    #include <gio/gio.h>
+#endif
 #include <libmtp.h>
 #include <libgen.h>
 #include <sys/stat.h>
@@ -143,6 +147,16 @@ guint deviceConnect(){
             DeviceMgr.storagedeviceID = MTP_DEVICE_SINGLE_STORAGE;
         }
         currentFolderID = 0;
+        DeviceMgr.devicename = NULL;
+        DeviceMgr.manufacturername = NULL;
+        DeviceMgr.modelname = NULL;
+        DeviceMgr.serialnumber = NULL;
+        DeviceMgr.deviceversion = NULL;
+        DeviceMgr.syncpartner = NULL;
+        DeviceMgr.sectime = NULL;
+        DeviceMgr.devcert = NULL;
+        DeviceMgr.Vendor = NULL;
+        DeviceMgr.Product = NULL;
 		return MTP_SUCCESS;
 	}
 }
@@ -158,6 +172,18 @@ guint deviceDisconnect(){
 		DeviceMgr.deviceConnected = FALSE;
 		LIBMTP_Release_Device(DeviceMgr.device);
 		g_free(DeviceMgr.rawdevices);
+        // Now clean up the dymanic data in struc that get's loaded when displaying the properties dialog.
+        if(DeviceMgr.devicename != NULL) g_string_free(DeviceMgr.devicename, TRUE);
+        if(DeviceMgr.manufacturername != NULL) g_string_free(DeviceMgr.manufacturername, TRUE);
+        if(DeviceMgr.modelname != NULL) g_string_free(DeviceMgr.modelname, TRUE);
+        if(DeviceMgr.serialnumber != NULL) g_string_free(DeviceMgr.serialnumber, TRUE);
+        if(DeviceMgr.deviceversion != NULL) g_string_free(DeviceMgr.deviceversion, TRUE);
+        if(DeviceMgr.syncpartner != NULL) g_string_free(DeviceMgr.syncpartner, TRUE);
+        if(DeviceMgr.sectime != NULL) g_string_free(DeviceMgr.sectime, TRUE);
+        if(DeviceMgr.devcert != NULL) g_string_free(DeviceMgr.devcert, TRUE);
+        if(DeviceMgr.Vendor != NULL) g_string_free(DeviceMgr.Vendor, TRUE);
+        if(DeviceMgr.Product != NULL) g_string_free(DeviceMgr.Product, TRUE);
+        g_free(DeviceMgr.filetypes);
 		return MTP_SUCCESS;
 	}
 
@@ -279,6 +305,46 @@ void deviceProperties(){
 	}
 }
 
+void clearDeviceFiles(LIBMTP_file_t * filelist){
+    if(filelist != NULL){
+        if(filelist->next != NULL){
+            clearDeviceFiles(filelist->next);
+            filelist->next = NULL;
+        }
+        LIBMTP_destroy_file_t(filelist);
+    }
+}
+
+void clearAlbumStruc(LIBMTP_album_t * albumlist){
+    if(albumlist != NULL){
+        if(albumlist->next != NULL){
+            clearAlbumStruc(albumlist->next);
+            albumlist->next = NULL;
+        }
+        LIBMTP_destroy_album_t(albumlist);
+    }
+}
+
+void clearDevicePlaylist(LIBMTP_playlist_t * playlist_list){
+    if(playlist_list != NULL){
+        if(playlist_list->next != NULL){
+            clearDevicePlaylist(playlist_list->next);
+            playlist_list->next = NULL;
+        }
+        LIBMTP_destroy_playlist_t(playlist_list);
+    }
+}
+
+void clearDeviceTracks(LIBMTP_track_t * tracklist){
+    if(tracklist != NULL){
+        if(tracklist->next != NULL){
+            clearDeviceTracks(tracklist->next);
+            tracklist->next = NULL;
+        }
+        LIBMTP_destroy_track_t(tracklist);
+    }
+}
+
 void deviceRescan(){
 	gchar tmp_string[256];
 	//g_print("You selected deviceRescan\n");
@@ -286,7 +352,10 @@ void deviceRescan(){
 	fileListClear();
 	// Now clear the folder/file structures.
 	LIBMTP_destroy_folder_t(deviceFolders);
-	LIBMTP_destroy_file_t(deviceFiles);
+    if(deviceFiles != NULL)
+        clearDeviceFiles(deviceFiles);
+
+    // Add in track, playlist globals as well.
 	deviceFolders = NULL;
 	deviceFiles = NULL;
 
@@ -348,7 +417,7 @@ LIBMTP_devicestorage_t* getCurrentDeviceStoragePtr(gint StorageID){
 
 // Find the ID of the parent folder.
 uint32_t getParentFolderID(LIBMTP_folder_t *tmpfolder, uint32_t currentFolderID){
-	uint32_t parentID;
+	uint32_t parentID = 0;
 	if(tmpfolder==NULL) {
 		return 0;
 	}
@@ -365,7 +434,7 @@ uint32_t getParentFolderID(LIBMTP_folder_t *tmpfolder, uint32_t currentFolderID)
 
 // Find the structure of the parent MTP Folder based on the currentID.
 LIBMTP_folder_t* getParentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t currentFolderID){
-	LIBMTP_folder_t* parentID;
+	LIBMTP_folder_t* parentID = NULL;
 	if(tmpfolder==NULL) {
 		return tmpfolder;
 	}
@@ -381,7 +450,7 @@ LIBMTP_folder_t* getParentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t current
 
 // Find the structure of the MTP Folder based on the currentID.
 LIBMTP_folder_t* getCurrentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t FolderID){
-	LIBMTP_folder_t* parentID;
+	LIBMTP_folder_t* parentID = NULL;
 	if(tmpfolder==NULL) {
 		return tmpfolder;
 	}
@@ -396,12 +465,12 @@ LIBMTP_folder_t* getCurrentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t Folder
 }
 
 void filesAdd(gchar* filename){
-	uint64_t filesize;
+	uint64_t filesize = 0;
 	gchar *filename_stripped;
 	struct stat sb;
-	LIBMTP_file_t *genfile;
-    LIBMTP_track_t *trackfile;
-    LIBMTP_album_t *albuminfo;
+	LIBMTP_file_t *genfile = NULL;
+    LIBMTP_track_t *trackfile = NULL;
+    LIBMTP_album_t *albuminfo = NULL;
 	gint ret;
 
 	//g_printf("You selected to add file %s\n", filename);
@@ -452,6 +521,7 @@ void filesAdd(gchar* filename){
         albuminfo = LIBMTP_new_album_t();
         albuminfo->parent_id = currentFolderID;
         albuminfo->storage_id = DeviceMgr.devicestorage->id;
+        albuminfo->album_id = 0;
         // Let's collect our metadata from the file, typically id3 tag data.
         switch(ret){
             case LIBMTP_FILETYPE_MP3 :
@@ -504,8 +574,8 @@ void filesAdd(gchar* filename){
         if(trackfile->album != NULL){
             albumAddTrackToAlbum(albuminfo, trackfile);
         }
-        LIBMTP_destroy_track_t(trackfile);
-        LIBMTP_destroy_album_t(albuminfo);
+        LIBMTP_destroy_track_t(trackfile);  
+        LIBMTP_destroy_album_t(albuminfo);  
     } else {
         // Generic file upload.
         //g_printf("We have a generic file without metadata\n");
@@ -523,7 +593,7 @@ void filesAdd(gchar* filename){
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
         }
-        LIBMTP_destroy_file_t(genfile);
+        LIBMTP_destroy_file_t(genfile); 
     }
 	destroyProgressBar();
 	// Now update the storage...
@@ -550,7 +620,7 @@ void filesDelete(gchar* filename, uint32_t objectID){
 }
 
 void filesDownload(gchar* filename, uint32_t objectID){
-	gchar* fullfilename;
+	gchar* fullfilename = NULL;
 	fullfilename = g_strndup("", 8192);
 	//g_print("You selected filesDownload\n");
 	displayProgressBar(_("File download"));
@@ -699,8 +769,9 @@ gboolean fileExists(gchar* filename){
 }
 
 void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo){
-    LIBMTP_album_t *album;
+    LIBMTP_album_t *album = NULL;
     LIBMTP_album_t *found_album = NULL;
+    LIBMTP_album_t *album_orig = NULL;
     gint ret = 0;
 
     // Quick sanity check.
@@ -708,8 +779,9 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo){
         return;
 
     // Lets try to find the album.
-    album = LIBMTP_Get_Album_List(DeviceMgr.device);
-    while(album != NULL) {
+    album = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
+    album_orig = album;
+    while((album != NULL)&&(found_album == NULL)) {
         if((album->name != NULL)&&(album->artist != NULL))
         {
             // Lets test it. We attempt to match both album name and artist.
@@ -719,13 +791,26 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo){
             }
         }
         album = album->next;
-        if(found_album != NULL)
-            album = NULL; // exit the loop
+    }
+    // Some devices ignore all other fields and only retain the ablum name - so test for this as well!
+    album = album_orig;
+    if (found_album == NULL){
+        while((album != NULL)&&(found_album == NULL)) {
+            if(album->name != NULL)
+            {
+                // Lets test it. We attempt to match both album name and artist.
+                if(g_ascii_strcasecmp(album->name, albuminfo->name) == 0){
+                    found_album = album;
+                }
+            }
+            album = album->next;
+        }
     }
 
     if (found_album != NULL) {
+        // The album already exists.
         uint32_t *tracks;
-        tracks = (uint32_t *)malloc((found_album->no_tracks+1) * sizeof(uint32_t));
+        tracks = (uint32_t *)g_malloc0((found_album->no_tracks+1) * sizeof(uint32_t));
         //g_printf("Album found: updating \"%s\"\n", found_album->name);
         if (!tracks) {
             g_fprintf(stderr, _("ERROR: Failed memory allocation in albumAddTrackToAlbum()\n"));
@@ -739,25 +824,19 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo){
         tracks[found_album->no_tracks-1] = trackinfo->item_id;  // This ID is only set once the track is on the device.
         found_album->tracks = tracks;
         ret = LIBMTP_Update_Album(DeviceMgr.device, found_album);
-        /*
-        if(found_album->name != NULL)
-            g_printf("Update Album Name: %s\n", found_album->name);
-        if(found_album->artist != NULL)
-            g_printf("Update Album Artist: %s\n", found_album->artist);*/
-        LIBMTP_destroy_album_t(found_album);
+        //LIBMTP_destroy_album_t(found_album);
+        g_free(tracks);
     } else {
+        // New album.
         uint32_t *trackid;
-        trackid = (uint32_t *)malloc(sizeof(uint32_t));
+        trackid = (uint32_t *)g_malloc0(sizeof(uint32_t));
         *trackid = trackinfo->item_id;
         albuminfo->tracks = trackid;
         albuminfo->no_tracks = 1;
-        /*
-        g_printf("Album doesn't exist: creating \"%s\"\n", albuminfo->name);
-        if(albuminfo->name != NULL)
-            g_printf("New Album Name: %s\n", albuminfo->name);
-        if(albuminfo->artist != NULL)
-            g_printf("New Album Artist: %s\n", albuminfo->artist);*/
+        albuminfo->storage_id = DeviceMgr.devicestorage->id;
+        //albuminfo->parent_id = DeviceMgr.device->default_album_folder;
         ret = LIBMTP_Create_New_Album(DeviceMgr.device, albuminfo);
+        g_free(trackid);
     }
     if (ret != 0) {
         displayError(_("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
@@ -765,6 +844,8 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo){
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
     }
+    //album = album_orig;
+    clearAlbumStruc(album_orig);
 }
 
 void albumAddArt(guint32 album_id, gchar* filename){
@@ -796,7 +877,7 @@ void albumAddArt(guint32 album_id, gchar* filename){
         fclose(fd);
     }
 
-    albumart = LIBMTP_new_filesampledata_t();
+    albumart = LIBMTP_new_filesampledata_t(); 
     albumart->data = (gchar *)imagedata;
     albumart->size = filesize;
     albumart->filetype = find_filetype(basename(filename));
@@ -811,9 +892,15 @@ void albumAddArt(guint32 album_id, gchar* filename){
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
     }
     g_free(imagedata);
+    albumart->data = NULL;
+    LIBMTP_destroy_filesampledata_t(albumart);
 }
 
 LIBMTP_playlist_t* getPlaylists(void){
+
+    if(devicePlayLists != NULL)
+        clearDevicePlaylist(devicePlayLists);
+
     devicePlayLists = LIBMTP_Get_Playlist_List(DeviceMgr.device);
     if (devicePlayLists == NULL) {
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
@@ -823,6 +910,9 @@ LIBMTP_playlist_t* getPlaylists(void){
 }
 
 LIBMTP_track_t* getTracks(void){
+    if(deviceTracks != NULL)
+        clearDeviceTracks(deviceTracks);
+
     deviceTracks = LIBMTP_Get_Tracklisting_With_Callback(DeviceMgr.device, NULL, NULL);
     if (deviceTracks == NULL) {
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
@@ -848,6 +938,7 @@ void playlistAdd(gchar* playlistname){
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
     }
+    LIBMTP_destroy_playlist_t(playlist);
 }
 
 void playlistDelete(LIBMTP_playlist_t * tmpplaylist){

@@ -21,8 +21,12 @@
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#include <gconf/gconf.h>
-#include <gconf/gconf-client.h>
+#if GMTP_USE_GTK2
+    #include <gconf/gconf.h>
+    #include <gconf/gconf-client.h>
+#else
+    #include <gio/gio.h>
+#endif
 #include <sys/types.h>
 #include <libgen.h>
 #include <string.h>
@@ -52,13 +56,21 @@ void gmtp_drag_data_received(GtkWidget * widget,
 				       guint time,
 				       gpointer user_data)
 {
-	if (selection_data->data)
-	{
+    #if GMTP_USE_GTK2
+        if (selection_data->data)
+    #else
+        if (gtk_selection_data_get_data(selection_data))
+    #endif
+    {
         
         GSList* files;
         //g_printf("Selection->data = %s\n", selection_data->data);
 
-        files = getFilesListURI((gchar *)selection_data->data);
+        #if GMTP_USE_GTK2
+            files = getFilesListURI((gchar *)selection_data->data);
+        #else
+            files = getFilesListURI((gchar *)gtk_selection_data_get_data(selection_data));
+        #endif
         if(files != NULL){
             //g_print("Do each file\n");
             g_slist_foreach(files, (GFunc)__filesAdd, NULL);

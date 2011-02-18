@@ -23,8 +23,12 @@
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#include <gconf/gconf.h>
-#include <gconf/gconf-client.h>
+#if GMTP_USE_GTK2
+    #include <gconf/gconf.h>
+    #include <gconf/gconf-client.h>
+#else
+    #include <gio/gio.h>
+#endif
 #include <libmtp.h>
 #include <libgen.h>
 #include <unistd.h>
@@ -48,16 +52,16 @@ GtkWidget *treeviewFiles;
 
 Device_Struct DeviceMgr;
 
-LIBMTP_file_t   *deviceFiles;
-LIBMTP_folder_t *deviceFolders;
-LIBMTP_track_t *deviceTracks;
-LIBMTP_playlist_t *devicePlayLists;
-uint32_t currentFolderID;
+LIBMTP_file_t       *deviceFiles = NULL;
+LIBMTP_folder_t     *deviceFolders = NULL;
+LIBMTP_track_t      *deviceTracks = NULL;
+LIBMTP_playlist_t   *devicePlayLists = NULL;
+uint32_t            currentFolderID = 0;
 
 gchar *applicationpath = NULL;
-GString *file_icon_png;
-GString *file_icon16_png;
-GString *file_about_png;
+GString *file_icon_png = NULL;
+GString *file_icon16_png = NULL;
+GString *file_about_png = NULL;
 
 int
 main (int argc, char *argv[])
@@ -110,38 +114,29 @@ void setFilePaths(int argc, char *argv[]){
 }
 
 gchar *getRuntimePath(int argc, char *argv[]){
-    //gint i;
+
     gchar *fullpath;
     gchar *filepath;
     gchar *foundpath = NULL;
     const char delimit[]=";:";
     gchar *token;
     
-    // Prints arguments
-    /*g_printf("Arguments:\n");
-    for (i = 0; i < argc; i++) {
-        g_printf("%i: %s\n", i, argv[i]);
-    }*/
     if(g_ascii_strcasecmp(PACKAGE, argv[0]) == 0){
-        //g_printf("Executed from %%PATH\n");
-        //g_printf("%%PATH = %s\n", getenv("PATH"));
         // list each directory individually.
         fullpath = g_strdup(getenv("PATH"));
         token = strtok (fullpath, delimit);
         while((token != NULL)&&(foundpath == NULL)){
-            //g_printf("Path = %s\n", token);
             // Now test to see if we have it here...
             filepath = g_strdup(token);
             filepath = g_strconcat(filepath, "/", PACKAGE, NULL);
-            //g_printf("Testing %s\n", filepath);
             if(access(filepath, F_OK) != -1){
-               // g_printf("Found the file: %s\n", filepath);
                 foundpath = g_strdup(token);
             }
             token = strtok(NULL, delimit);
             g_free(filepath);
         }
     } else {
+        // We were started with full file path.
         foundpath = g_strdup(dirname(argv[0]));
     }
     if(argc == 3){
@@ -151,7 +146,5 @@ gchar *getRuntimePath(int argc, char *argv[]){
             foundpath = g_strdup(argv[2]);
         }
     }
-    //if(foundpath != NULL)
-        //g_printf("Executed from %s\n", foundpath );
     return foundpath;
 }

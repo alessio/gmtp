@@ -37,6 +37,10 @@ typedef struct {
 guint deviceConnect();
 guint deviceDisconnect();
 void deviceProperties();
+void clearDeviceFiles(LIBMTP_file_t * filelist);
+void clearAlbumStruc(LIBMTP_album_t * albumlist);
+void clearDevicePlaylist(LIBMTP_playlist_t * playlist_list);
+void clearDeviceTracks(LIBMTP_track_t * tracklist);
 void deviceRescan();
 void filesAdd(gchar* filename);
 void filesDelete(gchar* filename, uint32_t objectID);

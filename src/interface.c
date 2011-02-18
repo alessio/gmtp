@@ -27,8 +27,12 @@
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#include <gconf/gconf.h>
-#include <gconf/gconf-client.h>
+#if GMTP_USE_GTK2
+    #include <gconf/gconf.h>
+    #include <gconf/gconf-client.h>
+#else
+    #include <gio/gio.h>
+#endif
 #include <libgen.h>
 #include <libmtp.h>
 #include <id3tag.h>
@@ -66,7 +70,9 @@ GtkWidget *editPlaylist;
 
 GtkWidget *contextMenu;
 
-GtkTooltips *tooltipsToolbar;
+ #if GMTP_USE_GTK2
+    GtkTooltips *tooltipsToolbar;
+#endif
 
 // Menu widget for Properties
 GtkListStore *fileList;
@@ -363,7 +369,9 @@ create_windowMain(void) {
     gtk_handle_box_set_shadow_type(GTK_HANDLE_BOX(handlebox1), GTK_SHADOW_ETCHED_OUT);
     gtk_box_pack_start(GTK_BOX(vbox1), handlebox1, FALSE, FALSE, 0);
 
-    tooltipsToolbar = gtk_tooltips_new();
+    #if GMTP_USE_GTK2
+        tooltipsToolbar = gtk_tooltips_new();
+    #endif
 
     toolbarMain = gtk_toolbar_new();
     gtk_widget_show(toolbarMain);
@@ -378,7 +386,11 @@ create_windowMain(void) {
     toolbuttonConnect = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Connect"));
     gtk_widget_show(toolbuttonConnect);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonConnect);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonConnect), GTK_TOOLTIPS(tooltipsToolbar), _("Connect/Disconnect to your device."), _("Connect/Disconnect to your device."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonConnect), GTK_TOOLTIPS(tooltipsToolbar), _("Connect/Disconnect to your device."), _("Connect/Disconnect to your device."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonConnect), _("Connect/Disconnect to your device."));
+    #endif
 
     toolbarSeparator = (GtkWidget*) gtk_separator_tool_item_new();
     gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(toolbarSeparator), TRUE);
@@ -390,21 +402,33 @@ create_windowMain(void) {
     toolbuttonAddFile = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Add"));
     gtk_widget_show(toolbuttonAddFile);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonAddFile);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonAddFile), GTK_TOOLTIPS(tooltipsToolbar), _("Add Files to your device."), _("Add a varity of Files to your device in the current folder."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonAddFile), GTK_TOOLTIPS(tooltipsToolbar), _("Add Files to your device."), _("Add a varity of Files to your device in the current folder."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonAddFile), _("Add Files to your device."));
+    #endif
 
     tmp_image = gtk_image_new_from_stock(GTK_STOCK_REMOVE, tmp_toolbar_icon_size);
     gtk_widget_show(tmp_image);
     toolbuttonRemoveFile = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Delete"));
     gtk_widget_show(toolbuttonRemoveFile);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonRemoveFile);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonRemoveFile), GTK_TOOLTIPS(tooltipsToolbar), _("Delete Files/Folders from your device."), _("Permanently remove files/folders from your device. Note: Albums are stored as *.alb files."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonRemoveFile), GTK_TOOLTIPS(tooltipsToolbar), _("Delete Files/Folders from your device."), _("Permanently remove files/folders from your device. Note: Albums are stored as *.alb files."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonRemoveFile), _("Delete Files/Folders from your device."));
+    #endif
 
     tmp_image = gtk_image_new_from_stock(GTK_STOCK_GOTO_BOTTOM, tmp_toolbar_icon_size);
     gtk_widget_show(tmp_image);
     toolbuttonRetrieve = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Download"));
     gtk_widget_show(toolbuttonRetrieve);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonRetrieve);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonRetrieve), GTK_TOOLTIPS(tooltipsToolbar), _("Download Files from your device to your Host PC."), _("Download files from your device to your PC. Default Download path is set in the prefernces dialog."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonRetrieve), GTK_TOOLTIPS(tooltipsToolbar), _("Download Files from your device to your Host PC."), _("Download files from your device to your PC. Default Download path is set in the prefernces dialog."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonRetrieve), _("Download Files from your device to your Host PC."));
+    #endif
 
     toolbarSeparator2 = (GtkWidget*) gtk_separator_tool_item_new();
     gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(toolbarSeparator2), TRUE);
@@ -416,21 +440,33 @@ create_windowMain(void) {
     toolbuttonAlbumArt = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Album Art"));
     gtk_widget_show(toolbuttonAlbumArt);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonAlbumArt);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonAlbumArt), GTK_TOOLTIPS(tooltipsToolbar), _("Upload an image file as Album Art."), _("Upload a JPG file and assign it as Album Art."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonAlbumArt), GTK_TOOLTIPS(tooltipsToolbar), _("Upload an image file as Album Art."), _("Upload a JPG file and assign it as Album Art."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonAlbumArt), _("Upload an image file as Album Art."));
+    #endif
 
     tmp_image = gtk_image_new_from_stock(GTK_STOCK_DND_MULTIPLE, tmp_toolbar_icon_size);
     gtk_widget_show(tmp_image);
     toolbuttonPlaylist = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Playlists"));
     gtk_widget_show(toolbuttonPlaylist);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonPlaylist);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonPlaylist), GTK_TOOLTIPS(tooltipsToolbar), _("Add and Modify Playlists."), _("Add and Modify Playlists."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonPlaylist), GTK_TOOLTIPS(tooltipsToolbar), _("Add and Modify Playlists."), _("Add and Modify Playlists."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonPlaylist), _("Add and Modify Playlists."));
+    #endif
 
     tmp_image = gtk_image_new_from_stock(GTK_STOCK_REFRESH, tmp_toolbar_icon_size);
     gtk_widget_show(tmp_image);
     toolbuttonRescan = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Refresh"));
     gtk_widget_show(toolbuttonRescan);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonRescan);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonRescan), GTK_TOOLTIPS(tooltipsToolbar), _("Refresh File/Folder listing."), _("Refresh File/Folder listing."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonRescan), GTK_TOOLTIPS(tooltipsToolbar), _("Refresh File/Folder listing."), _("Refresh File/Folder listing."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonRescan), _("Refresh File/Folder listing."));
+    #endif
 
     toolbarSeparator = (GtkWidget*) gtk_separator_tool_item_new();
     gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(toolbarSeparator), TRUE);
@@ -442,14 +478,22 @@ create_windowMain(void) {
     toolbuttonProperties = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Properties"));
     gtk_widget_show(toolbuttonProperties);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonProperties);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonProperties), GTK_TOOLTIPS(tooltipsToolbar), _("View Device Properties."), _("View Device Properties."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonProperties), GTK_TOOLTIPS(tooltipsToolbar), _("View Device Properties."), _("View Device Properties."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonProperties), _("View Device Properties."));
+    #endif
 
     tmp_image = gtk_image_new_from_stock(GTK_STOCK_PREFERENCES, tmp_toolbar_icon_size);
     gtk_widget_show(tmp_image);
     toolbuttonPreferences = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Preferences"));
     gtk_widget_show(toolbuttonPreferences);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonPreferences);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonPreferences), GTK_TOOLTIPS(tooltipsToolbar), _("View/Change gMTP Preferences."), _("View/Change gMTP Preferences."));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonPreferences), GTK_TOOLTIPS(tooltipsToolbar), _("View/Change gMTP Preferences."), _("View/Change gMTP Preferences."));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonPreferences), _("View/Change gMTP Preferences."));
+    #endif
 
     toolbarSeparator = (GtkWidget*) gtk_separator_tool_item_new();
     gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(toolbarSeparator), TRUE);
@@ -461,9 +505,15 @@ create_windowMain(void) {
     toolbuttonQuit = (GtkWidget*) gtk_tool_button_new(tmp_image, _("Quit"));
     gtk_widget_show(toolbuttonQuit);
     gtk_container_add(GTK_CONTAINER(toolbarMain), toolbuttonQuit);
-    gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonQuit), GTK_TOOLTIPS(tooltipsToolbar), _("Quit gMTP."), _("Quit"));
+    #if GMTP_USE_GTK2
+        gtk_tool_item_set_tooltip(GTK_TOOL_ITEM(toolbuttonQuit), GTK_TOOLTIPS(tooltipsToolbar), _("Quit gMTP."), _("Quit"));
+    #else
+        gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(toolbuttonQuit),  _("Quit gMTP."));
+    #endif
 
-    gtk_tooltips_enable(tooltipsToolbar);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_enable(tooltipsToolbar);
+    #endif
 
     scrolledwindowMain = gtk_scrolled_window_new(NULL, NULL);
     gtk_widget_show(scrolledwindowMain);
@@ -494,8 +544,8 @@ create_windowMain(void) {
     //gmtp_drag_dest_set(windowMain); // This gets done in the connect callback and
     // only activates if we actually are connected to a device.
 
-    gtk_signal_connect(GTK_OBJECT(windowMain), "drag-data-received",
-        GTK_SIGNAL_FUNC(gmtp_drag_data_received), NULL);
+    g_signal_connect(GTK_OBJECT(windowMain), "drag-data-received",
+        G_CALLBACK(gmtp_drag_data_received), NULL);
     // End Dnd functions
 
     g_signal_connect((gpointer) windowMain, "destroy",
@@ -845,9 +895,9 @@ gboolean fileListClear() {
 GSList* getFileGetList2Add() {
     GSList* files;
     GtkWidget *FileDialog;
-    gchar *savepath;
+    gchar *savepath = NULL;
 
-    savepath = g_strndup("", 8192);
+    savepath = g_malloc0(8192);
     FileDialog = gtk_file_chooser_dialog_new(_("Select Files to Add"),
         GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_OPEN,
         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -860,11 +910,11 @@ GSList* getFileGetList2Add() {
         savepath = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(FileDialog));
         // Save our upload path.
         Preferences.fileSystemUploadPath = g_string_assign(Preferences.fileSystemUploadPath, savepath);
-
     }
     files = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(FileDialog));
     gtk_widget_hide(FileDialog);
     gtk_widget_destroy(FileDialog);
+    g_free(savepath);
     return files;
 }
 
@@ -1022,8 +1072,8 @@ gboolean fileListAdd() {
 
 gboolean fileListDownload(GList *List) {
     GtkWidget *FileDialog;
-    gchar *savepath;
-    savepath = g_strndup("", 8192);
+    gchar *savepath = NULL;
+    savepath = g_malloc0(8192);
 
     // Let's confirm our download path.
 
@@ -1056,15 +1106,15 @@ gboolean fileListDownload(GList *List) {
 void __fileDownload(GtkTreeRowReference *Row) {
     GtkTreePath *path;
     GtkTreeIter iter;
-    gchar *filename;
-    gchar* fullfilename;
+    gchar *filename = NULL;
+    gchar* fullfilename = NULL;
 
     gboolean isFolder;
     uint32_t objectID;
 
 
-    fullfilename = g_strndup("", 8192);
-    filename = g_strndup("", 8192);
+    fullfilename = g_malloc0(8192);
+    //filename = g_malloc0(8192);
     // First of all, lets set the download path.
 
     //g_printf("Download path = %s\n", Preferences.fileSystemDownloadPath->str);
@@ -1128,10 +1178,10 @@ gboolean fileListRemove(GList *List) {
 void __fileRemove(GtkTreeRowReference *Row) {
     GtkTreePath *path;
     GtkTreeIter iter;
-    gchar* filename;
+    gchar* filename = NULL;
     uint32_t objectID;
     gboolean isFolder;
-    filename = g_strndup("", 8192);
+    //filename = g_malloc0(8192);
     // convert the referenece to a path and retrieve the iterator;
     path = gtk_tree_row_reference_get_path(Row);
     gtk_tree_model_get_iter(GTK_TREE_MODEL(fileList), &iter, path);
@@ -1165,10 +1215,10 @@ gboolean folderListRemove(GList *List) {
 void __folderRemove(GtkTreeRowReference *Row) {
     GtkTreePath *path;
     GtkTreeIter iter;
-    gchar* filename;
+    gchar* filename = NULL;
     uint32_t objectID;
     gboolean isFolder;
-    filename = g_strndup("", 8192);
+    //filename = g_malloc0(8192);
     // convert the referenece to a path and retrieve the iterator;
     path = gtk_tree_row_reference_get_path(Row);
     gtk_tree_model_get_iter(GTK_TREE_MODEL(fileList), &iter, path);
@@ -1193,7 +1243,7 @@ void __folderRemove(GtkTreeRowReference *Row) {
 }
 
 void __filesAdd(gchar* filename) {
-    gchar* filename_stripped;
+    gchar* filename_stripped = NULL;
 
     filename_stripped = basename(filename);
     if (Preferences.prompt_overwrite_file_op == FALSE) {
@@ -2064,7 +2114,12 @@ void displayAbout(void) {
     gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
     vbox = gtk_vbox_new(FALSE, 5);
     gtk_widget_show(vbox);
-    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), vbox);
+    #if GMTP_USE_GTK2
+        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), vbox);
+    #else
+        gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox);
+    #endif
+
 
     // Add in our icon.
     image = gtk_image_new_from_file(file_icon_png->str);
@@ -2134,7 +2189,12 @@ gchar* displayFolderNewDialog(void) {
 
     hbox = gtk_hbox_new(FALSE, 5);
     gtk_widget_show(hbox);
-    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    //gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #if GMTP_USE_GTK2
+        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #else
+        gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+    #endif
 
     label = gtk_label_new(_("Folder Name:"));
     gtk_widget_show(label);
@@ -2178,7 +2238,12 @@ gchar* displayChangeDeviceNameDialog(gchar* devicename) {
 
     hbox = gtk_hbox_new(FALSE, 5);
     gtk_widget_show(hbox);
-    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    //gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #if GMTP_USE_GTK2
+        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #else
+        gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+    #endif
 
     label = gtk_label_new(_("Device Name:"));
     gtk_widget_show(label);
@@ -2225,7 +2290,12 @@ gint displayMultiDeviceDialog(void) {
 
     hbox = gtk_hbox_new(FALSE, 5);
     gtk_widget_show(hbox);
-    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    //gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #if GMTP_USE_GTK2
+        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #else
+        gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+    #endif
 
     label = gtk_label_new(_("Device:"));
     gtk_widget_show(label);
@@ -2285,7 +2355,12 @@ gint displayDeviceStorageDialog(void) {
 
     hbox = gtk_hbox_new(FALSE, 5);
     gtk_widget_show(hbox);
-    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    //gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #if GMTP_USE_GTK2
+        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #else
+        gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+    #endif
 
     label = gtk_label_new(_("Storage Device:"));
     gtk_widget_show(label);
@@ -2340,7 +2415,9 @@ gint displayFileOverwriteDialog(gchar *filename) {
 Album_Struct* displayAddAlbumArtDialog(void) {
     Album_Struct* albumdetails;
     GtkWidget *hbox, *hbox2, *label, *label2, *textbox, *buttonFilePath;
-    LIBMTP_album_t * albuminfo, *albumtmp;
+    LIBMTP_album_t *albuminfo = NULL;
+    LIBMTP_album_t *albumtmp = NULL;
+    LIBMTP_album_t *album_orig = NULL;
 
     albumdetails = g_malloc(sizeof (Album_Struct));
     albumdetails->album_id = 0;
@@ -2355,8 +2432,13 @@ Album_Struct* displayAddAlbumArtDialog(void) {
 
     hbox = gtk_hbox_new(FALSE, 5);
     gtk_widget_show(hbox);
-    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(AlbumArtDialog)->vbox), hbox);
-
+    //gtk_container_add(GTK_CONTAINER(GTK_DIALOG(AlbumArtDialog)->vbox), hbox);
+    #if GMTP_USE_GTK2
+        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(AlbumArtDialog)->vbox), hbox);
+    #else
+        gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(AlbumArtDialog))), hbox);
+    #endif
+        
     label = gtk_label_new(_("Album:"));
     gtk_widget_show(label);
     //gtk_container_add (GTK_CONTAINER (hbox), label);
@@ -2369,7 +2451,7 @@ Album_Struct* displayAddAlbumArtDialog(void) {
     //gtk_container_add (GTK_CONTAINER (hbox), textbox);
     gtk_box_pack_start(GTK_BOX(hbox), textbox, TRUE, TRUE, 0);
     // Now add in our selection strings.
-    albuminfo = LIBMTP_Get_Album_List(DeviceMgr.device);
+    albuminfo = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
     // Better check to see if we actually have anything?
     if (albuminfo == NULL) {
         // we have no albums.
@@ -2380,6 +2462,7 @@ Album_Struct* displayAddAlbumArtDialog(void) {
     }
 
     albumtmp = albuminfo;
+    album_orig = albuminfo;
     while (albuminfo != NULL) {
         if (albuminfo->name != NULL)
             gtk_combo_box_append_text(GTK_COMBO_BOX(textbox), albuminfo->name);
@@ -2390,7 +2473,12 @@ Album_Struct* displayAddAlbumArtDialog(void) {
 
     hbox2 = gtk_hbox_new(FALSE, 5);
     gtk_widget_show(hbox2);
-    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(AlbumArtDialog)->vbox), hbox2);
+    //gtk_container_add(GTK_CONTAINER(GTK_DIALOG(AlbumArtDialog)->vbox), hbox2);
+    #if GMTP_USE_GTK2
+        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(AlbumArtDialog)->vbox), hbox2);
+    #else
+        gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(AlbumArtDialog))), hbox2);
+    #endif
 
     label2 = gtk_label_new(_("Filename:"));
     gtk_widget_show(label2);
@@ -2437,7 +2525,7 @@ Album_Struct* displayAddAlbumArtDialog(void) {
         albumdetails = NULL;
     }
     gtk_widget_destroy(AlbumArtDialog);
-    LIBMTP_destroy_album_t(albumtmp);
+    LIBMTP_destroy_album_t(album_orig);
     return albumdetails;
 }
 
@@ -2554,9 +2642,12 @@ create_windowPlaylist(void) {
 
     GtkWidget *hbuttonbox1;
     GtkWidget *button_Close;
-    GtkTooltips *tooltips;
+    
 
-    tooltips = gtk_tooltips_new();
+    #if GMTP_USE_GTK2
+        GtkTooltips *tooltips;
+        tooltips = gtk_tooltips_new();
+    #endif
 
     window_playlist = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gchar * winTitle;
@@ -2592,7 +2683,11 @@ create_windowPlaylist(void) {
     gtk_widget_show(button_Add_Playlist);
     gtk_box_pack_start(GTK_BOX(hbox1), button_Add_Playlist, FALSE, FALSE, 0);
     gtk_container_set_border_width(GTK_CONTAINER(button_Add_Playlist), 5);
-    gtk_tooltips_set_tip(tooltips, button_Add_Playlist, _("Add New Playlist"), NULL);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_set_tip(tooltips, button_Add_Playlist, _("Add New Playlist"), NULL);
+    #else
+        gtk_widget_set_tooltip_text (button_Add_Playlist, _("Add New Playlist"));
+    #endif
 
     alignment2 = gtk_alignment_new(0.5, 0.5, 0, 0);
     gtk_widget_show(alignment2);
@@ -2614,7 +2709,11 @@ create_windowPlaylist(void) {
     gtk_widget_show(button_Del_Playlist);
     gtk_box_pack_start(GTK_BOX(hbox1), button_Del_Playlist, FALSE, FALSE, 0);
     gtk_container_set_border_width(GTK_CONTAINER(button_Del_Playlist), 5);
-    gtk_tooltips_set_tip(tooltips, button_Del_Playlist, _("Remove Current Selected Playlist"), NULL);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_set_tip(tooltips, button_Del_Playlist, _("Remove Current Selected Playlist"), NULL);
+    #else
+        gtk_widget_set_tooltip_text (button_Del_Playlist, _("Remove Current Selected Playlist"));
+    #endif
 
     alignment1 = gtk_alignment_new(0.5, 0.5, 0, 0);
     gtk_widget_show(alignment1);
@@ -2645,7 +2744,11 @@ create_windowPlaylist(void) {
     gtk_widget_show(treeview_Avail_Files);
     gtk_container_add(GTK_CONTAINER(scrolledwindow2), treeview_Avail_Files);
     gtk_container_set_border_width(GTK_CONTAINER(treeview_Avail_Files), 5);
-    gtk_tooltips_set_tip(tooltips, treeview_Avail_Files, _("Device Audio Tracks"), NULL);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_set_tip(tooltips, treeview_Avail_Files, _("Device Audio Tracks"), NULL);
+    #else
+        gtk_widget_set_tooltip_text (treeview_Avail_Files, _("Device Audio Tracks"));
+    #endif
 
     playlist_TrackSelection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview_Avail_Files));
     gtk_tree_selection_set_mode(playlist_TrackSelection, GTK_SELECTION_MULTIPLE);
@@ -2663,7 +2766,11 @@ create_windowPlaylist(void) {
     button_Add_Files = gtk_button_new();
     gtk_widget_show(button_Add_Files);
     gtk_container_add(GTK_CONTAINER(vbuttonbox1), button_Add_Files);
-    gtk_tooltips_set_tip(tooltips, button_Add_Files, _("Add file to playlist"), NULL);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_set_tip(tooltips, button_Add_Files, _("Add file to playlist"), NULL);
+    #else
+        gtk_widget_set_tooltip_text (button_Add_Files, _("Add file to playlist"));
+    #endif
 
     alignment6 = gtk_alignment_new(0.5, 0.5, 0, 0);
     gtk_widget_show(alignment6);
@@ -2684,7 +2791,11 @@ create_windowPlaylist(void) {
     button_Del_File = gtk_button_new();
     gtk_widget_show(button_Del_File);
     gtk_container_add(GTK_CONTAINER(vbuttonbox1), button_Del_File);
-    gtk_tooltips_set_tip(tooltips, button_Del_File, _("Remove file from playlist"), NULL);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_set_tip(tooltips, button_Del_File, _("Remove file from playlist"), NULL);
+    #else
+        gtk_widget_set_tooltip_text (button_Del_File, _("Remove file from playlist"));
+    #endif
 
     alignment7 = gtk_alignment_new(0.5, 0.5, 0, 0);
     gtk_widget_show(alignment7);
@@ -2711,7 +2822,11 @@ create_windowPlaylist(void) {
     gtk_widget_show(treeview_Playlist_Files);
     gtk_container_add(GTK_CONTAINER(scrolledwindow3), treeview_Playlist_Files);
     gtk_container_set_border_width(GTK_CONTAINER(treeview_Playlist_Files), 5);
-    gtk_tooltips_set_tip(tooltips, treeview_Playlist_Files, _("Playlist Audio Tracks"), NULL);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_set_tip(tooltips, treeview_Playlist_Files, _("Playlist Audio Tracks"), NULL);
+    #else
+        gtk_widget_set_tooltip_text (treeview_Playlist_Files, _("Playlist Audio Tracks"));
+    #endif
 
     playlist_PL_Selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview_Playlist_Files));
     gtk_tree_selection_set_mode(playlist_PL_Selection, GTK_SELECTION_MULTIPLE);
@@ -2729,12 +2844,20 @@ create_windowPlaylist(void) {
     button_File_Move_Up = gtk_button_new_from_stock(GTK_STOCK_GO_UP);
     gtk_widget_show(button_File_Move_Up);
     gtk_container_add(GTK_CONTAINER(vbuttonbox2), button_File_Move_Up);
-    gtk_tooltips_set_tip(tooltips, button_File_Move_Up, _("Move selected file up in the playlist"), NULL);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_set_tip(tooltips, button_File_Move_Up, _("Move selected file up in the playlist"), NULL);
+    #else
+        gtk_widget_set_tooltip_text (button_File_Move_Up, _("Move selected file up in the playlist"));
+    #endif
 
     button_File_Move_Down = gtk_button_new_from_stock(GTK_STOCK_GO_DOWN);
     gtk_widget_show(button_File_Move_Down);
     gtk_container_add(GTK_CONTAINER(vbuttonbox2), button_File_Move_Down);
-    gtk_tooltips_set_tip(tooltips, button_File_Move_Down, _("Move selected file down in the playlist"), NULL);
+    #if GMTP_USE_GTK2
+        gtk_tooltips_set_tip(tooltips, button_File_Move_Down, _("Move selected file down in the playlist"), NULL);
+    #else
+        gtk_widget_set_tooltip_text (button_File_Move_Down, _("Move selected file down in the playlist"));
+    #endif
 
     hbuttonbox1 = gtk_hbutton_box_new();
     gtk_widget_show(hbuttonbox1);
@@ -2995,7 +3118,7 @@ void setPlaylistField(gint PlayListID){
     gint tmpplaylistID = PlayListID;
     gint trackID = 0;
     GtkTreeIter rowIter;
-    gchar * tmp_string;
+    gchar * tmp_string = NULL;
 
     playlist_track_count = 0;
 
@@ -3043,8 +3166,13 @@ gchar* displayPlaylistNewDialog(void) {
 
     hbox = gtk_hbox_new(FALSE, 5);
     gtk_widget_show(hbox);
-    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
-
+    //gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #if GMTP_USE_GTK2
+        gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+    #else
+        gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+    #endif
+        
     label = gtk_label_new(_("Playlist Name:"));
     gtk_widget_show(label);
     gtk_container_add(GTK_CONTAINER(hbox), label);
@@ -3180,6 +3308,13 @@ void __playlist_TrackList_Add(GtkTreeRowReference *Row) {
     gchar* title = NULL;
     gint item_id = 0;
     gchar * duration = NULL;
+    
+    // Allocate some memory.
+    //artist = g_malloc0(8192);
+    //album = g_malloc0(8192);
+    //title = g_malloc0(8192);
+    //duration = g_malloc0(8192);
+
     // convert the referenece to a path and retrieve the iterator;
     path = gtk_tree_row_reference_get_path(Row);
     gtk_tree_model_get_iter(GTK_TREE_MODEL(playlist_TrackList), &iter, path);
@@ -3192,6 +3327,11 @@ void __playlist_TrackList_Add(GtkTreeRowReference *Row) {
     gtk_list_store_set(GTK_LIST_STORE(playlist_PL_List), &PL_rowIter, COL_PL_ORDER_NUM, playlist_track_count, COL_PL_ARTIST, artist,
         COL_PL_ALBUM, album, COL_PL_TRACKID, item_id, COL_PL_TRACKNAME, title, COL_PL_TRACKDURATION, duration, -1);
 
+//Need to free our string values
+    g_free(artist);
+    g_free(album);
+    g_free(title);
+    g_free(duration);
 }
 
 gboolean playlist_move_files(gint direction){

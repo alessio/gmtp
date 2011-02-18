@@ -18,8 +18,12 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#include <gconf/gconf.h>
-#include <gconf/gconf-client.h>
+#if GMTP_USE_GTK2
+    #include <gconf/gconf.h>
+    #include <gconf/gconf-client.h>
+#else
+    #include <gio/gio.h>
+#endif
 #include <libmtp.h>
 #include <libgen.h>
 #include <sys/stat.h>
@@ -211,6 +215,7 @@ void get_mp3_info(gchar *filename, MP3_Info *mp3_struct){
         } else {
             mp3_struct->channels = 2;
         }
+        // Scan the full file for all frames.
         while ((get_mp3_header(mp3_file, &header_info) == TRUE) && (ftell(mp3_file) < (filesize - 128))){
             new_bitrate = mp3_bitrate[header_info.version & 0x1][header_info.layer - 1][header_info.bitrate];
             total_bitrate += new_bitrate;
@@ -224,7 +229,7 @@ void get_mp3_info(gchar *filename, MP3_Info *mp3_struct){
             mp3_struct->bitrate = (total_bitrate / frames_sampled) * 1000;
         }
         //mp3_struct->duration = frames_sampled * 26;
-        mp3_struct->duration = (double)(frames_sampled * (double)(26.00 / 1000)) * 1000;
+        mp3_struct->duration = (double)frames_sampled * 26.00;
         // Each frame lasts for 26ms, so just multiple the number of frames by 26 to get our duration
     }
 }
@@ -361,8 +366,9 @@ void get_ogg_tags(gchar *filename, LIBMTP_track_t *trackinformation){
     trackinformation->bitrate = ov_bitrate(mov_file, -1);
     trackinformation->bitratetype = 2; // VBR
     trackinformation->nochannels = mov_info->channels;
+    // Clean up our data structures.
     ov_clear(mov_file);
-     
+    g_free(mov_file);
     return;
 }
 

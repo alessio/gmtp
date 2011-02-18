@@ -21,14 +21,24 @@ extern "C" {
 
 #define PACKAGE "gmtp"
 #define PACKAGE_TITLE "gMTP"
-#define PACKAGE_VERSION "0.8.1"
+#define PACKAGE_VERSION "0.9"
 
-// Turn off translations for now.
-//#ifdef  ENABLE_NLS
-//#undef  ENABLE_NLS
-//#endif
+#define GMTP_GSETTINGS_SCHEMA "org.gnome.gmtp"
 
 #define ENABLE_NLS
+//  #define GMTP_USE_GTK3
+
+#ifndef GMTP_USE_GTK3
+    #ifdef GMTP_USE_GTK2
+        #undef GMTP_USE_GTK2
+    #endif
+    #define GMTP_USE_GTK2 1
+#else
+    #ifdef GMTP_USE_GTK2
+        #undef GMTP_USE_GTK2
+    #endif
+    #define GMTP_USE_GTK2 0
+#endif
 
 #ifdef	__cplusplus
 }
