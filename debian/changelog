@@ -1,8 +1,11 @@
 gmtp (0.9-1) unstable; urgency=low
 
-  * New upstream release.
+  * New upstream bugfix-only release:
+    - Fix some memleaks in mtp.c.
+    - Fix album updates for some broken devices.
+    - Fix minor bug in the playlist editor.
 
- -- Alessio Treglia <alessio@debian.org>  Fri, 25 Feb 2011 13:34:12 +0100
+ -- Alessio Treglia <alessio@debian.org>  Fri, 25 Feb 2011 14:03:05 +0100
 
 gmtp (0.8.1-1) unstable; urgency=low
 
