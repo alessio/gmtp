@@ -1,4 +1,4 @@
-Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=162
+Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=174
 Upstream-Name: gMTP
 Upstream-Contact: Darran Kartaschew <chewy509@mailcity.com>
 Source: http://chewy509.110mb.com/gMTP.html
@@ -53,7 +53,7 @@ Copyright: 2009, Victor Castillejo <perfectska04@gmail.com>
 License: GPL-2
 Comment: The icon is also included in the gnome-colors-common package.
 
-Files: ./debian/*
+Files: debian/*
 Copyright: 2009-2011, Alessio Treglia <alessio@debian.org>
 License: GPL-2
 
@@ -67,9 +67,8 @@ License: GPL-2
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
+Comment: You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  .
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-Comment: On Debian systems the full text of the GNU General Public
- License can be found in the `/usr/share/common-licenses/GPL-2' file.
+ On Debian systems, the full text of the GNU General Public License
+ version 2 can be found in the `/usr/share/common-licenses/GPL-2' file.
