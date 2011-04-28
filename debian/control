@@ -3,14 +3,14 @@ Section: sound
 Priority: optional
 Maintainer: Alessio Treglia <alessio@debian.org>
 Build-Depends: debhelper (>= 7),
- pkg-config,
- libgtk2.0-dev,
- libglib2.0-dev,
- libgconf2-dev,
- libid3tag0-dev,
  libflac-dev,
+ libgconf2-dev,
+ libglib2.0-dev,
+ libgtk2.0-dev,
+ libid3tag0-dev,
+ libmtp-dev,
  libvorbis-dev,
- libmtp-dev
+ pkg-config
 Standards-Version: 3.9.2
 Homepage: http://chewy509.110mb.com/gMTP.html
 Vcs-Git: git://git.debian.org/collab-maint/gmtp.git
