@@ -893,7 +893,7 @@ gboolean fileListClear() {
 }
 
 GSList* getFileGetList2Add() {
-    GSList* files;
+    GSList* files = NULL;
     GtkWidget *FileDialog;
     gchar *savepath = NULL;
 
@@ -910,8 +910,9 @@ GSList* getFileGetList2Add() {
         savepath = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(FileDialog));
         // Save our upload path.
         Preferences.fileSystemUploadPath = g_string_assign(Preferences.fileSystemUploadPath, savepath);
+        files = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(FileDialog));
     }
-    files = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(FileDialog));
+    
     gtk_widget_hide(FileDialog);
     gtk_widget_destroy(FileDialog);
     g_free(savepath);
