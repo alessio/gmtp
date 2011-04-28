@@ -1,4 +1,4 @@
-gmtp (0.9.1-1) UNRELEASED; urgency=low
+gmtp (0.9.1-1) unstable; urgency=low
 
   * New upstream release:
     - Fix "File continues to be uploaded, even if cancelling the
@@ -7,7 +7,7 @@ gmtp (0.9.1-1) UNRELEASED; urgency=low
     - Update to comply with DEP-5 svn-174.
   * Bump Standards.
 
- -- Alessio Treglia <alessio@debian.org>  Thu, 28 Apr 2011 19:22:31 +0200
+ -- Alessio Treglia <alessio@debian.org>  Thu, 28 Apr 2011 19:25:01 +0200
 
 gmtp (0.9-1) unstable; urgency=low
 
