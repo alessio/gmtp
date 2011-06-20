@@ -2,11 +2,11 @@ Source: gmtp
 Section: sound
 Priority: optional
 Maintainer: Alessio Treglia <alessio@debian.org>
-Build-Depends: debhelper (>= 7),
+Build-Depends: debhelper (>= 7.0.50~),
  libflac-dev,
  libgconf2-dev,
  libglib2.0-dev,
- libgtk2.0-dev,
+ libgtk-3-dev,
  libid3tag0-dev,
  libmtp-dev,
  libvorbis-dev,
