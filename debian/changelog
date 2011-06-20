@@ -1,3 +1,17 @@
+gmtp (1.0.0-1) unstable; urgency=low
+
+  * New upstream release:
+    - Finalised GTK3 build.
+    - Updated Album Art dialog allowing for upload, removing or
+      downloading album art files.
+    - Ability to rename files and folders on the device.
+    - New icons in the main window.
+    - Updated Properties Window to better suit small screen devices,
+      especially netbooks.
+  * Build with GTK3.
+
+ -- Alessio Treglia <alessio@debian.org>  Mon, 20 Jun 2011 11:13:26 +0200
+
 gmtp (0.9.1-1) unstable; urgency=low
 
   * New upstream release:
