@@ -2,7 +2,7 @@
 
 PKG_NAME = gmtp
 PREFIX ?= /usr/local
-VER = 0.9.1
+VER = 1.0.0
 # Note: If you update above, please update the config.h and pkginfo file as well.
 
 PKG = gmtp
@@ -40,7 +40,6 @@ GTK_LDFLAGS = `pkg-config --libs gtk+-2.0 gconf-2.0 libmtp id3tag flac vorbisfil
 ifeq ($(MAKECMDGOALS),gtk3)
 GTK_CFLAGS = `pkg-config --cflags gtk+-3.0 gio-2.0 libmtp id3tag flac vorbisfile`
 GTK_LDFLAGS = `pkg-config --libs gtk+-3.0 gio-2.0 libmtp id3tag flac vorbisfile`
-#CFLAGS += -DGMTP_USE_GTK3 -DGTK_DISABLE_SINGLE_INCLUDES -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DGSEAL_ENABLE
 CFLAGS += -DGMTP_USE_GTK3
 endif
 
@@ -132,6 +131,14 @@ install: gmtp $(catalogues)
 	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/icon-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/stock-about-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/audio-x-mp3-playlist.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/audio-x-mpeg.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/folder.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/image-x-generic.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/media-cdrom-audio.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/text-plain.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/video-x-generic.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/empty.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 misc/gMTP.desktop $(DESTDIR)$(PREFIX)/share/applications
 	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps
 	$(INSTALL) -m 644 misc/gMTP.schemas $(DESTDIR)$(PREFIX)/share/gconf/schemas
@@ -172,6 +179,14 @@ install-gtk3: gmtp $(catalogues)
 	$(INSTALL) -m 644 images/stock-about-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 misc/gMTP.desktop $(DESTDIR)$(PREFIX)/share/applications
 	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps
+	$(INSTALL) -m 644 images/audio-x-mp3-playlist.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/audio-x-mpeg.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/folder.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/image-x-generic.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/media-cdrom-audio.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/text-plain.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/video-x-generic.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/empty.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	mv $(DESTDIR)$(PREFIX)/share/pixmaps/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
 	cp po/es.mo $(DESTDIR)$(PREFIX)/share/locale/es/LC_MESSAGES/gmtp.mo
 	cp po/fr.mo $(DESTDIR)$(PREFIX)/share/locale/fr/LC_MESSAGES/gmtp.mo
@@ -193,9 +208,7 @@ install-doc:
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/gmtp
-	rm -f  $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/icon.png
-	rm -f  $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/icon-16.png
-	rm -f  $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/stock-about-16.png
+	rm -f  $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)/*
 	rm -f  $(DESTDIR)$(PREFIX)/share/applications/gMTP.desktop
 	rm -f  $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
 	rm -f  $(DESTDIR)$(PREFIX)/share/gconf/schemas/gmtp.schemas

@@ -545,3 +545,28 @@ msgid "Track Number"
 msgstr
 msgid "Genre"
 msgstr
+###########################################
+msgid "Select Album Art File"
+msgstr
+msgid "Save Album Art File"
+msgstr
+msgid "Couldn't save image file %s\n"
+msgstr
+msgid "Couldn't save image file\n"
+msgstr
+msgid "Failed to get storage parameters from the device - need to disconnect."
+msgstr
+msgid "Couldn't remove album art\n"
+msgstr
+msgid "Rename File"
+msgstr
+msgid "Rename File/Folder"
+msgstr
+msgid "File Name:"
+msgstr
+msgid "Upload"
+msgstr
+msgid "Remove"
+msgstr
+msgid "Download"
+msgstr
