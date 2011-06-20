@@ -1,4 +1,4 @@
-gMTP v0.9.1
+gMTP v1.0.0
 
 A basic MP3 Player client for Oracle Solaris 10.
 
@@ -39,7 +39,7 @@ Q. Does gMTP support Albums and uploading Album Art?
 A. Yes. Album data is autocreated/updated when you upload a MP3 (or other 
    supported audio file) by using information contained within the audio file,
    eg. Using the ID3 Tag information in an MP3 file. Once the Album has been
-   created, you can upload the album art via the 'Edit / Add Album Art' menu
+   created, you can upload the album art via the 'Edit / Album Art' menu
    option.
 
 Q. Will this software work on OpenSolaris, Linux, *BSD or other POSIX Operating 
@@ -105,6 +105,4 @@ TODO List
 
 1. Bugfixes as needed.
 2. Further translations.
-3. Finalise GNOME 3.0 (GTK3 and GSettings) support once it's released and I
-   have it installed.
 
