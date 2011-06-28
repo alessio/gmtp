@@ -1,3 +1,12 @@
+gmtp (1.0.1-1) unstable; urgency=low
+
+  * New upstream release:
+    - Fix application icon size with Window Maker.
+    - Added Format Device Option.
+    - General code cleanup.
+
+ -- Alessio Treglia <alessio@debian.org>  Tue, 28 Jun 2011 11:28:19 +0200
+
 gmtp (1.0.0-1) unstable; urgency=low
 
   * New upstream release:
