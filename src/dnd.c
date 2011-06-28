@@ -40,7 +40,7 @@
 #include "prefs.h"
 #include "dnd.h"
 
-const GtkTargetEntry _gmtp_drop_types[] ={
+const GtkTargetEntry _gmtp_drop_types[] = {
     {"text/plain", 0, GMTP_DROP_PLAINTEXT},
     {"text/uri-list", 0, GMTP_DROP_URLENCODED},
     {"STRING", 0, GMTP_DROP_STRING}

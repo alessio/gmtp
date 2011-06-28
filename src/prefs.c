@@ -216,6 +216,7 @@ gboolean savePreferences() {
  * @param user_data
  */
 #if GMTP_USE_GTK2
+
 void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data) {
     //g_printf("Gconf callback - %s\n", entry->key);
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/promptDownloadPath") == 0) {

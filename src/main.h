@@ -76,18 +76,20 @@ extern "C" {
     uint32_t currentFolderID; // This is the ID of the current folder....
 
     // Icon file locations.
-    GString *file_icon_png;
-    GString *file_icon16_png;
-    GString *file_about_png;
+    gchar *file_logo_png;
+    gchar *file_icon48_png;
+    gchar *file_icon16_png;
+    gchar *file_about_png;
+    gchar *file_format_png;
     // File view Icons
-    GString *file_audio_png;
-    GString *file_video_png;
-    GString *file_playlist_png;
-    GString *file_album_png;
-    GString *file_textfile_png;
-    GString *file_generic_png;
-    GString *file_folder_png;
-    GString *file_image_png;
+    gchar *file_audio_png;
+    gchar *file_video_png;
+    gchar *file_playlist_png;
+    gchar *file_album_png;
+    gchar *file_textfile_png;
+    gchar *file_generic_png;
+    gchar *file_folder_png;
+    gchar *file_image_png;
 
     // Misc Utility function;
     void setFilePaths(int argc, char *argv[]);

@@ -568,5 +568,9 @@ msgid "Upload"
 msgstr
 msgid "Remove"
 msgstr
-msgid "Download"
+msgid "Format Device"
+msgstr
+msgid "Are you sure you want to format this device?"
+msgstr
+msgid "Format Device failed?\n"
 msgstr

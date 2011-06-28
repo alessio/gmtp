@@ -1,4 +1,9 @@
---v1.0.0 -
+-- v1.0.1 - 27 Jun 2011
+* Fix application icon size with Window Maker.
++ Added Format Device Option.
+- General code cleanup.
+
+-- v1.0.0 - 18 Jun 2011
 * Fix compile issues with GTK3 based systems.
 * Fix segfault if user closes progress dialog mid-transfer.
 * Added TEXT file type detection.

@@ -35,6 +35,7 @@ extern "C" {
     void on_fileRemoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_fileRenameFile_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_editDeviceName_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void  on_editFormatDevice_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_editAddAlbumArt_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_editPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_view_activate(GtkMenuItem *menuitem, gpointer user_data);
@@ -74,6 +75,9 @@ extern "C" {
     // Progress Dialog
     void on_progressDialog_Close(GtkWidget *window, gpointer user_data);
     void on_progressDialog_Cancel(GtkWidget *window, gpointer user_data);
+
+    // Format Device Progress Bar.
+    void on_editFormatDevice_thread(void);
 
 #ifdef  __cplusplus
 }

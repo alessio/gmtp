@@ -96,6 +96,7 @@ extern "C" {
     GtkWidget* create_windowProperties(void);
     GtkWidget* create_windowMainContextMenu(void);
     GtkWidget* create_windowPlaylist(void);
+    GtkWidget* create_windowFormat(void);
 
     void SetToolbarButtonState(gboolean);
     void statusBarSet(gchar *text);
@@ -189,6 +190,7 @@ extern "C" {
     GtkWidget *fileRemoveFolder;
     GtkWidget *fileRescan;
     GtkWidget *editDeviceName;
+    GtkWidget *editFormatDevice;
     GtkWidget *editAddAlbumArt;
     GtkWidget *contextMenu;
 #if GMTP_USE_GTK2
@@ -247,6 +249,9 @@ extern "C" {
     GtkWidget *button_File_Move_Down;
     GtkWidget *button_Del_File;
     GtkWidget *button_Add_Files;
+
+    // Widget for formatDevice progress bar.
+    GtkWidget *formatDialog_progressBar1;
 
 #ifdef  __cplusplus
 }

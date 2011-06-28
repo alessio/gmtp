@@ -2,7 +2,7 @@
 
 PKG_NAME = gmtp
 PREFIX ?= /usr/local
-VER = 1.0.0
+VER = 1.0.1
 # Note: If you update above, please update the config.h and pkginfo file as well.
 
 PKG = gmtp
@@ -129,6 +129,7 @@ install: gmtp $(catalogues)
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/share/locale/de/LC_MESSAGES
 	$(INSTALL) -m 755 gmtp $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/logo.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/icon-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/stock-about-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/audio-x-mp3-playlist.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
@@ -139,6 +140,7 @@ install: gmtp $(catalogues)
 	$(INSTALL) -m 644 images/text-plain.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/video-x-generic.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/empty.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/view-refresh.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 misc/gMTP.desktop $(DESTDIR)$(PREFIX)/share/applications
 	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps
 	$(INSTALL) -m 644 misc/gMTP.schemas $(DESTDIR)$(PREFIX)/share/gconf/schemas
@@ -176,6 +178,7 @@ install-gtk3: gmtp $(catalogues)
 	$(INSTALL) -m 755 gmtp $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/icon-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/logo.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/stock-about-16.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 misc/gMTP.desktop $(DESTDIR)$(PREFIX)/share/applications
 	$(INSTALL) -m 644 images/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps
@@ -187,6 +190,7 @@ install-gtk3: gmtp $(catalogues)
 	$(INSTALL) -m 644 images/text-plain.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/video-x-generic.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	$(INSTALL) -m 644 images/empty.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
+	$(INSTALL) -m 644 images/view-refresh.png $(DESTDIR)$(PREFIX)/share/$(PKG_NAME)
 	mv $(DESTDIR)$(PREFIX)/share/pixmaps/icon.png $(DESTDIR)$(PREFIX)/share/pixmaps/gMTPicon.png
 	cp po/es.mo $(DESTDIR)$(PREFIX)/share/locale/es/LC_MESSAGES/gmtp.mo
 	cp po/fr.mo $(DESTDIR)$(PREFIX)/share/locale/fr/LC_MESSAGES/gmtp.mo
