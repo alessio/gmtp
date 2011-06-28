@@ -34,6 +34,8 @@
 #include "prefs.h"
 #include "dnd.h"
 
+static gboolean formatThreadWorking = TRUE;
+
 /**
  * on_quit1_activate - Call back for Quit toolbar and menu option.
  * @param menuitem
@@ -75,16 +77,16 @@ void on_deviceProperties_activate(GtkMenuItem *menuitem, gpointer user_data) {
     // Update the status bar with our information.
     if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
         tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                                        (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+            (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
     } else {
         if (DeviceMgr.devicestorage->StorageDescription != NULL) {
             tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"),
-                                            DeviceMgr.devicename->str,
-                                            DeviceMgr.devicestorage->StorageDescription,
-                                            (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                DeviceMgr.devicename->str,
+                DeviceMgr.devicestorage->StorageDescription,
+                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
         } else {
             tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                                            (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
         }
     }
     statusBarSet(tmp_string);
@@ -136,7 +138,7 @@ void on_deviceRescan_activate(GtkMenuItem *menuitem, gpointer user_data) {
  */
 void on_filesAdd_activate(GtkMenuItem *menuitem, gpointer user_data) {
     GSList* files;
-    
+
     files = getFileGetList2Add();
     if (files != NULL)
         g_slist_foreach(files, (GFunc) __filesAdd, NULL);
@@ -144,7 +146,7 @@ void on_filesAdd_activate(GtkMenuItem *menuitem, gpointer user_data) {
     // Now clear the GList;
     g_slist_foreach(files, (GFunc) g_free, NULL);
     g_slist_free(files);
-    
+
     // Now do a device rescan to see the new files.
     deviceRescan();
     deviceoverwriteop = MTP_ASK;
@@ -158,7 +160,7 @@ void on_filesAdd_activate(GtkMenuItem *menuitem, gpointer user_data) {
  * @param user_data
  */
 void on_fileRenameFile_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    
+
     GtkTreePath *path;
     GtkTreeIter iter;
     gchar *newfilename = NULL;
@@ -180,10 +182,10 @@ void on_fileRenameFile_activate(GtkMenuItem *menuitem, gpointer user_data) {
     // We have our Iter now.
     // Before we download, is it a folder ?
     gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_FILENAME_ACTUAL, &filename, COL_ISFOLDER, &isFolder,
-                                    COL_FILEID, &ObjectID, -1);
+        COL_FILEID, &ObjectID, -1);
 
     // Make sure we are not attempting to edit the parent link folder.
-    if(g_ascii_strcasecmp(filename, "..") == 0){
+    if (g_ascii_strcasecmp(filename, "..") == 0) {
         g_fprintf(stderr, _("Unable to rename parent folder\n"));
         displayInformation(_("Unable to rename this folder"));
         return;
@@ -281,17 +283,17 @@ void on_deviceConnect_activate(GtkMenuItem *menuitem, gpointer user_data) {
         // Now update the status bar;
         if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
             tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                                            (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
         } else {
             if (DeviceMgr.devicestorage->StorageDescription != NULL) {
                 tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"),
-                                                DeviceMgr.devicename->str,
-                                                DeviceMgr.devicestorage->StorageDescription,
-                                                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                    DeviceMgr.devicename->str,
+                    DeviceMgr.devicestorage->StorageDescription,
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
             } else {
-                tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), 
-                                                DeviceMgr.devicename->str,
-                                                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"),
+                    DeviceMgr.devicename->str,
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
             }
         }
         statusBarSet(tmp_string);
@@ -315,7 +317,7 @@ void on_deviceConnect_activate(GtkMenuItem *menuitem, gpointer user_data) {
         // Now update the filemenu;
         menuText = gtk_bin_get_child(GTK_BIN(fileConnect));
         gtk_label_set_text(GTK_LABEL(menuText), _("Connect Device"));
-        
+
         // Now update the file list area and disable Drag'n'Drop.
         fileListClear();
         gtk_drag_dest_unset(windowMain);
@@ -460,7 +462,7 @@ void on_PrefsDownloadPath_activate(GtkMenuItem *menuitem, gpointer user_data) {
     gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemDownloadPath->str);
     if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
         savepath = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
-        
+
         // Save our download path.
 #if GMTP_USE_GTK2
         if (gconfconnect != NULL)
@@ -574,7 +576,7 @@ void on_fileNewFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
  */
 void on_fileRemoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
     GtkWidget *dialog;
-    
+
     // Let's check to see if we have anything selected in our treeview?
     if (fileListGetSelection() == NULL) {
         displayInformation(_("No files/folders selected?"));
@@ -630,6 +632,73 @@ void on_editDeviceName_activate(GtkMenuItem *menuitem, gpointer user_data) {
         deviceRescan();
     }
 } // end on_editDeviceName_activate()
+
+// ************************************************************************************************
+
+/**
+ * Callback to format the current storage device.
+ * @param menuitem
+ * @param user_data
+ */
+void on_editFormatDevice_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    GtkWidget *dialog;
+    dialog = gtk_message_dialog_new(GTK_WINDOW(windowMain),
+        GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_MESSAGE_WARNING,
+        GTK_BUTTONS_YES_NO,
+        _("Are you sure you want to format this device?"));
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Format Device"));
+    gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_hide(GTK_WIDGET(dialog));
+    gtk_widget_destroy(dialog);
+
+    if (result == GTK_RESPONSE_YES) {
+        dialog = create_windowFormat();
+        // Show progress dialog.
+        gtk_widget_show_all(dialog);
+        // Ensure GTK redraws the window.
+
+        formatThreadWorking = TRUE;
+
+        g_thread_create((GThreadFunc) on_editFormatDevice_thread, NULL, FALSE, NULL);
+
+        while (formatThreadWorking) {
+            while (gtk_events_pending())
+                gtk_main_iteration();
+
+            if (formatDialog_progressBar1 != NULL) {
+                gtk_progress_bar_pulse(GTK_PROGRESS_BAR(formatDialog_progressBar1));
+                g_usleep(G_USEC_PER_SEC * 0.1);
+            }
+
+        }
+        // The worker thread has finished so let's continue.
+
+        // Disconnect and reconnect the device.
+        on_deviceConnect_activate(NULL, NULL);
+        // Sleep for 2 secs to allow the device to settle itself
+        g_usleep(G_USEC_PER_SEC * 2);
+        on_deviceConnect_activate(NULL, NULL);
+        // Close progress dialog.
+        gtk_widget_hide(dialog);
+        gtk_widget_destroy(dialog);
+        formatDialog_progressBar1 = NULL;
+    }
+    //
+} // end on_editFormatDevice_activate()
+
+// ************************************************************************************************
+
+/**
+ * Worker thread for on_editFormatDevice_activate();
+ */
+void on_editFormatDevice_thread(void) {
+    formatStorageDevice();
+    // Add a 5 sec wait so the device has time to settle itself.
+    g_usleep(G_USEC_PER_SEC * 5);
+    formatThreadWorking = FALSE;
+    g_thread_exit(NULL);
+}
 
 // ************************************************************************************************
 
@@ -715,11 +784,11 @@ void on_buttonAlbumArtAdd_activate(GtkWidget *button, gpointer user_data) {
 
     // Set the default path to be the normal upload folder.
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemUploadPath->str);
-    
+
     if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
         filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
 
-        if(filename != NULL){
+        if (filename != NULL) {
             // Upload the file to the selected album.
             gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(textboxAlbumArt));
             gint count = 0;
@@ -727,7 +796,7 @@ void on_buttonAlbumArtAdd_activate(GtkWidget *button, gpointer user_data) {
             LIBMTP_album_t *albuminfo = albumlist;
 
             while (albuminfo != NULL) {
-                if(count == selected){
+                if (count == selected) {
                     // Found our album, so update the image on the device, then update the display.
                     albumAddArt(albuminfo->album_id, filename);
                     AlbumArtUpdateImage(albuminfo);
@@ -766,7 +835,7 @@ void on_buttonAlbumArtDelete_activate(GtkWidget *button, gpointer user_data) {
     LIBMTP_album_t *albuminfo = albumlist;
 
     while (albuminfo != NULL) {
-        if(count == selected){
+        if (count == selected) {
             // Found our album, so update the image on the device, then update the display.
             albumDeleteArt(albuminfo->album_id);
             AlbumArtUpdateImage(NULL);
@@ -802,17 +871,17 @@ void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
 
     // Scan our albums, looking for the correct one.
     while (albuminfo != NULL) {
-        if(count == selected){
+        if (count == selected) {
             // Found our album, let's get our data..
             imagedata = albumGetArt(albuminfo);
-            if(imagedata != NULL){
+            if (imagedata != NULL) {
 
                 FileDialog = gtk_file_chooser_dialog_new(_("Save Album Art File"),
                     GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_SAVE,
                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                     GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
                     NULL);
-                
+
                 gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(FileDialog), TRUE);
 
                 // Set the default path to be the normal download folder.
@@ -825,7 +894,7 @@ void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
 
                 if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
                     filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
-                    if(filename != NULL){
+                    if (filename != NULL) {
                         // The user has selected a file to save as, so do the deed.
                         fd = fopen(filename, "w");
                         if (fd == NULL) {
@@ -861,14 +930,14 @@ void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
  * @param menuitem
  * @param user_data
  */
-void on_albumtextbox_activate (GtkComboBox *combobox, gpointer user_data){
+void on_albumtextbox_activate(GtkComboBox *combobox, gpointer user_data) {
     gint selected = gtk_combo_box_get_active(combobox);
     gint count = 0;
     LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
     LIBMTP_album_t *albuminfo = albumlist;
 
     while (albuminfo != NULL) {
-        if(count == selected){
+        if (count == selected) {
             AlbumArtUpdateImage(albuminfo);
             clearAlbumStruc(albumlist);
             return;

@@ -63,18 +63,20 @@ uint32_t currentFolderID = 0;
 
 // Paths to the application, and images used within the application.
 gchar *applicationpath = NULL;
-GString *file_icon_png = NULL;
-GString *file_icon16_png = NULL;
-GString *file_about_png = NULL;
+gchar *file_logo_png = NULL;
+gchar *file_icon48_png = NULL;
+gchar *file_icon16_png = NULL;
+gchar *file_about_png = NULL;
+gchar *file_format_png = NULL;
 // File view Icons
-GString *file_audio_png = NULL;
-GString *file_video_png = NULL;
-GString *file_playlist_png = NULL;
-GString *file_album_png = NULL;
-GString *file_textfile_png = NULL;
-GString *file_generic_png = NULL;
-GString *file_folder_png = NULL;
-GString *file_image_png = NULL;
+gchar *file_audio_png = NULL;
+gchar *file_video_png = NULL;
+gchar *file_playlist_png = NULL;
+gchar *file_album_png = NULL;
+gchar *file_textfile_png = NULL;
+gchar *file_generic_png = NULL;
+gchar *file_folder_png = NULL;
+gchar *file_image_png = NULL;
 
 
 // ************************************************************************************************
@@ -87,6 +89,8 @@ GString *file_image_png = NULL;
  */
 int main(int argc, char *argv[]) {
     setFilePaths(argc, argv);
+
+    g_thread_init(NULL);
 
 #if GMTP_USE_GTK2
     gtk_set_locale();
@@ -123,7 +127,7 @@ int main(int argc, char *argv[]) {
         deviceRescan();
 
     gtk_main();
-    
+
     return EXIT_SUCCESS;
 } // end main()
 
@@ -139,29 +143,20 @@ void setFilePaths(int argc, char *argv[]) {
     applicationpath = getRuntimePath(argc, argv);
 
     // Set our image locations.
-    file_icon_png = g_string_new(applicationpath);
-    file_icon_png = g_string_append(file_icon_png, "/../share/gmtp/icon.png");
-    file_icon16_png = g_string_new(applicationpath);
-    file_icon16_png = g_string_append(file_icon16_png, "/../share/gmtp/icon-16.png");
-    file_about_png = g_string_new(applicationpath);
-    file_about_png = g_string_append(file_about_png, "/../share/gmtp/stock-about-16.png");
+    file_logo_png = g_strdup_printf("%s/../share/gmtp/logo.png", applicationpath);
+    file_icon48_png = g_strdup_printf("%s/../share/gmtp/icon.png", applicationpath);
+    file_icon16_png = g_strdup_printf("%s/../share/gmtp/icon-16.png", applicationpath);
+    file_about_png = g_strdup_printf("%s/../share/gmtp/stock-about-16.png", applicationpath);
+    file_format_png = g_strdup_printf("%s/../share/gmtp/view-refresh.png", applicationpath);
 
-    file_audio_png = g_string_new(applicationpath);
-    file_audio_png = g_string_append(file_audio_png, "/../share/gmtp/audio-x-mpeg.png");;
-    file_video_png = g_string_new(applicationpath);
-    file_video_png = g_string_append(file_video_png, "/../share/gmtp/video-x-generic.png");;
-    file_playlist_png = g_string_new(applicationpath);
-    file_playlist_png = g_string_append(file_playlist_png, "/../share/gmtp/audio-x-mp3-playlist.png");;
-    file_album_png = g_string_new(applicationpath);
-    file_album_png = g_string_append(file_album_png, "/../share/gmtp/media-cdrom-audio.png");;
-    file_textfile_png = g_string_new(applicationpath);
-    file_textfile_png = g_string_append(file_textfile_png, "/../share/gmtp/text-plain.png");;
-    file_generic_png = g_string_new(applicationpath);
-    file_generic_png = g_string_append(file_generic_png, "/../share/gmtp/empty.png");;
-    file_folder_png = g_string_new(applicationpath);
-    file_folder_png = g_string_append(file_folder_png, "/../share/gmtp/folder.png");;
-    file_image_png = g_string_new(applicationpath);
-    file_image_png = g_string_append(file_image_png, "/../share/gmtp/image-x-generic.png");;
+    file_audio_png = g_strdup_printf("%s/../share/gmtp/audio-x-mpeg.png", applicationpath);
+    file_video_png = g_strdup_printf("%s/../share/gmtp/video-x-generic.png", applicationpath);
+    file_playlist_png = g_strdup_printf("%s/../share/gmtp/audio-x-mp3-playlist.png", applicationpath);
+    file_album_png = g_strdup_printf("%s/../share/gmtp/media-cdrom-audio.png", applicationpath);
+    file_textfile_png = g_strdup_printf("%s/../share/gmtp/text-plain.png", applicationpath);
+    file_generic_png = g_strdup_printf("%s/../share/gmtp/empty.png", applicationpath);
+    file_folder_png = g_strdup_printf("%s/../share/gmtp/folder.png", applicationpath);
+    file_image_png = g_strdup_printf("%s/../share/gmtp/image-x-generic.png", applicationpath);
 } // end setFilePaths()
 
 // ************************************************************************************************

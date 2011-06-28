@@ -66,6 +66,7 @@ GtkWidget *fileNewFolder;
 GtkWidget *fileRemoveFolder;
 GtkWidget *fileRescan;
 GtkWidget *editDeviceName;
+GtkWidget *editFormatDevice;
 GtkWidget *editAddAlbumArt;
 GtkWidget *editPlaylist;
 
@@ -115,6 +116,9 @@ GtkWidget *progressDialog_Text;
 GtkWidget *progressDialog_Bar;
 gchar *progressDialog_filename;
 gboolean progressDialog_killed = FALSE;
+
+// Widget for formatDevice progress bar.
+GtkWidget *formatDialog_progressBar1;
 
 // Flags for overwriting files of host PC and device.
 gint fileoverwriteop = MTP_ASK;
@@ -172,6 +176,7 @@ GtkWidget* create_windowMain(void) {
     GtkWidget *menuseparator3;
     GtkWidget *menuseparator4;
     GtkWidget *menuseparator5;
+    GtkWidget *menuseparator6;
     GtkWidget *quit1;
     GtkWidget *menuitem2;
     GtkWidget *menuitem2_menu;
@@ -202,7 +207,7 @@ GtkWidget* create_windowMain(void) {
     winTitle = g_strconcat(PACKAGE_TITLE, " v", PACKAGE_VERSION, NULL);
     gtk_window_set_title(GTK_WINDOW(windowMain), (winTitle));
     gtk_window_set_default_size(GTK_WINDOW(windowMain), 820, 400);
-    gtk_window_set_icon_from_file(GTK_WINDOW(windowMain), file_icon_png->str, NULL);
+    gtk_window_set_icon_from_file(GTK_WINDOW(windowMain), file_icon48_png, NULL);
     g_free(winTitle);
 
     vbox1 = gtk_vbox_new(FALSE, 0);
@@ -301,10 +306,20 @@ GtkWidget* create_windowMain(void) {
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem2), menuitem2_menu);
 
     editDeviceName = gtk_image_menu_item_new_with_label(_("Change Device Name"));
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(editDeviceName), gtk_image_new_from_file(file_icon16_png->str));
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(editDeviceName), gtk_image_new_from_file(file_icon16_png));
 
     gtk_widget_show(editDeviceName);
     gtk_container_add(GTK_CONTAINER(menuitem2_menu), editDeviceName);
+
+    editFormatDevice = gtk_image_menu_item_new_with_label(_("Format Device"));
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(editFormatDevice), gtk_image_new_from_file(file_format_png));
+
+    gtk_widget_show(editFormatDevice);
+    gtk_container_add(GTK_CONTAINER(menuitem2_menu), editFormatDevice);
+
+    menuseparator6 = gtk_separator_menu_item_new();
+    gtk_widget_show(menuseparator6);
+    gtk_container_add(GTK_CONTAINER(menuitem2_menu), menuseparator6);
 
     editAddAlbumArt = gtk_image_menu_item_new_from_stock(GTK_STOCK_CDROM, accel_group);
     menuText = gtk_bin_get_child(GTK_BIN(editAddAlbumArt));
@@ -377,7 +392,7 @@ GtkWidget* create_windowMain(void) {
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem4), menuitem4_menu);
 
     about1 = gtk_image_menu_item_new_with_mnemonic(_("_About"));
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(about1), gtk_image_new_from_file(file_about_png->str));
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(about1), gtk_image_new_from_file(file_about_png));
     gtk_widget_show(about1);
     gtk_container_add(GTK_CONTAINER(menuitem4_menu), about1);
 
@@ -593,6 +608,10 @@ GtkWidget* create_windowMain(void) {
         G_CALLBACK(on_editDeviceName_activate),
         NULL);
 
+    g_signal_connect((gpointer) editFormatDevice, "activate",
+        G_CALLBACK(on_editFormatDevice_activate),
+        NULL);
+
     g_signal_connect((gpointer) editAddAlbumArt, "activate",
         G_CALLBACK(on_editAddAlbumArt_activate),
         NULL);
@@ -764,6 +783,7 @@ void SetToolbarButtonState(gboolean state) {
     gtk_widget_set_sensitive(GTK_WIDGET(fileRemoveFolder), state);
     gtk_widget_set_sensitive(GTK_WIDGET(fileRescan), state);
     gtk_widget_set_sensitive(GTK_WIDGET(editDeviceName), state);
+    gtk_widget_set_sensitive(GTK_WIDGET(editFormatDevice), state);
     gtk_widget_set_sensitive(GTK_WIDGET(editAddAlbumArt), state);
     gtk_widget_set_sensitive(GTK_WIDGET(editPlaylist), state);
     gtk_widget_set_sensitive(GTK_WIDGET(treeviewFiles), state);
@@ -1023,7 +1043,7 @@ gboolean fileListAdd() {
     // We start with the folder list...
     if (currentFolderID != 0) {
         // If we are not folderID = 0; then...
-        image = gdk_pixbuf_new_from_file(file_folder_png->str, NULL);
+        image = gdk_pixbuf_new_from_file(file_folder_png, NULL);
         // Scan the folder list for the current folderID, and set the parent ID,
         tmpfolder = deviceFolders;
         parentID = getParentFolderID(tmpfolder, currentFolderID);
@@ -1048,7 +1068,7 @@ gboolean fileListAdd() {
     tmpfolder = getParentFolderPtr(deviceFolders, currentFolderID);
     while (tmpfolder != NULL) {
         if ((tmpfolder->parent_id == currentFolderID) && (tmpfolder->storage_id == DeviceMgr.devicestorage->id)) {
-            image = gdk_pixbuf_new_from_file(file_folder_png->str, NULL);
+            image = gdk_pixbuf_new_from_file(file_folder_png, NULL);
             gtk_list_store_append(GTK_LIST_STORE(fileList), &rowIter);
             //filename = g_strdup_printf("< %s >", tmpfolder->name);
             filename_hid = g_strdup_printf("     < %s >", tmpfolder->name);
@@ -1117,7 +1137,7 @@ gboolean fileListAdd() {
                     if (trackinfo->genre == NULL) trackinfo->genre = g_strdup("");
 
                     // Icon
-                    image = gdk_pixbuf_new_from_file(file_audio_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_audio_png, NULL);
 
                     gtk_list_store_set(GTK_LIST_STORE(fileList), &rowIter,
                         //COL_FILENAME, tmpfile->filename,
@@ -1153,21 +1173,21 @@ gboolean fileListAdd() {
             } else {
                 // Determine the file type.
                 if(LIBMTP_FILETYPE_IS_AUDIO(tmpfile->filetype)){
-                    image = gdk_pixbuf_new_from_file(file_audio_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_audio_png, NULL);
                 } else if(LIBMTP_FILETYPE_IS_AUDIOVIDEO(tmpfile->filetype)){
-                    image = gdk_pixbuf_new_from_file(file_video_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_video_png, NULL);
                 } else if(LIBMTP_FILETYPE_IS_VIDEO(tmpfile->filetype)){
-                    image = gdk_pixbuf_new_from_file(file_video_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_video_png, NULL);
                 } else if(LIBMTP_FILETYPE_IS_IMAGE(tmpfile->filetype)){
-                    image = gdk_pixbuf_new_from_file(file_image_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_image_png, NULL);
                 } else if(tmpfile->filetype == LIBMTP_FILETYPE_ALBUM) {
-                    image = gdk_pixbuf_new_from_file(file_album_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_album_png, NULL);
                 } else if(tmpfile->filetype == LIBMTP_FILETYPE_PLAYLIST) {
-                    image = gdk_pixbuf_new_from_file(file_playlist_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_playlist_png, NULL);
                 } else if(tmpfile->filetype == LIBMTP_FILETYPE_TEXT) {
-                    image = gdk_pixbuf_new_from_file(file_textfile_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_textfile_png, NULL);
                 } else {
-                    image = gdk_pixbuf_new_from_file(file_generic_png->str, NULL);
+                    image = gdk_pixbuf_new_from_file(file_generic_png, NULL);
                 }
 
                 // Otherwise just show the file information
@@ -1764,12 +1784,12 @@ GtkWidget* create_windowProperties() {
     GtkWidget *labelDevNum;
     GtkWidget *label1;
     GtkWidget *hbox2;
-    GtkWidget *button1;
+    GtkWidget *buttonClose;
 
     GtkWidget *label50;
 
     GString *tmp_string2;
-    gchar tmp_string[8192];
+    gchar *tmp_string = NULL;
 
     windowDialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gchar * winTitle;
@@ -2104,15 +2124,15 @@ GtkWidget* create_windowProperties() {
     gtk_widget_show(hbox2);
     gtk_box_pack_start(GTK_BOX(vbox1), hbox2, TRUE, TRUE, 0);
 
-    button1 = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-    gtk_widget_show(button1);
-    gtk_box_pack_end(GTK_BOX(hbox2), button1, FALSE, FALSE, 0);
+    buttonClose = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+    gtk_widget_show(buttonClose);
+    gtk_box_pack_end(GTK_BOX(hbox2), buttonClose, FALSE, FALSE, 0);
 
     g_signal_connect((gpointer) windowDialog, "destroy",
         G_CALLBACK(on_quitProp_activate),
         NULL);
 
-    g_signal_connect((gpointer) button1, "clicked",
+    g_signal_connect((gpointer) buttonClose, "clicked",
         G_CALLBACK(on_quitProp_activate),
         NULL);
 
@@ -2121,21 +2141,21 @@ GtkWidget* create_windowProperties() {
     gtk_label_set_text(GTK_LABEL(labelModel), DeviceMgr.modelname->str);
     gtk_label_set_text(GTK_LABEL(labelSerial), DeviceMgr.serialnumber->str);
     if (DeviceMgr.maxbattlevel != 0) {
-        g_sprintf(tmp_string, "%d / %d (%d%%)", DeviceMgr.currbattlevel, DeviceMgr.maxbattlevel,
+        tmp_string = g_strdup_printf("%d / %d (%d%%)", DeviceMgr.currbattlevel, DeviceMgr.maxbattlevel,
             (int) (((float) DeviceMgr.currbattlevel / (float) DeviceMgr.maxbattlevel) * 100.0));
     } else {
-        g_sprintf(tmp_string, "%d / %d", DeviceMgr.currbattlevel, DeviceMgr.maxbattlevel);
+        tmp_string = g_strdup_printf("%d / %d", DeviceMgr.currbattlevel, DeviceMgr.maxbattlevel);
     }
-    gtk_label_set_text(GTK_LABEL(labelBattery), (gchar *) & tmp_string);
+    gtk_label_set_text(GTK_LABEL(labelBattery), tmp_string);
     gtk_label_set_text(GTK_LABEL(labelManufacturer), DeviceMgr.manufacturername->str);
     gtk_label_set_text(GTK_LABEL(labelDeviceVer), DeviceMgr.deviceversion->str);
 
 
     if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
-        g_sprintf(tmp_string, _("%d MB (free) / %d MB (total)"),
+        tmp_string = g_strdup_printf(_("%d MB (free) / %d MB (total)"),
             (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE),
             (int) (DeviceMgr.devicestorage->MaxCapacity / MEGABYTE));
-        gtk_label_set_text(GTK_LABEL(labelStorage), (gchar *) & tmp_string);
+        gtk_label_set_text(GTK_LABEL(labelStorage), tmp_string);
     } else {
         tmp_string2 = g_string_new("");
         // Cycle through each storage device and list the name and capacity.
@@ -2148,14 +2168,14 @@ GtkWidget* create_windowProperties() {
             } else {
                 tmp_string2 = g_string_append(tmp_string2, deviceStorage->VolumeIdentifier);
             }
-            g_sprintf(tmp_string, " : %d MB (free) / %d MB (total)",
+            tmp_string = g_strdup_printf(" : %d MB (free) / %d MB (total)",
                 (int) (deviceStorage->FreeSpaceInBytes / MEGABYTE),
                 (int) (deviceStorage->MaxCapacity / MEGABYTE));
-            tmp_string2 = g_string_append(tmp_string2, (gchar *) & tmp_string);
+            tmp_string2 = g_string_append(tmp_string2, tmp_string);
             deviceStorage = deviceStorage->next;
         }
         gtk_label_set_text(GTK_LABEL(labelStorage), tmp_string2->str);
-        g_free(tmp_string2);
+        g_string_free(tmp_string2, TRUE);
     }
 
     tmp_string2 = g_string_new("");
@@ -2168,6 +2188,7 @@ GtkWidget* create_windowProperties() {
     }
 
     gtk_label_set_text(GTK_LABEL(labelSupportedFormat), tmp_string2->str);
+    g_string_free(tmp_string2, TRUE);
 
     gtk_label_set_text(GTK_LABEL(labelSecTime), DeviceMgr.sectime->str);
     gtk_label_set_text(GTK_LABEL(labelSyncPartner), DeviceMgr.syncpartner->str);
@@ -2175,17 +2196,11 @@ GtkWidget* create_windowProperties() {
     // This is our raw information.
     gtk_label_set_text(GTK_LABEL(labelDeviceVendor), DeviceMgr.Vendor->str);
     gtk_label_set_text(GTK_LABEL(labelDeviceProduct), DeviceMgr.Product->str);
-    g_sprintf(tmp_string, "0x%x", DeviceMgr.VendorID);
-    gtk_label_set_text(GTK_LABEL(labelVenID), (gchar *) & tmp_string);
-    g_sprintf(tmp_string, "0x%x", DeviceMgr.ProductID);
-    gtk_label_set_text(GTK_LABEL(labelProdID), (gchar *) & tmp_string);
-    g_sprintf(tmp_string, "0x%x", DeviceMgr.BusLoc);
-    gtk_label_set_text(GTK_LABEL(labelBusLoc), (gchar *) & tmp_string);
-    g_sprintf(tmp_string, "0x%x", DeviceMgr.DeviceID);
-    gtk_label_set_text(GTK_LABEL(labelDevNum), (gchar *) & tmp_string);
+    gtk_label_set_text(GTK_LABEL(labelVenID),  g_strdup_printf("0x%x", DeviceMgr.VendorID));
+    gtk_label_set_text(GTK_LABEL(labelProdID), g_strdup_printf("0x%x", DeviceMgr.ProductID));
+    gtk_label_set_text(GTK_LABEL(labelBusLoc), g_strdup_printf("0x%x", DeviceMgr.BusLoc));
+    gtk_label_set_text(GTK_LABEL(labelDevNum), g_strdup_printf("0x%x", DeviceMgr.DeviceID));
 
-    // Having the g_free here causes a segfault???
-    //g_free(tmp_string2);
     return windowDialog;
 }
 
@@ -2377,7 +2392,7 @@ void displayAbout(void) {
 
 
     // Add in our icon.
-    image = gtk_image_new_from_file(file_icon_png->str);
+    image = gtk_image_new_from_file(file_logo_png);
     gtk_widget_show(image);
     gtk_container_add(GTK_CONTAINER(vbox), image);
 
@@ -2634,7 +2649,7 @@ gchar* displayRenameFileDialog(gchar* currentfilename) {
  */
 gint displayMultiDeviceDialog(void) {
     GtkWidget *dialog, *hbox, *label, *textbox;
-    gchar tmp_string[256];
+    gchar *tmp_string;
     gint dialog_selection = 0;
 
     dialog = gtk_dialog_new_with_buttons(_("Connect to which device?"), GTK_WINDOW(windowMain),
@@ -2671,7 +2686,7 @@ gint displayMultiDeviceDialog(void) {
     for (i = 0; i < DeviceMgr.numrawdevices; i++) {
         if (DeviceMgr.rawdevices[i].device_entry.vendor != NULL ||
             DeviceMgr.rawdevices[i].device_entry.product != NULL) {
-            g_sprintf(tmp_string, "   %s %s : (%04x:%04x) @ bus %d, dev %d",
+            tmp_string = g_strdup_printf("   %s %s : (%04x:%04x) @ bus %d, dev %d",
                 DeviceMgr.rawdevices[i].device_entry.vendor,
                 DeviceMgr.rawdevices[i].device_entry.product,
                 DeviceMgr.rawdevices[i].device_entry.vendor_id,
@@ -2679,7 +2694,7 @@ gint displayMultiDeviceDialog(void) {
                 DeviceMgr.rawdevices[i].bus_location,
                 DeviceMgr.rawdevices[i].devnum);
         } else {
-            g_sprintf(tmp_string, _("Unknown : %04x:%04x @ bus %d, dev %d"),
+            tmp_string = g_strdup_printf( _("Unknown : %04x:%04x @ bus %d, dev %d"),
                 DeviceMgr.rawdevices[i].device_entry.vendor_id,
                 DeviceMgr.rawdevices[i].device_entry.product_id,
                 DeviceMgr.rawdevices[i].bus_location,
@@ -2698,6 +2713,7 @@ gint displayMultiDeviceDialog(void) {
         dialog_selection = gtk_combo_box_get_active(GTK_COMBO_BOX(textbox));
     }
     gtk_widget_destroy(dialog);
+    g_free(tmp_string);
     return dialog_selection;
 }
 
@@ -2710,7 +2726,7 @@ gint displayMultiDeviceDialog(void) {
 gint displayDeviceStorageDialog(void) {
     GtkWidget *dialog, *hbox, *label, *textbox;
     LIBMTP_devicestorage_t *devicestorage;
-    gchar tmp_string[256];
+    gchar *tmp_string;
     gint dialog_selection = 0;
 
     devicestorage = DeviceMgr.device->storage;
@@ -2753,7 +2769,7 @@ gint displayDeviceStorageDialog(void) {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(textbox), devicestorage->StorageDescription);
 #endif
         } else {
-            g_sprintf(tmp_string, _("Unknown id: %d, %lu MB"), devicestorage->id, (devicestorage->MaxCapacity / (1024 * 1024)));
+            tmp_string = g_strdup_printf(_("Unknown id: %d, %lu MB"), devicestorage->id, (devicestorage->MaxCapacity / MEGABYTE));
 #if GMTP_USE_GTK2
             gtk_combo_box_append_text(GTK_COMBO_BOX(textbox), tmp_string);
 #else
@@ -2770,6 +2786,7 @@ gint displayDeviceStorageDialog(void) {
         dialog_selection = gtk_combo_box_get_active(GTK_COMBO_BOX(textbox));
     }
     gtk_widget_destroy(dialog);
+    g_free(tmp_string);
     return dialog_selection;
 
 }
@@ -4058,4 +4075,42 @@ void playlist_SavePlaylist(gint PlayListID) {
     playlistUpdate(tmpplaylist);
     // Update our own metadata.
     devicePlayLists = getPlaylists();
+}
+
+GtkWidget* create_windowFormat(void) {
+    GtkWidget* windowFormat;
+    GtkWidget* label1;
+    GtkWidget* vbox1;
+
+    windowFormat = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gchar * winTitle;
+    winTitle = g_strconcat(PACKAGE_TITLE, " v", PACKAGE_VERSION, NULL);
+    gtk_window_set_title(GTK_WINDOW(windowFormat), winTitle);
+    gtk_window_set_position(GTK_WINDOW(windowFormat), GTK_WIN_POS_CENTER_ON_PARENT);
+    gtk_window_set_modal(GTK_WINDOW(windowFormat), TRUE);
+    //gtk_window_set_resizable(GTK_WINDOW(window1), FALSE);
+    gtk_window_set_transient_for(GTK_WINDOW(windowFormat), GTK_WINDOW(windowMain));
+    gtk_window_set_destroy_with_parent(GTK_WINDOW(windowFormat), TRUE);
+    gtk_window_set_type_hint(GTK_WINDOW(windowFormat), GDK_WINDOW_TYPE_HINT_DIALOG);
+    gtk_window_set_default_size(GTK_WINDOW(windowFormat), 200, 60);
+    g_free(winTitle);
+
+    vbox1 = gtk_vbox_new(FALSE, 0);
+    gtk_widget_show(vbox1);
+    gtk_container_add(GTK_CONTAINER(windowFormat), vbox1);
+    gtk_container_set_border_width(GTK_CONTAINER(vbox1), 10);
+    gtk_box_set_spacing(GTK_BOX(vbox1), 5);
+
+    label1 = gtk_label_new("Formatting...");
+    gtk_widget_show(label1);
+    gtk_box_pack_start(GTK_BOX(vbox1), label1, TRUE, TRUE, 0);
+    gtk_misc_set_padding(GTK_MISC(label1), 0, 5);
+    gtk_misc_set_alignment(GTK_MISC(label1), 0, 0);
+
+    formatDialog_progressBar1 = gtk_progress_bar_new();
+    gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(formatDialog_progressBar1), 0.05);
+    gtk_widget_show(formatDialog_progressBar1);
+    gtk_box_pack_start(GTK_BOX(vbox1), formatDialog_progressBar1, TRUE, TRUE, 0);
+ 
+    return windowFormat;
 }

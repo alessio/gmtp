@@ -394,7 +394,7 @@ void deviceRescan() {
     // First we clear the file list...
     fileListClear();
     // Now clear the folder/file structures.
-    if(deviceFolders != NULL)
+    if (deviceFolders != NULL)
         LIBMTP_destroy_folder_t(deviceFolders);
     if (deviceFiles != NULL)
         clearDeviceFiles(deviceFiles);
@@ -433,15 +433,15 @@ void deviceRescan() {
         // Update the status bar.
         if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
             tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                                                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
         } else {
             if (DeviceMgr.devicestorage->StorageDescription != NULL) {
-                tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"), DeviceMgr.devicename->str, 
-                                                DeviceMgr.devicestorage->StorageDescription,
-                                                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"), DeviceMgr.devicename->str,
+                    DeviceMgr.devicestorage->StorageDescription,
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
             } else {
                 tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                                                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
             }
         }
         statusBarSet(tmp_string);
@@ -571,7 +571,7 @@ void filesAdd(gchar* filename) {
     filesize = sb.st_size;
     if (filesize > DeviceMgr.devicestorage->FreeSpaceInBytes) {
         g_fprintf(stderr, _("Unable to add %s due to insufficient space: filesize = %lu, freespace = %lu\n"),
-                            filename, filesize, DeviceMgr.devicestorage->FreeSpaceInBytes);
+            filename, filesize, DeviceMgr.devicestorage->FreeSpaceInBytes);
         displayError(_("Unable to add file due to insufficient space"));
         return;
     }
@@ -751,7 +751,7 @@ void filesDownload(gchar* filename, uint32_t objectID) {
  * @param filename - New name to be given to the file.
  * @param ObjectID - The ID of the object.
  */
-void filesRename(gchar* filename, uint32_t ObjectID){
+void filesRename(gchar* filename, uint32_t ObjectID) {
     // We must first determine, if this is a file, a folder, playlist or album
     // and use the correct API.
     LIBMTP_file_t *genfile = NULL;
@@ -760,17 +760,17 @@ void filesRename(gchar* filename, uint32_t ObjectID){
     LIBMTP_playlist_t *playlist = NULL;
     LIBMTP_folder_t *folder = NULL;
 
-    if(filename == NULL){
+    if (filename == NULL) {
         return;
     }
-    if(ObjectID == 0){
+    if (ObjectID == 0) {
         return;
     }
 
     // Lets scan files first.
     genfile = deviceFiles;
-    while(genfile != NULL){
-        if(genfile->item_id == ObjectID){
+    while (genfile != NULL) {
+        if (genfile->item_id == ObjectID) {
             // We have our file, so update it.
             LIBMTP_Set_File_Name(DeviceMgr.device, genfile, filename);
             deviceRescan();
@@ -782,8 +782,8 @@ void filesRename(gchar* filename, uint32_t ObjectID){
     // Lets scan our albums.
     albuminfo = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
     albumlist = albuminfo;
-    while(albuminfo != NULL){
-        if(albuminfo->album_id == ObjectID){
+    while (albuminfo != NULL) {
+        if (albuminfo->album_id == ObjectID) {
             LIBMTP_Set_Album_Name(DeviceMgr.device, albuminfo, filename);
             deviceRescan();
             clearAlbumStruc(albumlist);
@@ -795,8 +795,8 @@ void filesRename(gchar* filename, uint32_t ObjectID){
 
     // Let's scan our playlists.
     playlist = devicePlayLists;
-    while(playlist != NULL){
-        if(playlist->playlist_id == ObjectID){
+    while (playlist != NULL) {
+        if (playlist->playlist_id == ObjectID) {
             // We have our playlist, so update it.
             LIBMTP_Set_Playlist_Name(DeviceMgr.device, playlist, filename);
             deviceRescan();
@@ -808,7 +808,7 @@ void filesRename(gchar* filename, uint32_t ObjectID){
     // Lets scan our folders;
     folder = deviceFolders;
     folder = LIBMTP_Find_Folder(folder, ObjectID);
-    if(folder != NULL){
+    if (folder != NULL) {
         LIBMTP_Set_Folder_Name(DeviceMgr.device, folder, filename);
         deviceRescan();
         return;
@@ -1120,18 +1120,18 @@ void albumAddArt(guint32 album_id, gchar* filename) {
  * Retrieves the raw image data for the selected album
  * @return Pointer to the image data.
  */
-LIBMTP_filesampledata_t * albumGetArt(LIBMTP_album_t* selectedAlbum){
+LIBMTP_filesampledata_t * albumGetArt(LIBMTP_album_t* selectedAlbum) {
     LIBMTP_filesampledata_t *albumart = LIBMTP_new_filesampledata_t();
     gint ret;
     // Attempt to get some data
     ret = LIBMTP_Get_Representative_Sample(DeviceMgr.device, selectedAlbum->album_id, albumart);
-    if(ret != 0){
+    if (ret != 0) {
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
         LIBMTP_destroy_filesampledata_t(albumart);
         return NULL;
     }
-    if(albumart == NULL){
+    if (albumart == NULL) {
         // Something went wrong;
         return NULL;
     }
@@ -1251,5 +1251,23 @@ void playlistUpdate(LIBMTP_playlist_t * tmpplaylist) {
         displayError(_("Updating playlist failed?\n"));
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
+    }
+}
+
+// ************************************************************************************************
+
+/**
+ * Format the current active device/storage partition.
+ */
+void formatStorageDevice() {
+    if (DeviceMgr.deviceConnected) {
+        guint res = LIBMTP_Format_Storage(DeviceMgr.device, DeviceMgr.devicestorage);
+        if (res != 0) {
+            displayError(_("Format Device failed?\n"));
+            LIBMTP_Dump_Errorstack(DeviceMgr.device);
+            LIBMTP_Clear_Errorstack(DeviceMgr.device);
+        }
+    } else {
+        g_fprintf(stderr, ("formatStorageDevice: How did I get called?\n"));
     }
 }

@@ -69,6 +69,9 @@ extern "C" {
     void playlistDelete(LIBMTP_playlist_t * tmpplaylist);
     void playlistUpdate(LIBMTP_playlist_t * tmpplaylist);
 
+    // Format device.
+    void formatStorageDevice();
+
 #ifdef  __cplusplus
 }
 #endif

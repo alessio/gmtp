@@ -464,10 +464,10 @@ void get_flac_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
 
     // Duration, bitrate and other information
     trackinformation->duration = (streaminfo.data.stream_info.total_samples /
-                                    streaminfo.data.stream_info.sample_rate) * 1000;
-    trackinformation->bitrate = 8.0 * (float) (trackinformation->filesize) / 
-                                    (1000.0 * (float) streaminfo.data.stream_info.total_samples
-                                                / (float) streaminfo.data.stream_info.sample_rate);
+        streaminfo.data.stream_info.sample_rate) * 1000;
+    trackinformation->bitrate = 8.0 * (float) (trackinformation->filesize) /
+        (1000.0 * (float) streaminfo.data.stream_info.total_samples
+        / (float) streaminfo.data.stream_info.sample_rate);
     trackinformation->bitratetype = 0; // Not used
     trackinformation->nochannels = streaminfo.data.stream_info.channels;
 
@@ -480,7 +480,7 @@ void get_flac_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
 // ************************************************************************************************
 
 /**
-  * Get our WMA track information. WMA and WMV are both contained in a ASF Container which the
+ * Get our WMA track information. WMA and WMV are both contained in a ASF Container which the
  * container header has all the information. (No need to parse the audio streams themselves).
  * @param filename The WMA file to extract information
  * @param trackinformation Return the Trackinformation via this variable.
@@ -600,7 +600,7 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
                     Descriptor_Name_UTF16 = g_malloc0(Descriptor_Name_Length + 0x10);
                     fread(Descriptor_Name_UTF16, Descriptor_Name_Length, 1, ASF_File);
                     Descriptor_Name = g_utf16_to_utf8((const gunichar2 *) Descriptor_Name_UTF16,
-                                                                Descriptor_Name_Length, NULL, NULL, NULL);
+                        Descriptor_Name_Length, NULL, NULL, NULL);
                     // Get our Value Type and Value Length
                     fread(&Descriptor_Value_Type, sizeof (uint16_t), 1, ASF_File);
                     fread(&Descriptor_Value_Length, sizeof (uint16_t), 1, ASF_File);
@@ -610,7 +610,7 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
                             Descriptor_Value_Str_UTF16 = g_malloc0(Descriptor_Value_Length + 0x10);
                             fread(Descriptor_Value_Str_UTF16, Descriptor_Value_Length, 1, ASF_File);
                             Descriptor_Value_Str = g_utf16_to_utf8((const gunichar2 *) Descriptor_Value_Str_UTF16,
-                                                                    Descriptor_Value_Length, NULL, NULL, NULL);
+                                Descriptor_Value_Length, NULL, NULL, NULL);
                             // We have out key=value pair so lets look for our desired  keys 'WM/AlbumTitle', 'WM/Genre' and 'WM/Year'
                             if (g_ascii_strcasecmp(Descriptor_Name, "WM/AlbumTitle\0") == 0) {
                                 // We have the album Title;

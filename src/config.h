@@ -21,7 +21,7 @@ extern "C" {
 
 #define PACKAGE "gmtp"
 #define PACKAGE_TITLE "gMTP"
-#define PACKAGE_VERSION "1.0.0"
+#define PACKAGE_VERSION "1.0.1"
 
 #define GMTP_GSETTINGS_SCHEMA "org.gnome.gmtp"
 
