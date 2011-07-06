@@ -1,3 +1,10 @@
+gmtp (1.0.1-2) unstable; urgency=low
+
+  * Remove duplicate free() call to prevent crashes while transfering
+    songs (Closes: #632454).
+
+ -- Alessio Treglia <alessio@debian.org>  Wed, 06 Jul 2011 08:44:14 +0200
+
 gmtp (1.0.1-1) unstable; urgency=low
 
   * New upstream release:
