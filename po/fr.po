@@ -571,4 +571,6 @@ msgid "Are you sure you want to format this device?"
 msgstr "Etes-vous sûr de vouloir formater ce périphérique?"
 msgid "Format Device failed?\n"
 msgstr "Device Format échoué?\n"
+msgid "Prompt to add New Music track to existing playlist"
+msgstr "Prompt à ajouter piste New Music à une playlist existante"
 

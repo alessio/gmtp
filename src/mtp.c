@@ -557,6 +557,7 @@ void filesAdd(gchar* filename) {
     LIBMTP_file_t *genfile = NULL;
     LIBMTP_track_t *trackfile = NULL;
     LIBMTP_album_t *albuminfo = NULL;
+    LIBMTP_playlist_t* tmpplaylist = NULL;
     gint ret;
 
     // Maybe something went wrong, so we disconnected. If so, then simple exit....
@@ -645,6 +646,12 @@ void filesAdd(gchar* filename) {
             albuminfo->composer = NULL;
             albuminfo->genre = g_strdup(trackfile->genre);
         }
+
+        // If we need a playlist, then ask for it.
+        if (addTrackPlaylistID == GMTP_REQUIRE_PLAYLIST){
+            addTrackPlaylistID = displayAddTrackPlaylistDialog();
+        }
+
         // Now send the track
         ret = LIBMTP_Send_Track_From_File(DeviceMgr.device, filename, trackfile, fileprogress, NULL);
         if (ret != 0) {
@@ -657,6 +664,25 @@ void filesAdd(gchar* filename) {
             // Only update Album data if transfer was successful.
             if (trackfile->album != NULL) {
                 albumAddTrackToAlbum(albuminfo, trackfile);
+            }
+
+            // Now add to playlist if needed...
+            if ((addTrackPlaylistID != GMTP_REQUIRE_PLAYLIST)&&(addTrackPlaylistID != GMTP_NO_PLAYLIST)){
+                // addTrackPlaylistID has the ID of the playlist, and trackfile is the track we need to
+                // add to that playlist.
+
+                // Find the playlist.
+                tmpplaylist = devicePlayLists;
+                while(tmpplaylist != NULL){
+                    if(tmpplaylist->playlist_id != addTrackPlaylistID){
+                        // Don't have it.
+                        tmpplaylist = tmpplaylist->next;
+                    } else {
+                        //We have found it.
+                        playlistAddTrack(tmpplaylist, trackfile);
+                        tmpplaylist = NULL;
+                    }
+                }
             }
         }
         LIBMTP_destroy_track_t(trackfile);
@@ -1042,6 +1068,7 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo) 
         found_album->tracks = tracks;
         ret = LIBMTP_Update_Album(DeviceMgr.device, found_album);
         g_free(tracks);
+        found_album->tracks = NULL;
     } else {
         // New album.
         uint32_t *trackid;
@@ -1052,6 +1079,7 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo) 
         albuminfo->storage_id = DeviceMgr.devicestorage->id;
         ret = LIBMTP_Create_New_Album(DeviceMgr.device, albuminfo);
         g_free(trackid);
+        albuminfo->tracks = NULL;
     }
     if (ret != 0) {
         displayError(_("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
@@ -1270,4 +1298,27 @@ void formatStorageDevice() {
     } else {
         g_fprintf(stderr, ("formatStorageDevice: How did I get called?\n"));
     }
+}
+
+// ************************************************************************************************
+
+/**
+ * Add the assigned track to the nominated playlist.
+ * @param playlist
+ * @param track
+ */
+void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track){
+    LIBMTP_playlist_t* tmpplaylist = playlist;
+    uint32_t *tmp = NULL;
+
+    tmpplaylist->no_tracks++;
+    // item_id = our track num... so append to tmpplaylist->tracks
+    if ((tmp = g_realloc(tmpplaylist->tracks, sizeof (uint32_t) * (tmpplaylist->no_tracks))) == NULL) {
+        g_fprintf(stderr, _("realloc in savePlayList failed\n"));
+        displayError(_("Updating playlist failed? 'realloc in savePlayList'\n"));
+        return;
+    }
+    tmpplaylist->tracks = tmp;
+    tmpplaylist->tracks[(tmpplaylist->no_tracks - 1)] = track->item_id;
+    playlistUpdate(tmpplaylist);
 }

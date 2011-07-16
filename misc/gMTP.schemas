@@ -165,5 +165,16 @@
         <long>Toggle to view track duration in main window</long>
       </locale>
     </schema>
+<schema>
+      <key>/schemas/apps/gMTP/autoAddTrackPlaylist</key>
+      <applyto>/apps/gMTP/autoAddTrackPlaylist</applyto>
+      <owner>gMTP</owner>
+      <type>bool</type>
+      <locale name="C">
+        <default>false</default>
+        <short>Toggle to automatically add a new track to a playlist</short>
+        <long>Toggle to automatically add a new track to a playlist</long>
+      </locale>
+    </schema>
   </schemalist>
 </gconfschemafile>

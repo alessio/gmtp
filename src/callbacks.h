@@ -52,6 +52,7 @@ extern "C" {
     void on_PrefsUploadPath_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_PrefsConfirmDelete_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_PrefsConfirmOverWriteFileOp_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_PrefsAutoAddTrackPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
 
     // Properties Dialog
     void on_quitProp_activate(GtkMenuItem *menuitem, gpointer user_data);
@@ -78,6 +79,9 @@ extern "C" {
 
     // Format Device Progress Bar.
     void on_editFormatDevice_thread(void);
+
+    // Add Track to Playlist option.
+    void on_TrackPlaylist_NewPlaylistButton_activate(GtkWidget *button, gpointer user_data);
 
 #ifdef  __cplusplus
 }

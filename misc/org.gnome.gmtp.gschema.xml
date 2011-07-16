@@ -75,5 +75,10 @@
             <summary>Toggle to view track duration in main window</summary>
             <description>Toggle to view track duration in main window</description>
         </key>
+        <key name="autoaddtrackplaylist" type="b">
+            <default>false</default>
+            <summary>Toggle to automatically add a new track to a playlist</summary>
+            <description>Toggle to automatically add a new track to a playlist</description>
+        </key>
     </schema>
 </schemalist>

@@ -60,6 +60,7 @@ LIBMTP_folder_t *deviceFolders = NULL;
 LIBMTP_track_t *deviceTracks = NULL;
 LIBMTP_playlist_t *devicePlayLists = NULL;
 uint32_t currentFolderID = 0;
+int32_t addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
 
 // Paths to the application, and images used within the application.
 gchar *applicationpath = NULL;

@@ -80,6 +80,13 @@ void gmtp_drag_data_received(GtkWidget * widget,
 #else
         files = getFilesListURI((gchar *) gtk_selection_data_get_data(selection_data));
 #endif
+        // Set the Playlist ID to be asked if needed.
+        if(Preferences.auto_add_track_to_playlist == TRUE){
+            addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
+        } else {
+            addTrackPlaylistID = GMTP_NO_PLAYLIST;
+        }
+        // Add the files.
         if (files != NULL) {
             g_slist_foreach(files, (GFunc) __filesAdd, NULL);
         }
@@ -196,6 +203,12 @@ void addFilesinFolder(gchar* foldername) {
             filename = g_dir_read_name(fileImageDir);
             g_free(tmpstring);
         }
+    }
+    // Set the Playlist ID to be asked if needed.
+    if(Preferences.auto_add_track_to_playlist == TRUE){
+        addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
+    } else {
+        addTrackPlaylistID = GMTP_NO_PLAYLIST;
     }
     // Upload our given files in the current selected folder.
     if (filelist != NULL) {

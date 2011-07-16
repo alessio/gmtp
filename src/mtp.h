@@ -68,6 +68,7 @@ extern "C" {
     void playlistAdd(gchar* playlistname);
     void playlistDelete(LIBMTP_playlist_t * tmpplaylist);
     void playlistUpdate(LIBMTP_playlist_t * tmpplaylist);
+    void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track);
 
     // Format device.
     void formatStorageDevice();

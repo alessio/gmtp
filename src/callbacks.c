@@ -138,7 +138,13 @@ void on_deviceRescan_activate(GtkMenuItem *menuitem, gpointer user_data) {
  */
 void on_filesAdd_activate(GtkMenuItem *menuitem, gpointer user_data) {
     GSList* files;
-
+    // Set the Playlist ID to be asked if needed.
+    if(Preferences.auto_add_track_to_playlist == TRUE){
+        addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
+    } else {
+        addTrackPlaylistID = GMTP_NO_PLAYLIST;
+    }
+    // Get the files, and add them.
     files = getFileGetList2Add();
     if (files != NULL)
         g_slist_foreach(files, (GFunc) __filesAdd, NULL);
@@ -425,6 +431,26 @@ void on_PrefsAskDownload_activate(GtkMenuItem *menuitem, gpointer user_data) {
 // ************************************************************************************************
 
 /**
+ * Callback for Ask Download Path Operations toggle in Preferences Dialog Box.
+ * @param menuitem
+ * @param user_data
+ */
+void on_PrefsAutoAddTrackPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonAutoAddTrackPlaylist));
+
+#if GMTP_USE_GTK2
+    if (gconfconnect != NULL)
+        gconf_client_set_bool(gconfconnect, "/apps/gMTP/autoAddTrackPlaylist", state, NULL);
+#else
+    if (gsettings_connect != NULL)
+        g_settings_set_boolean(gsettings_connect, "autoaddtrackplaylist", state);
+    g_settings_sync();
+#endif
+} // end on_PrefsAutoAddTrackPlaylist_activate()
+
+// ************************************************************************************************
+
+/**
  * Callback for Confirm Overwrite of File Operations toggle in Preferences Dialog Box.
  * @param menuitem
  * @param user_data
@@ -533,7 +559,7 @@ void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewC
     // Obtain the iter, and the related objectID.
     model = gtk_tree_view_get_model(treeview);
     if (gtk_tree_model_get_iter(model, &iter, path)) {
-        gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME, &filename, COL_FILEID, &objectID, -1);
+        gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME_ACTUAL, &filename, COL_FILEID, &objectID, -1);
         if (isFolder == FALSE) {
             // Now download the actual file from the MTP device.
             filesDownload(filename, objectID);
@@ -1176,3 +1202,37 @@ void on_progressDialog_Cancel(GtkWidget *button, gpointer user_data) {
     gtk_widget_hide(progressDialog);
     gtk_widget_destroy(progressDialog);
 } // end on_progressDialog_Cancel()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle user asking to create a new playlist from the AutoAddTrack to Playlist option.
+ * @param button
+ * @param user_data
+ */
+void on_TrackPlaylist_NewPlaylistButton_activate(GtkWidget *button, gpointer user_data) {
+    gchar *playlistname = NULL;
+    gint combobox_entries = 0;
+
+    playlistname = displayPlaylistNewDialog();
+    if (playlistname != NULL) {
+        // Add in playlist to MTP device.
+        playlistAdd(playlistname);
+        // Refresh our playlist information.
+        devicePlayLists = getPlaylists();
+
+        // Add it to our combobox
+#if GMTP_USE_GTK2
+        gtk_combo_box_append_text(GTK_COMBO_BOX(combobox_AddTrackPlaylist), g_strdup(playlistname));
+#else
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox_AddTrackPlaylist), g_strdup(playlistname));
+#endif
+        g_free(playlistname);
+
+        // Set the active combobox item.
+        combobox_entries = gtk_tree_model_iter_n_children(gtk_combo_box_get_model(GTK_COMBO_BOX(combobox_AddTrackPlaylist)), NULL);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_AddTrackPlaylist), combobox_entries - 1);
+    }
+}
+
