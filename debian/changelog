@@ -1,3 +1,10 @@
+gmtp (1.1.0-1) unstable; urgency=low
+
+  * New upstream bugfix release.
+  * Delete patches, applied upstream.
+
+ -- Alessio Treglia <alessio@debian.org>  Sat, 16 Jul 2011 08:54:39 +0200
+
 gmtp (1.0.1-2) unstable; urgency=low
 
   * Remove duplicate free() call to prevent crashes while transfering
