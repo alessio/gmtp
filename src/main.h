@@ -74,6 +74,7 @@ extern "C" {
     LIBMTP_track_t *deviceTracks;
     LIBMTP_playlist_t *devicePlayLists;
     uint32_t currentFolderID; // This is the ID of the current folder....
+    int32_t addTrackPlaylistID;
 
     // Icon file locations.
     gchar *file_logo_png;
@@ -98,6 +99,8 @@ extern "C" {
     // Common magic numbers.
 
 #define MEGABYTE 1048576
+#define GMTP_REQUIRE_PLAYLIST -2
+#define GMTP_NO_PLAYLIST -1
 
 #ifdef  __cplusplus
 }

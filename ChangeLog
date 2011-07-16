@@ -1,3 +1,10 @@
+-- v1.1.0 - 5 Jul 2011
+* Fix Solaris SYSV Package (fix missing image files).
+* Fix potential double-free memory error in mtp.c. reported here:
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=632454
+* Fixed filename when downloading files from device to PC. (Bug introduced in v1.0.0).
++ Added automatic add new track to playlist option. (updated gconf/gsetting schema).
+
 -- v1.0.1 - 27 Jun 2011
 * Fix application icon size with Window Maker.
 + Added Format Device Option.

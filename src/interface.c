@@ -109,6 +109,7 @@ GtkWidget *entryUploadPath;
 GtkWidget *checkbuttonDownloadPath;
 GtkWidget *checkbuttonConfirmFileOp;
 GtkWidget *checkbuttonConfirmOverWriteFileOp;
+GtkWidget *checkbuttonAutoAddTrackPlaylist;
 
 // Widget for Progress Bar Dialog box.
 GtkWidget *progressDialog;
@@ -158,6 +159,9 @@ GtkWidget *button_File_Move_Up;
 GtkWidget *button_File_Move_Down;
 GtkWidget *button_Del_File;
 GtkWidget *button_Add_Files;
+
+// Combobox used in AddTrackPlaylist feature.
+GtkWidget *combobox_AddTrackPlaylist;
 
 // ************************************************************************************************
 
@@ -1280,7 +1284,7 @@ void __fileDownload(GtkTreeRowReference *Row) {
     gtk_tree_model_get_iter(GTK_TREE_MODEL(fileList), &iter, path);
     // We have our Iter now.
     // Before we download, is it a folder ?
-    gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME, &filename, COL_FILEID, &objectID, -1);
+    gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME_ACTUAL, &filename, COL_FILEID, &objectID, -1);
     if (isFolder == FALSE) {
         // Our strings are not equal, so we get to download the file.
         g_sprintf(fullfilename, "%s/%s", Preferences.fileSystemDownloadPath->str, filename);
@@ -1354,7 +1358,7 @@ void __fileRemove(GtkTreeRowReference *Row) {
     path = gtk_tree_row_reference_get_path(Row);
     gtk_tree_model_get_iter(GTK_TREE_MODEL(fileList), &iter, path);
     // We have our Iter now.
-    gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME, &filename,
+    gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME_ACTUAL, &filename,
         COL_FILEID, &objectID, -1);
     if (isFolder == FALSE) {
         gtk_tree_model_get_iter(GTK_TREE_MODEL(fileList), &iter, path);
@@ -1403,7 +1407,7 @@ void __folderRemove(GtkTreeRowReference *Row) {
     path = gtk_tree_row_reference_get_path(Row);
     gtk_tree_model_get_iter(GTK_TREE_MODEL(fileList), &iter, path);
     // We have our Iter now.
-    gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME, &filename,
+    gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME_ACTUAL, &filename,
         COL_FILEID, &objectID, -1);
     if (isFolder == TRUE) {
         if (g_ascii_strcasecmp(filename, "< .. >") != 0) {
@@ -1525,6 +1529,7 @@ GtkWidget* create_windowPreferences(void) {
     GtkWidget *frame3;
     GtkWidget *alignment3;
     GtkWidget *alignment4;
+    GtkWidget *alignment5;
     GtkWidget *vbox2;
 
     GtkWidget *labelDevice;
@@ -1595,6 +1600,11 @@ GtkWidget* create_windowPreferences(void) {
     gtk_container_add(GTK_CONTAINER(vbox2), alignment4);
     gtk_alignment_set_padding(GTK_ALIGNMENT(alignment4), 0, 0, 12, 0);
 
+    alignment5 = gtk_alignment_new(0.5, 0.5, 1, 1);
+    gtk_widget_show(alignment5);
+    gtk_container_add(GTK_CONTAINER(vbox2), alignment5);
+    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment5), 0, 0, 12, 0);
+
     checkbuttonConfirmFileOp = gtk_check_button_new_with_mnemonic(_("Confirm File/Folder Delete"));
     gtk_widget_show(checkbuttonConfirmFileOp);
     gtk_container_add(GTK_CONTAINER(alignment3), checkbuttonConfirmFileOp);
@@ -1602,6 +1612,10 @@ GtkWidget* create_windowPreferences(void) {
     checkbuttonConfirmOverWriteFileOp = gtk_check_button_new_with_mnemonic(_("Prompt if to Overwrite file if already exists"));
     gtk_widget_show(checkbuttonConfirmOverWriteFileOp);
     gtk_container_add(GTK_CONTAINER(alignment4), checkbuttonConfirmOverWriteFileOp);
+
+    checkbuttonAutoAddTrackPlaylist = gtk_check_button_new_with_mnemonic(_("Prompt to add New Music track to existing playlist"));
+    gtk_widget_show(checkbuttonAutoAddTrackPlaylist);
+    gtk_container_add(GTK_CONTAINER(alignment5), checkbuttonAutoAddTrackPlaylist);
 
     labelDevice = gtk_label_new(_("<b>File Operations</b>"));
     gtk_widget_show(labelDevice);
@@ -1708,6 +1722,10 @@ GtkWidget* create_windowPreferences(void) {
         G_CALLBACK(on_PrefsConfirmOverWriteFileOp_activate),
         NULL);
 
+    g_signal_connect((gpointer) checkbuttonAutoAddTrackPlaylist, "toggled",
+        G_CALLBACK(on_PrefsAutoAddTrackPlaylist_activate),
+        NULL);
+
     g_signal_connect((gpointer) checkbuttonDownloadPath, "toggled",
         G_CALLBACK(on_PrefsAskDownload_activate),
         NULL);
@@ -1726,6 +1744,7 @@ GtkWidget* create_windowPreferences(void) {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonDownloadPath), Preferences.ask_download_path);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmFileOp), Preferences.confirm_file_delete_op);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmOverWriteFileOp), Preferences.prompt_overwrite_file_op);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAutoAddTrackPlaylist), Preferences.auto_add_track_to_playlist);
     gtk_entry_set_text(GTK_ENTRY(entryDownloadPath), Preferences.fileSystemDownloadPath->str);
     gtk_entry_set_text(GTK_ENTRY(entryUploadPath), Preferences.fileSystemUploadPath->str);
 
@@ -4077,6 +4096,12 @@ void playlist_SavePlaylist(gint PlayListID) {
     devicePlayLists = getPlaylists();
 }
 
+// ************************************************************************************************
+
+/**
+ * Creates the Format Device Dialog box
+ * @return Widget of completed dialog box.
+ */
 GtkWidget* create_windowFormat(void) {
     GtkWidget* windowFormat;
     GtkWidget* label1;
@@ -4113,4 +4138,117 @@ GtkWidget* create_windowFormat(void) {
     gtk_box_pack_start(GTK_BOX(vbox1), formatDialog_progressBar1, TRUE, TRUE, 0);
  
     return windowFormat;
+}
+
+// ************************************************************************************************
+
+/**
+ * Displays the playlist selection dialog used to auto add track to playlist option.
+ * @return The playlist MTP Object ID of the selected playlist, or GMTP_NO_PLAYLIST if none selected.
+ */
+uint32_t displayAddTrackPlaylistDialog(void){
+    GtkWidget *dialog, *hbox, *label, *buttonNewPlaylist;
+    LIBMTP_playlist_t* tmpplaylist = NULL;
+    gint selectedPlaylist = 0;
+
+#if GMTP_USE_GTK2
+    GtkTooltips *tooltips;
+    tooltips = gtk_tooltips_new();
+#endif
+
+    dialog = gtk_dialog_new_with_buttons(_("Playlists"), GTK_WINDOW(windowMain),
+        (GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+        GTK_STOCK_OK, GTK_RESPONSE_OK,
+        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+        NULL);
+
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+    gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
+
+    hbox = gtk_hbox_new(FALSE, 5);
+    gtk_widget_show(hbox);
+
+#if GMTP_USE_GTK2
+    gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
+#else
+    gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), hbox);
+#endif
+
+    // Add in the label
+    label = gtk_label_new(_("Playlist Name:"));
+    gtk_widget_show(label);
+    gtk_container_add(GTK_CONTAINER(hbox), label);
+    gtk_misc_set_padding(GTK_MISC(label), 5, 0);
+
+    // Add in the combobox
+#if GMTP_USE_GTK2
+    combobox_AddTrackPlaylist = gtk_combo_box_new_text();
+#else
+    combobox_AddTrackPlaylist = gtk_combo_box_text_new();
+#endif
+    gtk_widget_show(combobox_AddTrackPlaylist);
+    gtk_box_pack_start(GTK_BOX(hbox), combobox_AddTrackPlaylist, TRUE, TRUE, 0);
+    gtk_container_set_border_width(GTK_CONTAINER(combobox_AddTrackPlaylist), 5);
+
+    // Add in the new playlist button.
+    buttonNewPlaylist = gtk_button_new_from_stock(GTK_STOCK_ADD);
+    gtk_widget_show(buttonNewPlaylist);
+    gtk_container_add(GTK_CONTAINER(hbox), buttonNewPlaylist);
+    gtk_container_set_border_width(GTK_CONTAINER(buttonNewPlaylist), 5);
+
+#if GMTP_USE_GTK2
+    gtk_tooltips_set_tip(tooltips, buttonNewPlaylist, _("Add New Playlist"), NULL);
+#else
+    gtk_widget_set_tooltip_text(buttonNewPlaylist, _("Add New Playlist"));
+#endif
+
+    // Assign the callback for the new playlist button.
+    g_signal_connect((gpointer) buttonNewPlaylist, "clicked",
+        G_CALLBACK(on_TrackPlaylist_NewPlaylistButton_activate),
+        NULL);
+
+    // Populate the combobox with the current playlists.
+
+    // We need to remove all entries in the combo box before starting.
+    // This is a little bit of a hack - but does work.
+    gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combobox_AddTrackPlaylist))));
+
+    if (devicePlayLists != NULL) {
+        // Populate the playlist dropdown box;
+        //comboboxentry_playlist;
+        tmpplaylist = devicePlayLists;
+        while (tmpplaylist != NULL) {
+            if (tmpplaylist->storage_id == DeviceMgr.devicestorage->id) {
+#if GMTP_USE_GTK2
+                gtk_combo_box_append_text(GTK_COMBO_BOX(combobox_AddTrackPlaylist), g_strdup(tmpplaylist->name));
+#else
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox_AddTrackPlaylist), g_strdup(tmpplaylist->name));
+#endif
+            }
+            tmpplaylist = tmpplaylist->next;
+        }
+    }
+    if (devicePlayLists != NULL) {
+        // Set our playlist to the first one.
+        gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_AddTrackPlaylist), 0);
+    }
+   
+    gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (result == GTK_RESPONSE_OK) {
+        // Get our playlist ID.
+        selectedPlaylist = gtk_combo_box_get_active(GTK_COMBO_BOX(combobox_AddTrackPlaylist));
+        // Now cycle through the playlists to get the correct one.
+        tmpplaylist = devicePlayLists;
+
+        if (selectedPlaylist > 0) {
+            while (selectedPlaylist--)
+                if (tmpplaylist->next != NULL)
+                    tmpplaylist = tmpplaylist->next;
+        }
+        gtk_widget_destroy(dialog);
+        return tmpplaylist->playlist_id;
+    } else {
+        gtk_widget_destroy(dialog);
+        return GMTP_NO_PLAYLIST;
+    }
 }

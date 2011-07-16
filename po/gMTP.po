@@ -574,3 +574,5 @@ msgid "Are you sure you want to format this device?"
 msgstr
 msgid "Format Device failed?\n"
 msgstr
+msgid "Prompt to add New Music track to existing playlist"
+msgstr

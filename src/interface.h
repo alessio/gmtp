@@ -180,6 +180,9 @@ extern "C" {
 
     void playlist_SavePlaylist(gint PlayListID);
 
+    // Add track to playlist dialog;
+    uint32_t displayAddTrackPlaylistDialog(void);
+
     // Widgets for menu items;
     GtkWidget *fileConnect;
     GtkWidget *fileAdd;
@@ -226,6 +229,7 @@ extern "C" {
     GtkWidget *checkbuttonDownloadPath;
     GtkWidget *checkbuttonConfirmFileOp;
     GtkWidget *checkbuttonConfirmOverWriteFileOp;
+    GtkWidget *checkbuttonAutoAddTrackPlaylist;
 
     // AlbumArt Dialog global pointers
     GtkWidget *AlbumArtDialog;
@@ -252,6 +256,9 @@ extern "C" {
 
     // Widget for formatDevice progress bar.
     GtkWidget *formatDialog_progressBar1;
+
+    // Combobox used in AddTrackPlaylist feature.
+    GtkWidget *combobox_AddTrackPlaylist;
 
 #ifdef  __cplusplus
 }
