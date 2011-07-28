@@ -1,3 +1,2 @@
 version=3
-http://chewy509.110mb.com/gMTP.html \
-gmtp-([0-9\.]+)-.*\.tar\.gz
+http://sf.net/gmtp/gmtp-([0-9\.]+)-.*\.tar\.gz

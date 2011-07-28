@@ -1,7 +1,7 @@
 Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=174
 Upstream-Name: gMTP
 Upstream-Contact: Darran Kartaschew <chewy509@mailcity.com>
-Source: http://chewy509.110mb.com/gMTP.html
+Source: http://sf.net/projects/gmtp/files/
 Copyright: 2009-2011, Darran Kartaschew.
 
 Files: *
