@@ -3,30 +3,36 @@ body {
 	padding-left: 20px;
 	padding-right: 20px;
 	margin: 10px;
-	color: black;
-	background-color: white;
-	background-image: url(./bkgnd.gif);
-	background-attachment: fixed;
+	margin-left: auto;
+	margin-right: auto;
+	color: #eee;
 	font-family: Verdana, Tahoma, arial, sans-serif;
 	font-size: 12px;
-}
-
-hr {
-	background-color: black;
-	color : black;
-	height: 1px;
-	border: 0px;
+	background-image: url('../background.png');
+    background-repeat:repeat-x;
+    background-color: black;
+	min-width: 800px;
+	max-width: 1280px;
 }
 
 a {
-	color: black;
+	color: #ddd;
 	font-weight: bold;
+	text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 img {
 	border: 0;
 }
 
+dt {
+    font-weight: bold;
+    margin: 15px 0px 0px 10px;
+}
 .code {
     padding-left: 20px;
 }
@@ -41,35 +47,87 @@ img {
 
 .question {
     font-weight: bold;
+    margin-left: -20px;
+}
+
+#Logo {
+	width: 100px;
 }
 
 #Menu {
-    float: left;
-    width: 150px;
+    float: right;
+    clear: right;
     text-align: center;
-    margin: 10px 0px 0px 0px;
-    padding: 0;
-    border: 1px solid black;
-    background-color: #EEE;
-    position: fixed;
-    top: 60px
+    background-color: #111;
+    min-width: 620px;
+	max-width: 1120px;
+	height: 38px;
+	margin-left: 180px;
+    margin-top: 12px;
+	-moz-border-radius: 1em 1em 0em 0em;
+	border-radius: 1em 1em 0em 0em;
+	border-bottom: 1px solid #222;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#303030', endColorstr='#000000'); /* for IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(#333), to(#000)); /* for webkit browsers */
+	background: -moz-linear-gradient(top,  #333,  #000); /* for firefox 3.6+ */
+	background-image: -o-linear-gradient(#333,#000); /* for CSS3 compliant browsers. */
 }
 
 #Menu ul {
     list-style: none;
     list-style-type: none;
-    padding: 0;
+    padding: 0px;
 }
 
 #Menu li {
-    padding: 4px 0px 2px 0px;
+    display: inline-block;
+    margin: 0px 0px 5px 10px;
+    padding: 0px 10px 0px 0px;
+    border-right: #444 1px dotted;
+}
+
+#Menu li.end {
+    border-right: 0px;
 }
 
 #ContentArea {
-    margin-left: 180px;
+	clear: both;
+    background: black;
+    border: 1px solid #111;
+    border-bottom-width: 0px;
+    padding: 5px 30px 10px 30px;;
+    -moz-border-radius: 2em 0em 0em 0em;
+	border-radius: 2em 0em 0em 0em;
+    min-height: 400px;
+    margin-bottom: 0px;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#101010', endColorstr='#000000'); /* for IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(#111), to(#000)); /* for webkit browsers */
+	background: -moz-linear-gradient(top,  #111,  #000); /* for firefox 3.6+ */
+	background-image: -o-linear-gradient(#111,#000); /* for CSS3 compliant browsers. */
 }
 
+#ContentArea p {
+    padding-left: 30px;
+}
+
+#ContentArea li {
+    margin-left: 10px;
+}
+
+#FontArea {
+	float: right;
+	margin: 0px;
+	padding: 0px;
+}
+
+#DivScreenshots {
+    display: block;
+    height: 450px;
+}
 
 #Footer {
     clear: both;
+    margin-top: 0px;
+    padding: 0px;
+    font-size: smaller;
 }

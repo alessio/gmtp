@@ -98,6 +98,7 @@ gboolean loadPreferences() {
         Preferences.fileSystemDownloadPath = g_string_new(gconf_client_get_string(gconfconnect, "/apps/gMTP/DownloadPath", NULL));
         Preferences.fileSystemUploadPath = g_string_new(gconf_client_get_string(gconfconnect, "/apps/gMTP/UploadPath", NULL));
         Preferences.auto_add_track_to_playlist = gconf_client_get_bool(gconfconnect, "/apps/gMTP/autoAddTrackPlaylist", NULL);
+        Preferences.ignore_path_in_playlist_import = gconf_client_get_bool(gconfconnect, "/apps/gMTP/ignorepathinplaylist", NULL);
         Preferences.view_size = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewFileSize", NULL);
         Preferences.view_type = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewFileType", NULL);
         Preferences.view_track_number = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewTrackNumber", NULL);
@@ -120,6 +121,7 @@ gboolean loadPreferences() {
         Preferences.fileSystemDownloadPath = g_string_new(g_settings_get_string(gsettings_connect, "downloadpath"));
         Preferences.fileSystemUploadPath = g_string_new(g_settings_get_string(gsettings_connect, "uploadpath"));
         Preferences.auto_add_track_to_playlist = g_settings_get_boolean(gsettings_connect, "autoaddtrackplaylist");
+        Preferences.ignore_path_in_playlist_import = g_settings_get_boolean(gsettings_connect, "ignorepathinplaylist");
         Preferences.view_size = g_settings_get_boolean(gsettings_connect, "viewfilesize");
         Preferences.view_type = g_settings_get_boolean(gsettings_connect, "viewfiletype");
         Preferences.view_track_number = g_settings_get_boolean(gsettings_connect, "viewtracknumber");
@@ -172,6 +174,7 @@ gboolean savePreferences() {
         gconf_client_set_string(gconfconnect, "/apps/gMTP/DownloadPath", Preferences.fileSystemDownloadPath->str, NULL);
         gconf_client_set_string(gconfconnect, "/apps/gMTP/UploadPath", Preferences.fileSystemUploadPath->str, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/autoAddTrackPlaylist", Preferences.auto_add_track_to_playlist, NULL);
+        gconf_client_set_bool(gconfconnect, "/apps/gMTP/ignorepathinplaylist", Preferences.ignore_path_in_playlist_import, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewFileSize", Preferences.view_size, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewFileType", Preferences.view_type, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewTrackNumber", Preferences.view_track_number, NULL);
@@ -195,6 +198,7 @@ gboolean savePreferences() {
         g_settings_set_string(gsettings_connect, "downloadpath", Preferences.fileSystemDownloadPath->str);
         g_settings_set_string(gsettings_connect, "uploadpath", Preferences.fileSystemUploadPath->str);
         g_settings_set_boolean(gsettings_connect, "autoaddtrackplaylist", Preferences.auto_add_track_to_playlist);
+        g_settings_set_boolean(gsettings_connect, "ignorepathinplaylist", Preferences.ignore_path_in_playlist_import);
         g_settings_set_boolean(gsettings_connect, "viewfilesize", Preferences.view_size);
         g_settings_set_boolean(gsettings_connect, "viewfiletype", Preferences.view_type);
         g_settings_set_boolean(gsettings_connect, "viewtracknumber", Preferences.view_track_number);
@@ -335,6 +339,12 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAutoAddTrackPlaylist), Preferences.auto_add_track_to_playlist);
         return;
     }
+    if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/ignorepathinplaylist") == 0) {
+        //set our promptDownloadPath in Preferences
+        Preferences.ignore_path_in_playlist_import = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
+        if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonIgnorePathInPlaylist), Preferences.ignore_path_in_playlist_import);
+        return;
+    }
     g_fprintf(stderr, _("WARNING: gconf_callback_func() failed - we got a callback for a key thats not ours?\n"));
 }
 #else
@@ -455,6 +465,12 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         //set our promptDownloadPath in Preferences
         Preferences.auto_add_track_to_playlist = (gboolean) g_settings_get_boolean(settings, key);
         if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAutoAddTrackPlaylist), Preferences.auto_add_track_to_playlist);
+        return;
+    }
+    if (g_ascii_strcasecmp(key, "ignorepathinplaylist") == 0) {
+        //set our promptDownloadPath in Preferences
+        Preferences.ignore_path_in_playlist_import = (gboolean) g_settings_get_boolean(settings, key);
+        if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonIgnorePathInPlaylist), Preferences.ignore_path_in_playlist_import);
         return;
     }
     g_fprintf(stderr, _("WARNING: gsettings_callback_func() failed - we got a callback for a key thats not ours?\n"));

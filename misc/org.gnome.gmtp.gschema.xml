@@ -80,5 +80,10 @@
             <summary>Toggle to automatically add a new track to a playlist</summary>
             <description>Toggle to automatically add a new track to a playlist</description>
         </key>
+        <key name="ignorepathinplaylist" type="b">
+            <default>false</default>
+            <summary>Ignore path in playlist file when importing a playlist</summary>
+            <description>Ignore path in playlist file when importing a playlist</description>
+        </key>
     </schema>
 </schemalist>

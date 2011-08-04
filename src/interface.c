@@ -110,6 +110,7 @@ GtkWidget *checkbuttonDownloadPath;
 GtkWidget *checkbuttonConfirmFileOp;
 GtkWidget *checkbuttonConfirmOverWriteFileOp;
 GtkWidget *checkbuttonAutoAddTrackPlaylist;
+GtkWidget *checkbuttonIgnorePathInPlaylist;
 
 // Widget for Progress Bar Dialog box.
 GtkWidget *progressDialog;
@@ -155,6 +156,7 @@ GList *playlist_Selection_PL_RowReferences = NULL;
 
 // Buttons for playlist
 GtkWidget *button_Del_Playlist;
+GtkWidget *button_Export_Playlist;
 GtkWidget *button_File_Move_Up;
 GtkWidget *button_File_Move_Down;
 GtkWidget *button_Del_File;
@@ -1318,6 +1320,9 @@ void __fileDownload(GtkTreeRowReference *Row) {
         } else {
             filesDownload(filename, objectID);
         }
+    } else {
+        // Overwrite critera performed within this call...
+        folderDownload(filename, objectID, TRUE);
     }
     g_free(filename);
     g_free(fullfilename);
@@ -1529,7 +1534,11 @@ GtkWidget* create_windowPreferences(void) {
     GtkWidget *frame3;
     GtkWidget *alignment3;
     GtkWidget *alignment4;
+    GtkWidget *labelPlaylist;
+    GtkWidget *frame4;
     GtkWidget *alignment5;
+    GtkWidget *alignment6;
+    GtkWidget *vbox4;
     GtkWidget *vbox2;
 
     GtkWidget *labelDevice;
@@ -1600,11 +1609,6 @@ GtkWidget* create_windowPreferences(void) {
     gtk_container_add(GTK_CONTAINER(vbox2), alignment4);
     gtk_alignment_set_padding(GTK_ALIGNMENT(alignment4), 0, 0, 12, 0);
 
-    alignment5 = gtk_alignment_new(0.5, 0.5, 1, 1);
-    gtk_widget_show(alignment5);
-    gtk_container_add(GTK_CONTAINER(vbox2), alignment5);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment5), 0, 0, 12, 0);
-
     checkbuttonConfirmFileOp = gtk_check_button_new_with_mnemonic(_("Confirm File/Folder Delete"));
     gtk_widget_show(checkbuttonConfirmFileOp);
     gtk_container_add(GTK_CONTAINER(alignment3), checkbuttonConfirmFileOp);
@@ -1613,9 +1617,39 @@ GtkWidget* create_windowPreferences(void) {
     gtk_widget_show(checkbuttonConfirmOverWriteFileOp);
     gtk_container_add(GTK_CONTAINER(alignment4), checkbuttonConfirmOverWriteFileOp);
 
+    // Playlist Frame.
+
+    frame4 = gtk_frame_new(NULL);
+    gtk_widget_show(frame4);
+    gtk_box_pack_start(GTK_BOX(vbox1), frame4, TRUE, TRUE, 0);
+    gtk_frame_set_shadow_type(GTK_FRAME(frame4), GTK_SHADOW_NONE);
+
+    labelPlaylist = gtk_label_new(_("<b>Playlist</b>"));
+    gtk_widget_show(labelPlaylist);
+    gtk_frame_set_label_widget(GTK_FRAME(frame4), labelPlaylist);
+    gtk_label_set_use_markup(GTK_LABEL(labelPlaylist), TRUE);
+
+    vbox4 = gtk_vbox_new(FALSE, 5);
+    gtk_widget_show(vbox4);
+    gtk_container_add(GTK_CONTAINER(frame4), vbox4);
+    
+    alignment5 = gtk_alignment_new(0.5, 0.5, 1, 1);
+    gtk_widget_show(alignment5);
+    gtk_container_add(GTK_CONTAINER(vbox4), alignment5);
+    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment5), 0, 0, 12, 0);
+
+    alignment6 = gtk_alignment_new(0.5, 0.5, 1, 1);
+    gtk_widget_show(alignment6);
+    gtk_container_add(GTK_CONTAINER(vbox4), alignment6);
+    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment6), 0, 0, 12, 0);
+
     checkbuttonAutoAddTrackPlaylist = gtk_check_button_new_with_mnemonic(_("Prompt to add New Music track to existing playlist"));
     gtk_widget_show(checkbuttonAutoAddTrackPlaylist);
     gtk_container_add(GTK_CONTAINER(alignment5), checkbuttonAutoAddTrackPlaylist);
+
+    checkbuttonIgnorePathInPlaylist = gtk_check_button_new_with_mnemonic(_("Ignore path information when importing playlist"));
+    gtk_widget_show(checkbuttonIgnorePathInPlaylist);
+    gtk_container_add(GTK_CONTAINER(alignment6), checkbuttonIgnorePathInPlaylist);
 
     labelDevice = gtk_label_new(_("<b>File Operations</b>"));
     gtk_widget_show(labelDevice);
@@ -1726,6 +1760,10 @@ GtkWidget* create_windowPreferences(void) {
         G_CALLBACK(on_PrefsAutoAddTrackPlaylist_activate),
         NULL);
 
+    g_signal_connect((gpointer) checkbuttonIgnorePathInPlaylist, "toggled",
+        G_CALLBACK(on_PrefsIgnorePathInPlaylist_activate),
+        NULL);
+
     g_signal_connect((gpointer) checkbuttonDownloadPath, "toggled",
         G_CALLBACK(on_PrefsAskDownload_activate),
         NULL);
@@ -1745,6 +1783,7 @@ GtkWidget* create_windowPreferences(void) {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmFileOp), Preferences.confirm_file_delete_op);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmOverWriteFileOp), Preferences.prompt_overwrite_file_op);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAutoAddTrackPlaylist), Preferences.auto_add_track_to_playlist);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonIgnorePathInPlaylist), Preferences.ignore_path_in_playlist_import);
     gtk_entry_set_text(GTK_ENTRY(entryDownloadPath), Preferences.fileSystemDownloadPath->str);
     gtk_entry_set_text(GTK_ENTRY(entryUploadPath), Preferences.fileSystemUploadPath->str);
 
@@ -2387,7 +2426,7 @@ int fileprogress(const uint64_t sent, const uint64_t total, void const * const d
  * Display the About Dialog Box.
  */
 void displayAbout(void) {
-    GtkWidget *dialog, *vbox, *label, *label2, *label3, *label4, *image;
+    GtkWidget *dialog, *vbox, *label, *label2, *label3, *label4, *label5, *image;
     gchar *version_string;
     gchar *gtk_version_string;
 
@@ -2428,6 +2467,11 @@ void displayAbout(void) {
     gtk_misc_set_padding(GTK_MISC(label2), 5, 0);
     gtk_widget_show(label2);
     gtk_container_add(GTK_CONTAINER(vbox), label2);
+
+    label5 = gtk_label_new("http://gmtp.sourceforge.net\n");
+    gtk_label_set_use_markup(GTK_LABEL(label5), TRUE);
+    gtk_widget_show(label5);
+    gtk_container_add(GTK_CONTAINER(vbox), label5);
 
     label3 = gtk_label_new(_("<small>Copyright 2009-2011, Darran Kartaschew\nReleased under the BSD Licence</small>"));
     gtk_label_set_use_markup(GTK_LABEL(label3), TRUE);
@@ -3155,6 +3199,7 @@ GtkWidget* create_windowPlaylist(void) {
     GtkWidget *label_Playlist;
 
     GtkWidget *button_Add_Playlist;
+    GtkWidget *button_Import_Playlist;
     GtkWidget *alignment2;
     GtkWidget *hbox3;
     GtkWidget *image2;
@@ -3276,6 +3321,32 @@ GtkWidget* create_windowPlaylist(void) {
     label2 = gtk_label_new_with_mnemonic(_("Del"));
     gtk_widget_show(label2);
     gtk_box_pack_start(GTK_BOX(hbox2), label2, FALSE, FALSE, 0);
+
+    // Import Button
+
+    button_Import_Playlist = gtk_button_new_from_stock(GTK_STOCK_OPEN);
+    gtk_widget_show(button_Import_Playlist);
+    gtk_box_pack_start(GTK_BOX(hbox1), button_Import_Playlist, FALSE, FALSE, 0);
+    gtk_container_set_border_width(GTK_CONTAINER(button_Import_Playlist), 5);
+#if GMTP_USE_GTK2
+    gtk_tooltips_set_tip(tooltips, button_Import_Playlist, _("Import Playlist"), NULL);
+#else
+    gtk_widget_set_tooltip_text(button_Import_Playlist, _("Import Playlist"));
+#endif
+
+    // Export Button
+
+    button_Export_Playlist = gtk_button_new_from_stock(GTK_STOCK_SAVE_AS);
+    gtk_widget_show(button_Export_Playlist);
+    gtk_box_pack_start(GTK_BOX(hbox1), button_Export_Playlist, FALSE, FALSE, 0);
+    gtk_container_set_border_width(GTK_CONTAINER(button_Export_Playlist), 5);
+#if GMTP_USE_GTK2
+    gtk_tooltips_set_tip(tooltips, button_Export_Playlist, _("Export Playlist"), NULL);
+#else
+    gtk_widget_set_tooltip_text(button_Export_Playlist, _("Export Playlist"));
+#endif
+
+    // Scrolled Window.
 
     hbox4 = gtk_hbox_new(FALSE, 5);
     gtk_widget_show(hbox4);
@@ -3425,6 +3496,14 @@ GtkWidget* create_windowPlaylist(void) {
 
     g_signal_connect((gpointer) button_Add_Playlist, "clicked",
         G_CALLBACK(on_Playlist_NewPlaylistButton_activate),
+        NULL);
+
+    g_signal_connect((gpointer) button_Import_Playlist, "clicked",
+        G_CALLBACK(on_Playlist_ImportPlaylistButton_activate),
+        NULL);
+
+    g_signal_connect((gpointer) button_Export_Playlist, "clicked",
+        G_CALLBACK(on_Playlist_ExportPlaylistButton_activate),
         NULL);
 
     g_signal_connect((gpointer) button_Del_Playlist, "clicked",
@@ -3635,6 +3714,7 @@ void setup_PL_List(GtkTreeView *treeviewFiles) {
  */
 void SetPlaylistButtonState(gboolean state) {
     gtk_widget_set_sensitive(GTK_WIDGET(button_Del_Playlist), state);
+    gtk_widget_set_sensitive(GTK_WIDGET(button_Export_Playlist), state);
     gtk_widget_set_sensitive(GTK_WIDGET(button_File_Move_Up), state);
     gtk_widget_set_sensitive(GTK_WIDGET(button_File_Move_Down), state);
     gtk_widget_set_sensitive(GTK_WIDGET(button_Del_File), state);

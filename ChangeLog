@@ -1,3 +1,11 @@
+-- v1.2.0 - 4 Aug 2011
++ Added ability to download entire folder tree in one operation.
++ Added import and export of playlists in m3u format. (updated gconf/gsetting schema).
+* Disallowed upload of *.PLA or *.ALB files as these map directly to Playlists and 
+  Album metadata pointers on the device. (Allowing this may result in corrupt metadata
+  on the device).
+* New website design... (hope you like it).
+
 -- v1.1.0 - 5 Jul 2011
 * Fix Solaris SYSV Package (fix missing image files).
 * Fix potential double-free memory error in mtp.c. reported here:
