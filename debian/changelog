@@ -1,3 +1,18 @@
+gmtp (1.2.0-1) unstable; urgency=low
+
+  * New upstream release:
+    - New features:
+      + Import/export *.m3u playlist files from within the playlist editor.
+      + Download entire folders from the MTP device to your local PC.
+    - Other changes:
+      + Disable upload of .PLA or .ALB files as these map directly to
+        Playlists and Album metadata pointers on the device. (Allowing this
+        may result in corrupt metadata on the device).
+  * debian/{control,copyright,watch):
+    - Upstream moved to SourceForge.
+
+ -- Alessio Treglia <alessio@debian.org>  Thu, 04 Aug 2011 09:57:56 +0200
+
 gmtp (1.1.0-1) unstable; urgency=low
 
   * New upstream bugfix release.
