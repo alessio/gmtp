@@ -113,6 +113,8 @@ extern "C" {
 
     gboolean folderListRemove(GList *List);
 
+    // Flags for overwriting files of host PC and device.
+    gint fileoverwriteop;
     // Flag to allow overwrite of files on device.
     gint deviceoverwriteop;
     // Aggreegate function for adding a file to the device.
@@ -230,6 +232,7 @@ extern "C" {
     GtkWidget *checkbuttonConfirmFileOp;
     GtkWidget *checkbuttonConfirmOverWriteFileOp;
     GtkWidget *checkbuttonAutoAddTrackPlaylist;
+    GtkWidget *checkbuttonIgnorePathInPlaylist;
 
     // AlbumArt Dialog global pointers
     GtkWidget *AlbumArtDialog;
@@ -249,6 +252,7 @@ extern "C" {
 
     // Buttons for playlist
     GtkWidget *button_Del_Playlist;
+    GtkWidget *button_Export_Playlist;
     GtkWidget *button_File_Move_Up;
     GtkWidget *button_File_Move_Down;
     GtkWidget *button_Del_File;

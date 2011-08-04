@@ -50,6 +50,7 @@ extern "C" {
     guint32 folderAdd(gchar* foldername);
     void folderDelete(LIBMTP_folder_t* folderptr, guint level);
     void folderDeleteChildrenFiles(guint folderID);
+    void folderDownload(gchar * foldername, uint32_t folderID, gboolean isParent);
     void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo);
     void albumAddArt(guint32 album_id, gchar* filename);
     void albumDeleteArt(guint32 album_id);
@@ -69,9 +70,16 @@ extern "C" {
     void playlistDelete(LIBMTP_playlist_t * tmpplaylist);
     void playlistUpdate(LIBMTP_playlist_t * tmpplaylist);
     void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track);
+    gchar* playlistImport(gchar * filename);
+    void playlistExport(gchar * filename, LIBMTP_playlist_t * playlist);
 
     // Format device.
     void formatStorageDevice();
+
+    // File operation helper.
+    gchar* getFullFilename(uint32_t item_id);
+    uint32_t getFileID(gchar* filename, gboolean ignorepath);
+    uint32_t getFolderID(LIBMTP_folder_t* folderptr, gchar* foldername);
 
 #ifdef  __cplusplus
 }

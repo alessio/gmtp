@@ -696,12 +696,15 @@ void filesAdd(gchar* filename) {
         genfile->parent_id = currentFolderID;
         genfile->storage_id = DeviceMgr.devicestorage->id;
 
-        ret = LIBMTP_Send_File_From_File(DeviceMgr.device, filename, genfile, fileprogress, NULL);
-        if (ret != 0) {
-            g_fprintf(stderr, _("Error sending file %s.\n"), filename);
-            displayError(g_strconcat(_("Error sending file:"), " <b>", filename, "</b>", NULL));
-            LIBMTP_Dump_Errorstack(DeviceMgr.device);
-            LIBMTP_Clear_Errorstack(DeviceMgr.device);
+        // Only import the file if it's not a Playlist or Album. (Bad mojo if this happens).
+        if((genfile->filetype != LIBMTP_FILETYPE_ALBUM)&&(genfile->filetype != LIBMTP_FILETYPE_PLAYLIST)){
+            ret = LIBMTP_Send_File_From_File(DeviceMgr.device, filename, genfile, fileprogress, NULL);
+            if (ret != 0) {
+                g_fprintf(stderr, _("Error sending file %s.\n"), filename);
+                displayError(g_strconcat(_("Error sending file:"), " <b>", filename, "</b>", NULL));
+                LIBMTP_Dump_Errorstack(DeviceMgr.device);
+                LIBMTP_Clear_Errorstack(DeviceMgr.device);
+            }
         }
         LIBMTP_destroy_file_t(genfile);
     }
@@ -905,6 +908,115 @@ void folderDeleteChildrenFiles(guint folderID) {
         }
         files = files->next;
     }
+}
+
+// ************************************************************************************************
+
+/**
+ * Download the defined folder to the local device.
+ * @param foldername Name of the folder to be downloaded
+ * @param folderID ID of the folder on the device
+ * @param isParent TRUE, if this is the parent folder to download (eg ignore any folder siblings).
+ */
+void folderDownload(gchar *foldername, uint32_t folderID, gboolean isParent){
+    gchar* fullfilename = NULL;
+    LIBMTP_folder_t* currentFolder = NULL;
+    LIBMTP_file_t* tmpFiles = NULL;
+
+    // Store our current path for safe keeping and generate our new path.
+    GString *currentdownload_folder = g_string_new(Preferences.fileSystemDownloadPath->str);
+    fullfilename = g_strdup_printf("%s/%s", Preferences.fileSystemDownloadPath->str, foldername);
+
+    // See if folder exists, if not create it.
+    if(g_file_test(fullfilename, G_FILE_TEST_IS_DIR) == FALSE){
+        if(mkdir(fullfilename, S_IRWXU | S_IRWXG | S_IRWXO) != 0){
+            g_fprintf(stderr, _("Folder creation failed: %s\n"), fullfilename);
+            displayError(g_strconcat(_("Folder creation failed:"), " <b>", fullfilename, "</b>", NULL));
+            // Since we can't create that directory, then we simple return from this call...
+            return;
+        }
+    }
+    
+    // First we scan for all folders in the current folder, and do those first...
+    currentFolder = getCurrentFolderPtr(deviceFolders, folderID);
+
+    if(currentFolder == NULL){
+        // This means we don't exist, so bail out.
+        return;
+    }
+
+    if(currentFolder->child != NULL){
+        // Now we can simple set our download path to the new path, and save all folders/files there.
+        Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, fullfilename);
+
+        // Call to download all folder/files in that folder...
+        folderDownload(currentFolder->child->name, currentFolder->child->folder_id, FALSE);
+
+        // Restore the old download path;
+        Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, currentdownload_folder->str);
+    }
+    
+    if(isParent == FALSE){
+        if(currentFolder->sibling != NULL){
+            folderDownload(currentFolder->sibling->name, currentFolder->sibling->folder_id, FALSE);
+        }
+    }
+    // Now download all the files whose parentID = folderID;
+
+    // Now we can simple set our download path to the new path, and save all folders/files there.
+    Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, fullfilename);
+
+    // we no longer need the full folder path, so free it's variable.
+    g_free(fullfilename);
+
+    // Start processing all our files.
+    tmpFiles = deviceFiles;
+    while(tmpFiles != NULL){
+        if ((tmpFiles->parent_id == folderID) && (tmpFiles->storage_id == DeviceMgr.devicestorage->id)) {
+            // We have a file in this folder, so download it...
+            // But first check to see if it exists, before overwriting it...
+            fullfilename = g_strdup_printf("%s/%s", Preferences.fileSystemDownloadPath->str, tmpFiles->filename);
+            // Check if file exists?
+            if (access(fullfilename, F_OK) != -1) {
+                // We have that file already?
+                if ((Preferences.prompt_overwrite_file_op == TRUE)) {
+                    if (fileoverwriteop == MTP_ASK) {
+                        fileoverwriteop = displayFileOverwriteDialog(tmpFiles->filename);
+                    }
+                    switch (fileoverwriteop) {
+                        case MTP_ASK:
+                            break;
+                        case MTP_SKIP:
+                            fileoverwriteop = MTP_ASK;
+                            break;
+                        case MTP_SKIP_ALL:
+                            break;
+                        case MTP_OVERWRITE:
+                            filesDownload(tmpFiles->filename, tmpFiles->item_id);
+                            fileoverwriteop = MTP_ASK;
+                            break;
+                        case MTP_OVERWRITE_ALL:
+                            filesDownload(tmpFiles->filename, tmpFiles->item_id);
+                            break;
+                    }
+                } else {
+                    filesDownload(tmpFiles->filename, tmpFiles->item_id);
+                }
+            } else {
+                filesDownload(tmpFiles->filename, tmpFiles->item_id);
+            }
+            // Free our file name...
+            g_free(fullfilename);
+        }
+        // Start working on the next file...
+        tmpFiles = tmpFiles->next;
+    }
+
+    // Restore the old download path;
+    Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, currentdownload_folder->str);
+
+    // Clean up any tmp items;
+    g_string_free(currentdownload_folder, TRUE);
 }
 
 // ************************************************************************************************
@@ -1285,6 +1397,150 @@ void playlistUpdate(LIBMTP_playlist_t * tmpplaylist) {
 // ************************************************************************************************
 
 /**
+ * Import a playlist into the current device.
+ * @param filename Filename of the playlist to import.
+ * @return The Playlist Name as stored in the file. Caller to free when no longer needed.
+ */
+gchar* playlistImport(gchar * filename) {
+    FILE* fd;
+    gchar* playlistname = NULL;
+    gchar* fileString = NULL;
+    gchar* needle = NULL;
+    uint32_t *tracktmp = NULL;
+    uint32_t fileobject = 0;
+    gboolean ignorepath = Preferences.ignore_path_in_playlist_import;
+
+    // Build basic playlist object
+    LIBMTP_playlist_t *playlist = LIBMTP_new_playlist_t();
+    playlist->name = NULL;
+    playlist->no_tracks = 0;
+    playlist->tracks = NULL;
+    playlist->parent_id = DeviceMgr.device->default_playlist_folder;
+    playlist->storage_id = DeviceMgr.devicestorage->id;
+
+    // Load the file, and parse.
+    fd = fopen(filename, "r");
+    if (fd == NULL) {
+        g_fprintf(stderr, _("Couldn't open playlist file %s\n"), filename);
+        displayError(_("Couldn't open playlist file\n"));
+        LIBMTP_destroy_playlist_t(playlist);
+        return NULL;
+    } else {
+        fileString = g_malloc0(GMTP_MAX_STRING);
+        // Read file until EOF
+        while(fgets(fileString, GMTP_MAX_STRING, fd) != NULL){
+            // Strip any trailing '\n' from the string...
+            fileString = g_strchomp(fileString);
+            if(g_ascii_strncasecmp(fileString, "#GMTPPLA: ", 10) == 0){
+                // We have a playlist name marker...
+                playlistname = g_strdup((fileString+10));
+                playlist->name = g_strdup(playlistname);
+            } else {
+                // We should have a file?
+                // But ignore ANY line starting with a # as this is a comment line.
+                if((*fileString != '#')&&(*fileString != '\0')){
+                    fileobject = getFileID(fileString, ignorepath);
+                    if(fileobject != 0){
+                        // We have a file within our device!
+                        playlist->no_tracks++;
+                        if ((tracktmp = g_realloc(playlist->tracks, sizeof (uint32_t) * (playlist->no_tracks))) == NULL) {
+                            g_fprintf(stderr, _("realloc in playlistImport failed\n"));
+                            displayError(_("Updating playlist failed? 'realloc in playlistImport'\n"));
+                            return NULL;
+                        }
+                        playlist->tracks = tracktmp;
+                        playlist->tracks[(playlist->no_tracks - 1)] = fileobject;
+                    }
+                }
+            }
+        }
+        g_free(fileString);
+        fclose(fd);
+    }
+    if((playlistname == NULL) && (playlist->no_tracks > 0)){
+        // We have some tracks, but no playlist name.
+        // So derive the playlist name from the filename...
+        playlistname = g_path_get_basename(filename);
+        // Now chop off the file extension?
+        needle = g_strrstr(playlistname, ".");
+        if(needle != NULL){
+            *needle = '\0';
+        }
+        // And set the name...
+        playlist->name = g_strdup(playlistname);
+    }
+
+    // If we have something?
+    if((playlistname != NULL) && (playlist->no_tracks > 0)){
+        // Store the playlist on the device...
+        gint ret = LIBMTP_Create_New_Playlist(DeviceMgr.device, playlist);
+        if (ret != 0) {
+            displayError(_("Couldn't create playlist object\n"));
+            LIBMTP_Dump_Errorstack(DeviceMgr.device);
+            LIBMTP_Clear_Errorstack(DeviceMgr.device);
+            g_free(playlistname);
+            playlistname = NULL;
+        } else {
+            displayInformation(_("Playlist imported.\n"));
+        }
+    } else {
+        // Let the user know we found zero tracks, so didn't bother to import it.
+        displayInformation(_("Found no tracks within the playlist that exist on this device. Did not import the playlist.\n"));
+        g_fprintf(stderr, _("Found no tracks within the playlist that exist on this device. Did not import the playlist.\n"));
+        // Clean up the playlist name, since we don't need it.
+        if(playlistname != NULL){
+            g_free(playlistname);
+            playlistname = NULL;
+        }
+    }
+
+    // Clean up our playlist data structure.
+    LIBMTP_destroy_playlist_t(playlist);
+
+    // Return to caller.
+    return playlistname;
+}
+
+// ************************************************************************************************
+
+/**
+ * Export a playlist.
+ * @param filename Filename of the playlist to import.
+ * @param playlist Pointer to Playlist to export.
+ */
+void playlistExport(gchar * filename, LIBMTP_playlist_t * playlist) {
+    FILE* fd;
+    uint32_t numtracks = playlist->no_tracks;
+    uint32_t *tracks = playlist->tracks;
+    uint32_t trackid = 0;
+    gchar* trackname = NULL;
+
+    // Open the file to save it to...
+    fd = fopen(filename, "w");
+    if (fd == NULL) {
+        g_fprintf(stderr, _("Couldn't save playlist file %s\n"), filename);
+        displayError(_("Couldn't save playlist file\n"));
+    } else {
+        fprintf(fd, "#GMTPPLA: %s\n", playlist->name);
+        fflush(fd);
+        while(numtracks--){
+            trackid = *tracks++;
+            // We now have our track id. Let's form the complete path to the file including the filename.
+            // Then store that string in the file...
+            trackname = getFullFilename(trackid);
+            if(trackname != NULL){
+                fprintf(fd, "%s\n", trackname);
+                g_free(trackname);
+                trackname = NULL;
+            }
+        }
+        fclose(fd);
+    }
+}
+
+// ************************************************************************************************
+
+/**
  * Format the current active device/storage partition.
  */
 void formatStorageDevice() {
@@ -1322,3 +1578,136 @@ void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track){
     tmpplaylist->tracks[(tmpplaylist->no_tracks - 1)] = track->item_id;
     playlistUpdate(tmpplaylist);
 }
+
+// ************************************************************************************************
+
+/**
+ * Return the full filename including path of the selected MTP file object
+ * @param trackid MTP file objectID
+ * @return
+ */
+gchar* getFullFilename(uint32_t item_id){
+    gchar* fullfilename = NULL;
+    gchar* tmpfilename = NULL;
+    uint32_t parent_id = 0;
+    LIBMTP_file_t* tmpfile = deviceFiles;
+    LIBMTP_folder_t* tmpfolder = deviceFolders;
+
+    // Find our file...
+    while(tmpfile != NULL){
+        if(tmpfile->item_id == item_id){
+            fullfilename = g_strdup(tmpfile->filename);
+            parent_id = tmpfile->parent_id;
+            tmpfile = NULL;
+        } else {
+            tmpfile = tmpfile->next;
+        }
+    }
+    // Let's see if we have a filename?
+    if(fullfilename != NULL){
+        // Now let's prepend the parent folder names to it...
+        while(tmpfolder != NULL){
+            tmpfolder = getCurrentFolderPtr(deviceFolders, parent_id);
+            if(tmpfolder != NULL){
+                // We have something.
+                tmpfilename = g_strdup_printf("%s/%s", tmpfolder->name, fullfilename);
+                g_free(fullfilename);
+                fullfilename = tmpfilename;
+                parent_id = tmpfolder->parent_id;
+            }
+        }
+    }
+    return fullfilename;
+}
+
+// ************************************************************************************************
+
+/**
+ * Find the file within the device.
+ * @param filename Name of the file to search for.
+ * @param ignorepath Ignore any path information that may be present.
+ * @return Object ID or 0 if not found.
+ */
+uint32_t getFileID(gchar* filename, gboolean ignorepath){
+    LIBMTP_file_t* files = deviceFiles;
+    uint32_t folderID = 0;
+
+    // Separate into filename and path...
+    gchar* basefilename = g_path_get_basename(filename);
+    gchar* dirfilename = g_path_get_dirname(filename);
+
+    // If we are ignoring all path information, then simply scan all files for the filename.
+    if(ignorepath == TRUE){
+        while(files != NULL){
+            // Ensure we only check if we are on the current storage device...
+            if(files->storage_id == DeviceMgr.devicestorage->id){
+                // See if our filename is the same.
+                if(g_ascii_strcasecmp(basefilename, files->filename) == 0){
+                    // We found our file...
+                    g_free(basefilename);
+                    g_free(dirfilename);
+                    return files->item_id;
+                }
+            }
+            files = files->next;
+        }
+    } else {
+        // Lets find the folderid of the path we have, so it makes searching a lot easier...
+        folderID = getFolderID(deviceFolders, dirfilename);
+        if(folderID == -1){
+            // We don't have this path on the device, so no need to continue checking.
+            g_free(basefilename);
+            g_free(dirfilename);
+            return 0;
+        }
+        while(files != NULL){
+            // Ensure we only check if we are on the current storage device AND the file is in the correct folder...
+            if((files->storage_id == DeviceMgr.devicestorage->id)&&(files->parent_id == folderID)){
+                // See if our filename is the same.
+                if(g_ascii_strcasecmp(basefilename, files->filename) == 0){
+                    // We found our file...
+                    g_free(basefilename);
+                    g_free(dirfilename);
+                    return files->item_id;
+                }
+            }
+            files = files->next;
+        }
+    }
+    g_free(basefilename);
+    g_free(dirfilename);
+    return 0;
+}
+
+// ************************************************************************************************
+
+/**
+ * Find the folder within the device.
+ * @param folderptr Folder Structure to search in.
+ * @param foldername Name of the folder to find.
+ * @return Object ID or -1 if not found.
+ */
+uint32_t getFolderID(LIBMTP_folder_t* folderptr, gchar* foldername){
+    gchar** pathcomponents;
+    if(g_ascii_strcasecmp(foldername, ".") == 0){
+        // We have a root directory...
+        return 0;
+    }
+    // Get the first component of the foldername.
+    pathcomponents = g_strsplit(foldername, "/", 2);
+    while(folderptr != NULL){
+        if(g_ascii_strcasecmp(pathcomponents[0], folderptr->name) == 0){
+            // We have found our path...
+            // If we have of the path to process then...
+            if(pathcomponents[1] != NULL){
+                return(getFolderID(folderptr->child, pathcomponents[1]));
+            } else {
+                return folderptr->folder_id;
+            }
+        } else {
+            folderptr = folderptr->sibling;
+        }
+    }
+    return -1;
+}
+

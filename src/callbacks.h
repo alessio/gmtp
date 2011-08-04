@@ -53,6 +53,7 @@ extern "C" {
     void on_PrefsConfirmDelete_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_PrefsConfirmOverWriteFileOp_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_PrefsAutoAddTrackPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_PrefsIgnorePathInPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
 
     // Properties Dialog
     void on_quitProp_activate(GtkMenuItem *menuitem, gpointer user_data);
@@ -66,6 +67,8 @@ extern "C" {
     // Playlist Dialog
     void on_quitPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_Playlist_NewPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_Playlist_ImportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_Playlist_ExportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_Playlist_DelPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_Playlist_DelFileButton_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_Playlist_AddFileButton_activate(GtkMenuItem *menuitem, gpointer user_data);

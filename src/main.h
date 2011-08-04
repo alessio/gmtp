@@ -101,6 +101,7 @@ extern "C" {
 #define MEGABYTE 1048576
 #define GMTP_REQUIRE_PLAYLIST -2
 #define GMTP_NO_PLAYLIST -1
+#define GMTP_MAX_STRING 8192
 
 #ifdef  __cplusplus
 }

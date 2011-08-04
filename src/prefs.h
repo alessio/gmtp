@@ -27,6 +27,7 @@ extern "C" {
         gboolean prompt_overwrite_file_op;
         gboolean confirm_file_delete_op;
         gboolean auto_add_track_to_playlist;
+        gboolean ignore_path_in_playlist_import;
         gboolean view_size;
         gboolean view_type;
         gboolean view_track_number;
