@@ -108,6 +108,7 @@ gboolean loadPreferences() {
         Preferences.view_year = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewYear", NULL);
         Preferences.view_genre = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewGenre", NULL);
         Preferences.view_duration = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewDuration", NULL);
+        Preferences.view_folders = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewFolders", NULL);
     } else {
         g_fprintf(stderr, _("WARNING: gconf schema invalid, reverting to defaults. Please ensure schema is loaded in gconf database.\n"));
     }
@@ -131,6 +132,7 @@ gboolean loadPreferences() {
         Preferences.view_year = g_settings_get_boolean(gsettings_connect, "viewyear");
         Preferences.view_genre = g_settings_get_boolean(gsettings_connect, "viewgenre");
         Preferences.view_duration = g_settings_get_boolean(gsettings_connect, "viewduration");
+        Preferences.view_folders = g_settings_get_boolean(gsettings_connect, "viewfolders");
     }
 #endif
     // Set some menu options and view states.
@@ -153,6 +155,17 @@ gboolean loadPreferences() {
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_year), Preferences.view_year);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_genre), Preferences.view_genre);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_duration), Preferences.view_duration);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_folders), Preferences.view_folders);
+
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewSize), Preferences.view_size);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewType), Preferences.view_type);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewTrackNumber), Preferences.view_track_number);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewTrackName), Preferences.view_title);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewArtist), Preferences.view_artist);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewAlbum), Preferences.view_album);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewYear), Preferences.view_year);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewGenre), Preferences.view_genre);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewDuration), Preferences.view_duration);
 
     return TRUE;
 }
@@ -184,6 +197,7 @@ gboolean savePreferences() {
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewYear", Preferences.view_year, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewGenre", Preferences.view_genre, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewDuration", Preferences.view_duration, NULL);
+        gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewFolders", Preferences.view_folders, NULL);
     } else {
         g_fprintf(stderr, _("WARNING: gconf schema invalid, unable to save! Please ensure schema is loaded in gconf database.\n"));
     }
@@ -208,6 +222,7 @@ gboolean savePreferences() {
         g_settings_set_boolean(gsettings_connect, "viewyear", Preferences.view_year);
         g_settings_set_boolean(gsettings_connect, "viewgenre", Preferences.view_genre);
         g_settings_set_boolean(gsettings_connect, "viewduration", Preferences.view_duration);
+        g_settings_set_boolean(gsettings_connect, "viewfolders", Preferences.view_folders);
     }
     g_settings_sync();
 #endif
@@ -275,6 +290,7 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_size = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Size, Preferences.view_size);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_filesize), Preferences.view_size);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewSize), Preferences.view_size);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewFileType") == 0) {
@@ -282,6 +298,7 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_type = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Type, Preferences.view_type);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_filetype), Preferences.view_type);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewType), Preferences.view_type);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewTrackNumber") == 0) {
@@ -289,6 +306,7 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_track_number = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Track_Number, Preferences.view_track_number);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_track_number), Preferences.view_track_number);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewTrackNumber), Preferences.view_track_number);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewTitle") == 0) {
@@ -296,6 +314,7 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_title = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Title, Preferences.view_title);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_title), Preferences.view_title);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewTrackName), Preferences.view_title);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewArtist") == 0) {
@@ -303,6 +322,7 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_artist = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Artist, Preferences.view_artist);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_artist), Preferences.view_artist);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewArtist), Preferences.view_artist);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewAlbum") == 0) {
@@ -310,6 +330,7 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_album = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Album, Preferences.view_album);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_album), Preferences.view_album);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewAlbum), Preferences.view_album);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewYear") == 0) {
@@ -317,6 +338,7 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_year = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Year, Preferences.view_year);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_year), Preferences.view_year);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewYear), Preferences.view_year);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewGenre") == 0) {
@@ -324,6 +346,7 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_genre = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Genre, Preferences.view_genre);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_genre), Preferences.view_genre);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewGenre), Preferences.view_genre);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewDuration") == 0) {
@@ -331,6 +354,20 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         Preferences.view_duration = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         gtk_tree_view_column_set_visible(column_Duration, Preferences.view_duration);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_duration), Preferences.view_duration);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewDuration), Preferences.view_duration);
+        return;
+    }
+    if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewFolders") == 0) {
+        //set our promptDownloadPath in Preferences
+        Preferences.view_folders = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
+        //gtk_tree_view_column_set_visible(column_Duration, Preferences.view_folders);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_folders), Preferences.view_folders);
+        //gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewDuration), Preferences.view_duration);
+        if (Preferences.view_folders == TRUE) {
+            gtk_widget_show(scrolledwindowFolders);
+        } else {
+            gtk_widget_hide(scrolledwindowFolders);
+        }
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/autoAddTrackPlaylist") == 0) {
@@ -403,6 +440,7 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_size = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Size, Preferences.view_size);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_filesize), Preferences.view_size);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewSize), Preferences.view_size);
         return;
     }
     if (g_ascii_strcasecmp(key, "viewFileType") == 0) {
@@ -410,6 +448,7 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_type = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Type, Preferences.view_type);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_filetype), Preferences.view_type);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewType), Preferences.view_type);
         return;
     }
     if (g_ascii_strcasecmp(key, "viewTrackNumber") == 0) {
@@ -417,6 +456,7 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_track_number = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Track_Number, Preferences.view_track_number);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_track_number), Preferences.view_track_number);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewTrackNumber), Preferences.view_track_number);
         return;
     }
     if (g_ascii_strcasecmp(key, "viewTitle") == 0) {
@@ -424,6 +464,7 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_title = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Title, Preferences.view_title);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_title), Preferences.view_title);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewTrackName), Preferences.view_title);
         return;
     }
     if (g_ascii_strcasecmp(key, "viewArtist") == 0) {
@@ -431,6 +472,7 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_artist = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Artist, Preferences.view_artist);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_artist), Preferences.view_artist);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewArtist), Preferences.view_artist);
         return;
     }
     if (g_ascii_strcasecmp(key, "viewAlbum") == 0) {
@@ -438,6 +480,7 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_album = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Album, Preferences.view_album);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_album), Preferences.view_album);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewAlbum), Preferences.view_album);
         return;
     }
     if (g_ascii_strcasecmp(key, "viewYear") == 0) {
@@ -445,6 +488,7 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_year = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Year, Preferences.view_year);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_year), Preferences.view_year);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewYear), Preferences.view_year);
         return;
     }
     if (g_ascii_strcasecmp(key, "viewGenre") == 0) {
@@ -452,6 +496,7 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_genre = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Genre, Preferences.view_genre);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_genre), Preferences.view_genre);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewGenre), Preferences.view_genre);
         return;
     }
     if (g_ascii_strcasecmp(key, "viewDuration") == 0) {
@@ -459,6 +504,20 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_duration = (gboolean) g_settings_get_boolean(settings, key);
         gtk_tree_view_column_set_visible(column_Duration, Preferences.view_duration);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_duration), Preferences.view_duration);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewDuration), Preferences.view_duration);
+        return;
+    }
+    if (g_ascii_strcasecmp(key, "viewFolders") == 0) {
+        //set our promptDownloadPath in Preferences
+        Preferences.view_folders = (gboolean) g_settings_get_boolean(settings, key);
+        //gtk_tree_view_column_set_visible(column_Duration, Preferences.view_duration);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_folders), Preferences.view_folders);
+        if (Preferences.view_folders == TRUE) {
+            gtk_widget_show(scrolledwindowFolders);
+        } else {
+            gtk_widget_hide(scrolledwindowFolders);
+        }
+        //gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewDuration), Preferences.view_duration);
         return;
     }
     if (g_ascii_strcasecmp(key, "autoaddtrackplaylist") == 0) {

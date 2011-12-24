@@ -31,6 +31,7 @@
 #include <string.h>
 #include <id3tag.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <FLAC/all.h>
 
 #include "main.h"
@@ -391,8 +392,9 @@ void clearDeviceTracks(LIBMTP_track_t * tracklist) {
 void deviceRescan() {
     gchar* tmp_string;
     //g_print("You selected deviceRescan\n");
-    // First we clear the file list...
+    // First we clear the file and folder list...
     fileListClear();
+    folderListClear();
     // Now clear the folder/file structures.
     if (deviceFolders != NULL)
         LIBMTP_destroy_folder_t(deviceFolders);
@@ -418,6 +420,7 @@ void deviceRescan() {
         devicePlayLists = getPlaylists();
         deviceTracks = getTracks();
         fileListAdd();
+        folderListAdd(deviceFolders, NULL);
         // Now update the storage...
         if (LIBMTP_Get_Storage(DeviceMgr.device, 0) != 0) {
             // We have an error getting our storage, so let the user know and then disconnect the device.
@@ -433,15 +436,15 @@ void deviceRescan() {
         // Update the status bar.
         if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
             tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
         } else {
             if (DeviceMgr.devicestorage->StorageDescription != NULL) {
                 tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"), DeviceMgr.devicename->str,
-                    DeviceMgr.devicestorage->StorageDescription,
-                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                        DeviceMgr.devicestorage->StorageDescription,
+                        (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
             } else {
                 tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                        (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
             }
         }
         statusBarSet(tmp_string);
@@ -571,8 +574,8 @@ void filesAdd(gchar* filename) {
 
     filesize = sb.st_size;
     if (filesize > DeviceMgr.devicestorage->FreeSpaceInBytes) {
-        g_fprintf(stderr, _("Unable to add %s due to insufficient space: filesize = %lu, freespace = %lu\n"),
-            filename, filesize, DeviceMgr.devicestorage->FreeSpaceInBytes);
+        g_fprintf(stderr, _("Unable to add %s due to insufficient space: filesize = %llu, freespace = %llu\n"),
+                filename, filesize, DeviceMgr.devicestorage->FreeSpaceInBytes);
         displayError(_("Unable to add file due to insufficient space"));
         return;
     }
@@ -587,9 +590,9 @@ void filesAdd(gchar* filename) {
     ret = find_filetype(filename_stripped);
 
     if ((ret == LIBMTP_FILETYPE_MP3) ||
-        (ret == LIBMTP_FILETYPE_OGG) ||
-        (ret == LIBMTP_FILETYPE_FLAC) ||
-        (ret == LIBMTP_FILETYPE_WMA)) {
+            (ret == LIBMTP_FILETYPE_OGG) ||
+            (ret == LIBMTP_FILETYPE_FLAC) ||
+            (ret == LIBMTP_FILETYPE_WMA)) {
         // We have an MP3/Ogg/FLAC/WMA file.
         trackfile = LIBMTP_new_track_t();
 
@@ -648,8 +651,8 @@ void filesAdd(gchar* filename) {
         }
 
         // If we need a playlist, then ask for it.
-        if (addTrackPlaylistID == GMTP_REQUIRE_PLAYLIST){
-            addTrackPlaylistID = displayAddTrackPlaylistDialog();
+        if (addTrackPlaylistID == GMTP_REQUIRE_PLAYLIST) {
+            addTrackPlaylistID = displayAddTrackPlaylistDialog(TRUE);
         }
 
         // Now send the track
@@ -657,7 +660,7 @@ void filesAdd(gchar* filename) {
         if (ret != 0) {
             // Report the error in sending the file.
             g_fprintf(stderr, _("Error sending track.\n"));
-            displayError(g_strdup_printf(_("Error code %d sending track to device: <b>%s</b>"), ret, filename, NULL));
+            displayError(g_strdup_printf(_("Error code %d sending track to device: <b>%s</b>"), ret, filename));
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
         } else {
@@ -667,14 +670,14 @@ void filesAdd(gchar* filename) {
             }
 
             // Now add to playlist if needed...
-            if ((addTrackPlaylistID != GMTP_REQUIRE_PLAYLIST)&&(addTrackPlaylistID != GMTP_NO_PLAYLIST)){
+            if ((addTrackPlaylistID != GMTP_REQUIRE_PLAYLIST) && (addTrackPlaylistID != GMTP_NO_PLAYLIST)) {
                 // addTrackPlaylistID has the ID of the playlist, and trackfile is the track we need to
                 // add to that playlist.
 
                 // Find the playlist.
                 tmpplaylist = devicePlayLists;
-                while(tmpplaylist != NULL){
-                    if(tmpplaylist->playlist_id != addTrackPlaylistID){
+                while (tmpplaylist != NULL) {
+                    if (tmpplaylist->playlist_id != (uint32_t) addTrackPlaylistID) {
                         // Don't have it.
                         tmpplaylist = tmpplaylist->next;
                     } else {
@@ -697,7 +700,7 @@ void filesAdd(gchar* filename) {
         genfile->storage_id = DeviceMgr.devicestorage->id;
 
         // Only import the file if it's not a Playlist or Album. (Bad mojo if this happens).
-        if((genfile->filetype != LIBMTP_FILETYPE_ALBUM)&&(genfile->filetype != LIBMTP_FILETYPE_PLAYLIST)){
+        if ((genfile->filetype != LIBMTP_FILETYPE_ALBUM) && (genfile->filetype != LIBMTP_FILETYPE_PLAYLIST)) {
             ret = LIBMTP_Send_File_From_File(DeviceMgr.device, filename, genfile, fileprogress, NULL);
             if (ret != 0) {
                 g_fprintf(stderr, _("Error sending file %s.\n"), filename);
@@ -732,9 +735,28 @@ void filesAdd(gchar* filename) {
  */
 void filesDelete(gchar* filename, uint32_t objectID) {
     gint ret = 1;
+    GSList *node;
+    FileListStruc *fileptr;
     // Maybe something went wrong, so we disconnected. If so, then simple exit....
     if (DeviceMgr.deviceConnected == FALSE)
         return;
+
+    // Now remove the item from the searchlist if we are in search mode.
+    if (inFindMode == TRUE) {
+        // searchList
+        node = searchList;
+        while (node != NULL) {
+            fileptr = node->data;
+            if (fileptr->itemid == objectID) {
+                // remove this node from the main list;
+                searchList = g_slist_delete_link(searchList, node);
+                g_free_search(fileptr);
+                node = NULL;
+            } else {
+                node = node->next;
+            }
+        }
+    }
     // Delete the file based on the object ID.
     ret = LIBMTP_Delete_Object(DeviceMgr.device, objectID);
     if (ret != 0) {
@@ -788,12 +810,31 @@ void filesRename(gchar* filename, uint32_t ObjectID) {
     LIBMTP_album_t *albumlist = NULL;
     LIBMTP_playlist_t *playlist = NULL;
     LIBMTP_folder_t *folder = NULL;
+    GSList *node;
+    FileListStruc *fileptr;
 
     if (filename == NULL) {
         return;
     }
     if (ObjectID == 0) {
         return;
+    }
+
+    // Now remove the item from the searchlist if we are in search mode.
+    if (inFindMode == TRUE) {
+        // searchList
+        node = searchList;
+        while (node != NULL) {
+            fileptr = node->data;
+            if (fileptr->itemid == ObjectID) {
+                // update the filename appropriately;
+                g_free(fileptr->filename);
+                fileptr->filename = g_strdup(filename);
+                node = NULL;
+            } else {
+                node = node->next;
+            }
+        }
     }
 
     // Lets scan files first.
@@ -871,6 +912,10 @@ guint32 folderAdd(gchar* foldername) {
  * @param level Set to 0 as default.
  */
 void folderDelete(LIBMTP_folder_t* folderptr, guint level) {
+
+    GSList *node;
+    FileListStruc *fileptr;
+
     if (folderptr == NULL) {
         // Sanity check for rogue data or exit here operation, that is no child/sibling to work on.
         return;
@@ -885,6 +930,23 @@ void folderDelete(LIBMTP_folder_t* folderptr, guint level) {
     if (level != 0)
         folderDelete(folderptr->sibling, level + 1);
     // That should clear all the children.
+
+    // Now remove the item from the searchlist if we are in search mode.
+    if (inFindMode == TRUE) {
+        // searchList
+        node = searchList;
+        while (node != NULL) {
+            fileptr = node->data;
+            if (fileptr->itemid == folderptr->folder_id) {
+                // remove this node from the main list;
+                searchList = g_slist_delete_link(searchList, node);
+                g_free_search(fileptr);
+                node = NULL;
+            } else {
+                node = node->next;
+            }
+        }
+    }
     // Now do self.
     guint res = LIBMTP_Delete_Object(DeviceMgr.device, folderptr->folder_id);
     if (res != 0) {
@@ -918,7 +980,7 @@ void folderDeleteChildrenFiles(guint folderID) {
  * @param folderID ID of the folder on the device
  * @param isParent TRUE, if this is the parent folder to download (eg ignore any folder siblings).
  */
-void folderDownload(gchar *foldername, uint32_t folderID, gboolean isParent){
+void folderDownload(gchar *foldername, uint32_t folderID, gboolean isParent) {
     gchar* fullfilename = NULL;
     LIBMTP_folder_t* currentFolder = NULL;
     LIBMTP_file_t* tmpFiles = NULL;
@@ -928,24 +990,29 @@ void folderDownload(gchar *foldername, uint32_t folderID, gboolean isParent){
     fullfilename = g_strdup_printf("%s/%s", Preferences.fileSystemDownloadPath->str, foldername);
 
     // See if folder exists, if not create it.
-    if(g_file_test(fullfilename, G_FILE_TEST_IS_DIR) == FALSE){
-        if(mkdir(fullfilename, S_IRWXU | S_IRWXG | S_IRWXO) != 0){
+    if (g_file_test(fullfilename, G_FILE_TEST_IS_DIR) == FALSE) {
+        if (mkdir(fullfilename, S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
             g_fprintf(stderr, _("Folder creation failed: %s\n"), fullfilename);
             displayError(g_strconcat(_("Folder creation failed:"), " <b>", fullfilename, "</b>", NULL));
             // Since we can't create that directory, then we simple return from this call...
             return;
         }
     }
-    
-    // First we scan for all folders in the current folder, and do those first...
-    currentFolder = getCurrentFolderPtr(deviceFolders, folderID);
 
-    if(currentFolder == NULL){
+    // First we scan for all folders in the current folder, and do those first...
+    if (folderID != 0) {
+        currentFolder = getCurrentFolderPtr(deviceFolders, folderID);
+    } else {
+        // If our id = 0 then we are dealing with the root device.
+        currentFolder = deviceFolders;
+    }
+
+    if (currentFolder == NULL) {
         // This means we don't exist, so bail out.
         return;
     }
 
-    if(currentFolder->child != NULL){
+    if (currentFolder->child != NULL) {
         // Now we can simple set our download path to the new path, and save all folders/files there.
         Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, fullfilename);
 
@@ -955,9 +1022,9 @@ void folderDownload(gchar *foldername, uint32_t folderID, gboolean isParent){
         // Restore the old download path;
         Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, currentdownload_folder->str);
     }
-    
-    if(isParent == FALSE){
-        if(currentFolder->sibling != NULL){
+
+    if ((isParent == FALSE) || (folderID == 0)) {
+        if (currentFolder->sibling != NULL) {
             folderDownload(currentFolder->sibling->name, currentFolder->sibling->folder_id, FALSE);
         }
     }
@@ -971,7 +1038,7 @@ void folderDownload(gchar *foldername, uint32_t folderID, gboolean isParent){
 
     // Start processing all our files.
     tmpFiles = deviceFiles;
-    while(tmpFiles != NULL){
+    while (tmpFiles != NULL) {
         if ((tmpFiles->parent_id == folderID) && (tmpFiles->storage_id == DeviceMgr.devicestorage->id)) {
             // We have a file in this folder, so download it...
             // But first check to see if it exists, before overwriting it...
@@ -1027,7 +1094,7 @@ void folderDownload(gchar *foldername, uint32_t folderID, gboolean isParent){
  * @return
  */
 LIBMTP_filetype_t find_filetype(const gchar * filename) {
-    LIBMTP_filetype_t filetype = -1;
+    LIBMTP_filetype_t filetype = LIBMTP_FILETYPE_UNKNOWN;
     gchar *fileext;
     gint i;
     gint j = sizeof (file_ext) / sizeof (MTP_file_ext_struct);
@@ -1047,9 +1114,9 @@ LIBMTP_filetype_t find_filetype(const gchar * filename) {
             break;
         }
     }
-    if (filetype == -1) {
-        filetype = LIBMTP_FILETYPE_UNKNOWN;
-    }
+    //if (filetype == 0) {
+    //    filetype = LIBMTP_FILETYPE_UNKNOWN;
+    //}
     return filetype;
 }
 
@@ -1143,7 +1210,7 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo) 
         if ((album->name != NULL) && (album->artist != NULL)) {
             // Lets test it. We attempt to match both album name and artist.
             if ((g_ascii_strcasecmp(album->name, albuminfo->name) == 0) &&
-                (g_ascii_strcasecmp(album->artist, albuminfo->artist) == 0)) {
+                    (g_ascii_strcasecmp(album->artist, albuminfo->artist) == 0)) {
                 found_album = album;
             }
         }
@@ -1428,19 +1495,19 @@ gchar* playlistImport(gchar * filename) {
     } else {
         fileString = g_malloc0(GMTP_MAX_STRING);
         // Read file until EOF
-        while(fgets(fileString, GMTP_MAX_STRING, fd) != NULL){
+        while (fgets(fileString, GMTP_MAX_STRING, fd) != NULL) {
             // Strip any trailing '\n' from the string...
             fileString = g_strchomp(fileString);
-            if(g_ascii_strncasecmp(fileString, "#GMTPPLA: ", 10) == 0){
+            if (g_ascii_strncasecmp(fileString, "#GMTPPLA: ", 10) == 0) {
                 // We have a playlist name marker...
-                playlistname = g_strdup((fileString+10));
+                playlistname = g_strdup((fileString + 10));
                 playlist->name = g_strdup(playlistname);
             } else {
                 // We should have a file?
                 // But ignore ANY line starting with a # as this is a comment line.
-                if((*fileString != '#')&&(*fileString != '\0')){
+                if ((*fileString != '#') && (*fileString != '\0')) {
                     fileobject = getFileID(fileString, ignorepath);
-                    if(fileobject != 0){
+                    if (fileobject != 0) {
                         // We have a file within our device!
                         playlist->no_tracks++;
                         if ((tracktmp = g_realloc(playlist->tracks, sizeof (uint32_t) * (playlist->no_tracks))) == NULL) {
@@ -1457,13 +1524,13 @@ gchar* playlistImport(gchar * filename) {
         g_free(fileString);
         fclose(fd);
     }
-    if((playlistname == NULL) && (playlist->no_tracks > 0)){
+    if ((playlistname == NULL) && (playlist->no_tracks > 0)) {
         // We have some tracks, but no playlist name.
         // So derive the playlist name from the filename...
         playlistname = g_path_get_basename(filename);
         // Now chop off the file extension?
         needle = g_strrstr(playlistname, ".");
-        if(needle != NULL){
+        if (needle != NULL) {
             *needle = '\0';
         }
         // And set the name...
@@ -1471,7 +1538,7 @@ gchar* playlistImport(gchar * filename) {
     }
 
     // If we have something?
-    if((playlistname != NULL) && (playlist->no_tracks > 0)){
+    if ((playlistname != NULL) && (playlist->no_tracks > 0)) {
         // Store the playlist on the device...
         gint ret = LIBMTP_Create_New_Playlist(DeviceMgr.device, playlist);
         if (ret != 0) {
@@ -1488,7 +1555,7 @@ gchar* playlistImport(gchar * filename) {
         displayInformation(_("Found no tracks within the playlist that exist on this device. Did not import the playlist.\n"));
         g_fprintf(stderr, _("Found no tracks within the playlist that exist on this device. Did not import the playlist.\n"));
         // Clean up the playlist name, since we don't need it.
-        if(playlistname != NULL){
+        if (playlistname != NULL) {
             g_free(playlistname);
             playlistname = NULL;
         }
@@ -1523,12 +1590,12 @@ void playlistExport(gchar * filename, LIBMTP_playlist_t * playlist) {
     } else {
         fprintf(fd, "#GMTPPLA: %s\n", playlist->name);
         fflush(fd);
-        while(numtracks--){
+        while (numtracks--) {
             trackid = *tracks++;
             // We now have our track id. Let's form the complete path to the file including the filename.
             // Then store that string in the file...
             trackname = getFullFilename(trackid);
-            if(trackname != NULL){
+            if (trackname != NULL) {
                 fprintf(fd, "%s\n", trackname);
                 g_free(trackname);
                 trackname = NULL;
@@ -1563,7 +1630,7 @@ void formatStorageDevice() {
  * @param playlist
  * @param track
  */
-void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track){
+void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track) {
     LIBMTP_playlist_t* tmpplaylist = playlist;
     uint32_t *tmp = NULL;
 
@@ -1579,6 +1646,66 @@ void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track){
     playlistUpdate(tmpplaylist);
 }
 
+
+// ************************************************************************************************
+
+/**
+ * Remove the assigned track from a playlist.
+ * @param playlist
+ * @param track
+ */
+void playlistRemoveTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track, uint32_t instances) {
+    LIBMTP_playlist_t* tmpplaylist = playlist;
+    uint32_t *tmp = NULL;
+
+    uint32_t numtracks = tmpplaylist->no_tracks;
+    int32_t count;
+    int32_t count2;
+    // item_id = our track num... so remove to tmpplaylist->tracks
+    if ((instances == MTP_PLAYLIST_ALL_INSTANCES) || (instances == MTP_PLAYLIST_FIRST_INSTANCE)) {
+        for (count = 0; count < (int32_t) numtracks; count++) {
+            if (tmpplaylist->tracks[count] == track->item_id) {
+                // move all ones up one.
+                for (count2 = count; count2 < (int32_t) numtracks; count2++) {
+                    if ((count2 + 1) != (int32_t) numtracks) {
+                        tmpplaylist->tracks[count2] = tmpplaylist->tracks[count2 + 1];
+                    }
+                }
+                // exit the for loop if only doing the first instance.
+                if (instances == MTP_PLAYLIST_FIRST_INSTANCE) {
+                    count = numtracks;
+                }
+                tmpplaylist->no_tracks--;
+            }
+        }
+    } else {
+        for (count = numtracks - 1; count >= 0; count--) {
+            if (tmpplaylist->tracks[count] == track->item_id) {
+                // move all ones up one.
+                for (count2 = count; count2 < (int32_t) numtracks; count2++) {
+                    if ((count2 + 1) != (int32_t) numtracks) {
+                        tmpplaylist->tracks[count2] = tmpplaylist->tracks[count2 + 1];
+                    }
+                }
+                // exit the for loop if only doing the first instance.
+                if (instances == MTP_PLAYLIST_LAST_INSTANCE) {
+                    count = numtracks;
+                }
+                tmpplaylist->no_tracks--;
+            }
+        }
+    }
+    // And redo the memory allocation.
+    if ((tmp = g_realloc(tmpplaylist->tracks, sizeof (uint32_t) * (tmpplaylist->no_tracks))) == NULL) {
+        g_fprintf(stderr, _("realloc in savePlayList failed\n"));
+        displayError(_("Updating playlist failed? 'realloc in savePlayList'\n"));
+        return;
+    }
+    tmpplaylist->tracks = tmp;
+    playlistUpdate(tmpplaylist);
+}
+
+
 // ************************************************************************************************
 
 /**
@@ -1586,7 +1713,7 @@ void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track){
  * @param trackid MTP file objectID
  * @return
  */
-gchar* getFullFilename(uint32_t item_id){
+gchar* getFullFilename(uint32_t item_id) {
     gchar* fullfilename = NULL;
     gchar* tmpfilename = NULL;
     uint32_t parent_id = 0;
@@ -1594,8 +1721,8 @@ gchar* getFullFilename(uint32_t item_id){
     LIBMTP_folder_t* tmpfolder = deviceFolders;
 
     // Find our file...
-    while(tmpfile != NULL){
-        if(tmpfile->item_id == item_id){
+    while (tmpfile != NULL) {
+        if (tmpfile->item_id == item_id) {
             fullfilename = g_strdup(tmpfile->filename);
             parent_id = tmpfile->parent_id;
             tmpfile = NULL;
@@ -1604,11 +1731,11 @@ gchar* getFullFilename(uint32_t item_id){
         }
     }
     // Let's see if we have a filename?
-    if(fullfilename != NULL){
+    if (fullfilename != NULL) {
         // Now let's prepend the parent folder names to it...
-        while(tmpfolder != NULL){
+        while (tmpfolder != NULL) {
             tmpfolder = getCurrentFolderPtr(deviceFolders, parent_id);
-            if(tmpfolder != NULL){
+            if (tmpfolder != NULL) {
                 // We have something.
                 tmpfilename = g_strdup_printf("%s/%s", tmpfolder->name, fullfilename);
                 g_free(fullfilename);
@@ -1628,7 +1755,7 @@ gchar* getFullFilename(uint32_t item_id){
  * @param ignorepath Ignore any path information that may be present.
  * @return Object ID or 0 if not found.
  */
-uint32_t getFileID(gchar* filename, gboolean ignorepath){
+uint32_t getFileID(gchar* filename, gboolean ignorepath) {
     LIBMTP_file_t* files = deviceFiles;
     uint32_t folderID = 0;
 
@@ -1637,12 +1764,12 @@ uint32_t getFileID(gchar* filename, gboolean ignorepath){
     gchar* dirfilename = g_path_get_dirname(filename);
 
     // If we are ignoring all path information, then simply scan all files for the filename.
-    if(ignorepath == TRUE){
-        while(files != NULL){
+    if (ignorepath == TRUE) {
+        while (files != NULL) {
             // Ensure we only check if we are on the current storage device...
-            if(files->storage_id == DeviceMgr.devicestorage->id){
+            if (files->storage_id == DeviceMgr.devicestorage->id) {
                 // See if our filename is the same.
-                if(g_ascii_strcasecmp(basefilename, files->filename) == 0){
+                if (g_ascii_strcasecmp(basefilename, files->filename) == 0) {
                     // We found our file...
                     g_free(basefilename);
                     g_free(dirfilename);
@@ -1654,17 +1781,17 @@ uint32_t getFileID(gchar* filename, gboolean ignorepath){
     } else {
         // Lets find the folderid of the path we have, so it makes searching a lot easier...
         folderID = getFolderID(deviceFolders, dirfilename);
-        if(folderID == -1){
+        if ((int32_t) folderID == -1) {
             // We don't have this path on the device, so no need to continue checking.
             g_free(basefilename);
             g_free(dirfilename);
             return 0;
         }
-        while(files != NULL){
+        while (files != NULL) {
             // Ensure we only check if we are on the current storage device AND the file is in the correct folder...
-            if((files->storage_id == DeviceMgr.devicestorage->id)&&(files->parent_id == folderID)){
+            if ((files->storage_id == DeviceMgr.devicestorage->id) && (files->parent_id == folderID)) {
                 // See if our filename is the same.
-                if(g_ascii_strcasecmp(basefilename, files->filename) == 0){
+                if (g_ascii_strcasecmp(basefilename, files->filename) == 0) {
                     // We found our file...
                     g_free(basefilename);
                     g_free(dirfilename);
@@ -1687,20 +1814,20 @@ uint32_t getFileID(gchar* filename, gboolean ignorepath){
  * @param foldername Name of the folder to find.
  * @return Object ID or -1 if not found.
  */
-uint32_t getFolderID(LIBMTP_folder_t* folderptr, gchar* foldername){
+uint32_t getFolderID(LIBMTP_folder_t* folderptr, gchar* foldername) {
     gchar** pathcomponents;
-    if(g_ascii_strcasecmp(foldername, ".") == 0){
+    if (g_ascii_strcasecmp(foldername, ".") == 0) {
         // We have a root directory...
         return 0;
     }
     // Get the first component of the foldername.
     pathcomponents = g_strsplit(foldername, "/", 2);
-    while(folderptr != NULL){
-        if(g_ascii_strcasecmp(pathcomponents[0], folderptr->name) == 0){
+    while (folderptr != NULL) {
+        if (g_ascii_strcasecmp(pathcomponents[0], folderptr->name) == 0) {
             // We have found our path...
             // If we have of the path to process then...
-            if(pathcomponents[1] != NULL){
-                return(getFolderID(folderptr->child, pathcomponents[1]));
+            if (pathcomponents[1] != NULL) {
+                return (getFolderID(folderptr->child, pathcomponents[1]));
             } else {
                 return folderptr->folder_id;
             }
@@ -1711,3 +1838,298 @@ uint32_t getFolderID(LIBMTP_folder_t* folderptr, gchar* foldername){
     return -1;
 }
 
+
+// ************************************************************************************************
+
+/**
+ * Returns the string holding the full path name for the given folderid.
+ * @param folderid - the selected path to be returned.
+ * @return The full path name.
+ */
+gchar* getFullFolderPath(uint32_t folderid) {
+
+    gchar* fullfilename = g_strdup("");
+    gchar* tmpfilename = NULL;
+    uint32_t parent_id = folderid;
+    guint stringlength = 0;
+    LIBMTP_folder_t* tmpfolder = deviceFolders;
+
+    while (tmpfolder != NULL) {
+        tmpfolder = getCurrentFolderPtr(deviceFolders, parent_id);
+        if (tmpfolder != NULL) {
+            // We have something.
+            tmpfilename = g_strdup_printf("%s/%s", tmpfolder->name, fullfilename);
+            g_free(fullfilename);
+            fullfilename = tmpfilename;
+            parent_id = tmpfolder->parent_id;
+        }
+    }
+    // Add in leading slash if needed
+    if (*fullfilename != '/') {
+        tmpfilename = g_strdup_printf("/%s", fullfilename);
+        g_free(fullfilename);
+        fullfilename = tmpfilename;
+    }
+    // Remove trailing slash if needed.
+    stringlength = strlen(fullfilename);
+    if (stringlength > 1) {
+        fullfilename[stringlength - 1] = '\0';
+    }
+    return fullfilename;
+}
+
+
+// ************************************************************************************************
+
+/**
+ * Returns a list of files/folders that have been found on the device.
+ * @param searchstring - string to search
+ * @param searchfiles - search files/folder names.
+ * @param searchmeta - search file metadata.
+ * @return
+ */
+GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchmeta) {
+    GSList *list = NULL;
+    GPatternSpec *pspec = g_pattern_spec_new(searchstring);
+    LIBMTP_file_t *files = deviceFiles;
+    LIBMTP_track_t *tracks = deviceTracks;
+    FileListStruc *filestruc = NULL;
+    LIBMTP_track_t *trackinfo;
+    gchar *tmpstring1 = NULL;
+    gchar *tmpstring2 = NULL;
+    gchar *tmpstring3 = NULL;
+    gchar *tmpstring4 = NULL;
+
+    if (searchfiles == TRUE) {
+        // Search folders
+        folderSearch(pspec, &list, deviceFolders);
+        // Seach files.
+        while (files != NULL) {
+            if ((files->storage_id == DeviceMgr.devicestorage->id)) {
+                // Make search case insensitive.
+                tmpstring1 = g_utf8_strup(files->filename, -1);
+                if (g_pattern_match_string(pspec, tmpstring1) == TRUE) {
+                    g_free(tmpstring1);
+                    tmpstring1 = NULL;
+                    // We have found a matching string...
+                    filestruc = g_malloc(sizeof (FileListStruc));
+                    if (filestruc == NULL) {
+                        g_fprintf(stderr, _("malloc in filesSearch failed\n"));
+                        displayError(_("Failed searching? 'malloc in filesSearch'\n"));
+                        return list;
+                    }
+                    filestruc->filename = g_strdup(files->filename);
+                    filestruc->filesize = files->filesize;
+                    filestruc->isFolder = FALSE;
+                    filestruc->itemid = files->item_id;
+                    filestruc->filetype = files->filetype;
+                    filestruc->location = getFullFolderPath(files->parent_id);
+                    list = g_slist_append(list, filestruc);
+                } else if (searchmeta == TRUE) {
+                    // Now if it's a track type file, eg OGG, WMA, MP3 or FLAC, get it's metadata.
+                    // search case insensitive.
+                    if ((files->filetype == LIBMTP_FILETYPE_MP3) ||
+                            (files->filetype == LIBMTP_FILETYPE_OGG) ||
+                            (files->filetype == LIBMTP_FILETYPE_FLAC) ||
+                            (files->filetype == LIBMTP_FILETYPE_WMA)) {
+                        trackinfo = LIBMTP_Get_Trackmetadata(DeviceMgr.device, files->item_id);
+                        if (trackinfo != NULL) {
+                            // search case insensitive.
+                            if (tmpstring1 != NULL) {
+                                g_free(tmpstring1);
+                                tmpstring1 = NULL;
+                            }
+                            tmpstring1 = g_utf8_strup(trackinfo->album, -1);
+                            tmpstring2 = g_utf8_strup(trackinfo->artist, -1);
+                            tmpstring3 = g_utf8_strup(trackinfo->genre, -1);
+                            tmpstring4 = g_utf8_strup(trackinfo->title, -1);
+                            if ((g_pattern_match_string(pspec, tmpstring1) == TRUE) ||
+                                    (g_pattern_match_string(pspec, tmpstring2) == TRUE) ||
+                                    (g_pattern_match_string(pspec, tmpstring3) == TRUE) ||
+                                    (g_pattern_match_string(pspec, tmpstring4) == TRUE)) {
+                                // We have found a matching string...
+                                filestruc = g_malloc(sizeof (FileListStruc));
+                                if (filestruc == NULL) {
+                                    if (tmpstring1 != NULL) {
+                                        g_free(tmpstring1);
+                                        tmpstring1 = NULL;
+                                    }
+                                    if (tmpstring2 != NULL) {
+                                        g_free(tmpstring2);
+                                        tmpstring2 = NULL;
+                                    }
+                                    if (tmpstring3 != NULL) {
+                                        g_free(tmpstring3);
+                                        tmpstring3 = NULL;
+                                    }
+                                    if (tmpstring4 != NULL) {
+                                        g_free(tmpstring4);
+                                        tmpstring4 = NULL;
+                                    }
+                                    g_fprintf(stderr, _("malloc in filesSearch failed\n"));
+                                    displayError(_("Failed searching? 'malloc in filesSearch'\n"));
+                                    return list;
+                                }
+                                filestruc->filename = g_strdup(files->filename);
+                                filestruc->filesize = files->filesize;
+                                filestruc->isFolder = FALSE;
+                                filestruc->itemid = files->item_id;
+                                filestruc->filetype = files->filetype;
+                                filestruc->location = getFullFolderPath(files->parent_id);
+                                list = g_slist_append(list, filestruc);
+                            }
+                            if (tmpstring1 != NULL) {
+                                g_free(tmpstring1);
+                                tmpstring1 = NULL;
+                            }
+                            if (tmpstring2 != NULL) {
+                                g_free(tmpstring2);
+                                tmpstring2 = NULL;
+                            }
+                            if (tmpstring3 != NULL) {
+                                g_free(tmpstring3);
+                                tmpstring3 = NULL;
+                            }
+                            if (tmpstring4 != NULL) {
+                                g_free(tmpstring4);
+                                tmpstring4 = NULL;
+                            }
+                            LIBMTP_destroy_track_t(trackinfo);
+                        }
+                    }
+                }
+                if (tmpstring1 != NULL) {
+                    g_free(tmpstring1);
+                    tmpstring1 = NULL;
+                }
+            }
+            files = files->next;
+        }
+    } else if (searchmeta == TRUE) {
+        // Search using the Track information only.
+        while (tracks != NULL) {
+            // Make search case insensitive.
+            tmpstring1 = g_utf8_strup(tracks->album, -1);
+            tmpstring2 = g_utf8_strup(tracks->artist, -1);
+            tmpstring3 = g_utf8_strup(tracks->genre, -1);
+            tmpstring4 = g_utf8_strup(tracks->title, -1);
+            if ((g_pattern_match_string(pspec, tmpstring1) == TRUE) ||
+                    (g_pattern_match_string(pspec, tmpstring2) == TRUE) ||
+                    (g_pattern_match_string(pspec, tmpstring3) == TRUE) ||
+                    (g_pattern_match_string(pspec, tmpstring4) == TRUE)) {
+                // We have found a matching string...
+                filestruc = g_malloc(sizeof (FileListStruc));
+                if (filestruc == NULL) {
+                    if (tmpstring1 != NULL) {
+                        g_free(tmpstring1);
+                        tmpstring1 = NULL;
+                    }
+                    if (tmpstring2 != NULL) {
+                        g_free(tmpstring2);
+                        tmpstring2 = NULL;
+                    }
+                    if (tmpstring3 != NULL) {
+                        g_free(tmpstring3);
+                        tmpstring3 = NULL;
+                    }
+                    if (tmpstring4 != NULL) {
+                        g_free(tmpstring4);
+                        tmpstring4 = NULL;
+                    }
+                    g_fprintf(stderr, _("malloc in filesSearch failed\n"));
+                    displayError(_("Failed searching? 'malloc in filesSearch'\n"));
+                    return list;
+                }
+                filestruc->filename = g_strdup(tracks->filename);
+                filestruc->filesize = tracks->filesize;
+                filestruc->isFolder = FALSE;
+                filestruc->itemid = tracks->item_id;
+                filestruc->filetype = tracks->filetype;
+                filestruc->location = getFullFolderPath(tracks->parent_id);
+                list = g_slist_append(list, filestruc);
+            }
+            if (tmpstring1 != NULL) {
+                g_free(tmpstring1);
+                tmpstring1 = NULL;
+            }
+            if (tmpstring2 != NULL) {
+                g_free(tmpstring2);
+                tmpstring2 = NULL;
+            }
+            if (tmpstring3 != NULL) {
+                g_free(tmpstring3);
+                tmpstring3 = NULL;
+            }
+            if (tmpstring4 != NULL) {
+                g_free(tmpstring4);
+                tmpstring4 = NULL;
+            }
+            tracks = tracks->next;
+        }
+    }
+    return list;
+}
+
+
+// ************************************************************************************************
+
+/**
+ * Search the folder hier for the foldername.
+ * @param pspec - foldername to search
+ * @param list - the GSList to append found items.
+ * @param folderptr - the MTP folder struc to search.
+ */
+void folderSearch(GPatternSpec *pspec, GSList **list, LIBMTP_folder_t * folderptr) {
+    FileListStruc *filestruc = NULL;
+    gchar *tmpstring = NULL;
+    while (folderptr != NULL) {
+        // Make search case insensitive.
+        tmpstring = g_utf8_strup(folderptr->name, -1);
+        if (g_pattern_match_string(pspec, tmpstring) == TRUE) {
+            // We have found a matching string...
+            filestruc = g_malloc(sizeof (FileListStruc));
+            if (filestruc == NULL) {
+                if (tmpstring != NULL) {
+                    g_free(tmpstring);
+                    tmpstring = NULL;
+                }
+                g_fprintf(stderr, _("malloc in foldersearch failed\n"));
+                displayError(_("Failed searching? 'malloc in foldersearch'\n"));
+                return;
+            }
+            filestruc->filename = g_strdup(folderptr->name);
+            filestruc->filesize = 0;
+            filestruc->isFolder = TRUE;
+            filestruc->itemid = folderptr->folder_id;
+#if defined(LIBMTP_FILETYPE_FOLDER)
+            filestruc->filetype = LIBMTP_FILETYPE_FOLDER;
+#else
+            filestruc->filetype = LIBMTP_FILETYPE_UNKNOWN;
+#endif
+            filestruc->location = getFullFolderPath(folderptr->parent_id);
+            *(list) = g_slist_append(*(list), filestruc);
+        }
+        if (tmpstring != NULL) {
+            g_free(tmpstring);
+            tmpstring = NULL;
+        }
+        // Search child if present;
+        if (folderptr->child != NULL) {
+            folderSearch(pspec, list, folderptr->child);
+        }
+        folderptr = folderptr->sibling;
+    }
+}
+
+
+// ************************************************************************************************
+
+/**
+ * Updates the parent FolderID for a given object within the device.
+ * @param objectID - The object to be updated.
+ * @param folderID - The new parent folder ID for the object.
+ * @return 0 on success, any other value means failure.
+ */
+int setNewParentFolderID(uint32_t objectID, uint32_t folderID) {
+    return LIBMTP_Set_Object_u32(DeviceMgr.device, objectID, LIBMTP_PROPERTY_ParentObject, folderID);
+}

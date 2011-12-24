@@ -21,7 +21,7 @@ extern "C" {
 
 #define PACKAGE "gmtp"
 #define PACKAGE_TITLE "gMTP"
-#define PACKAGE_VERSION "1.2.0"
+#define PACKAGE_VERSION "1.3.0"
 
 #define GMTP_GSETTINGS_SCHEMA "org.gnome.gmtp"
 
@@ -39,6 +39,11 @@ extern "C" {
 #endif
 #define GMTP_USE_GTK2 0
 #endif
+
+        /* Define that all files are to be C99 compliant with POSIX. */
+#define _STDC_C99
+#define _POSIX_C_SOURCE 200112L
+#define _XOPEN_SOURCE 600
 
 #ifdef	__cplusplus
 }

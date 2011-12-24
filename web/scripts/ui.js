@@ -109,9 +109,9 @@ function saveSettings(){
 
 function SetDefaultView(){
     ShowMenu('DivHome');
-    toggle('libmtp');
-    toggle('libid3tag');
-    toggle('libflac');
+    gmtp_toggle('libmtp');
+    gmtp_toggle('libid3tag');
+    gmtp_toggle('libflac');
     // Get the hash after the URL, and set that area to be viewed.
     var loc = location.hash;
     if(loc != ""){
@@ -120,6 +120,9 @@ function SetDefaultView(){
         ShowMenu(loc);
     }
     window.scroll(0,0);
+    if(loc == 'DivScreenshots'){
+        myFrog.thumbIn(1, 'right');
+    }
 }
 
 function ShowMenu(div_name){
@@ -141,7 +144,7 @@ function ShowMenu(div_name){
     }
 }
 
-function toggle(div_name) {
+function gmtp_toggle(div_name) {
 
     var elementObject = (document.getElementById) ? document.getElementById(div_name) : document.all(div_name);
     var imageObject = (document.getElementById) ? document.getElementById(div_name + '_image') : document.all(div_name + '_image');
