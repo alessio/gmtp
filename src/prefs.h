@@ -37,6 +37,7 @@ extern "C" {
         gboolean view_year;
         gboolean view_genre;
         gboolean view_duration;
+        gboolean view_folders;
     } Preferences_Struct;
 
     Preferences_Struct Preferences;

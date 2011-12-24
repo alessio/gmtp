@@ -40,7 +40,7 @@
 #include "prefs.h"
 #include "dnd.h"
 
-const GtkTargetEntry _gmtp_drop_types[] = {
+GtkTargetEntry _gmtp_drop_types[] = {
     {"text/plain", 0, GMTP_DROP_PLAINTEXT},
     {"text/uri-list", 0, GMTP_DROP_URLENCODED},
     {"STRING", 0, GMTP_DROP_STRING}
@@ -59,14 +59,8 @@ const GtkTargetEntry _gmtp_drop_types[] = {
  * @param time
  * @param user_data
  */
-void gmtp_drag_data_received(GtkWidget * widget,
-    GdkDragContext * context,
-    gint x,
-    gint y,
-    GtkSelectionData * selection_data,
-    guint info,
-    guint time,
-    gpointer user_data) {
+void gmtp_drag_data_received(GtkWidget *widget, GdkDragContext *context, gint x, gint y,
+        GtkSelectionData *selection_data, guint info, guint time, gpointer user_data) {
 #if GMTP_USE_GTK2
     if (selection_data->data)
 #else
@@ -81,7 +75,7 @@ void gmtp_drag_data_received(GtkWidget * widget,
         files = getFilesListURI((gchar *) gtk_selection_data_get_data(selection_data));
 #endif
         // Set the Playlist ID to be asked if needed.
-        if(Preferences.auto_add_track_to_playlist == TRUE){
+        if (Preferences.auto_add_track_to_playlist == TRUE) {
             addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
         } else {
             addTrackPlaylistID = GMTP_NO_PLAYLIST;
@@ -98,6 +92,112 @@ void gmtp_drag_data_received(GtkWidget * widget,
         deviceoverwriteop = MTP_ASK;
     }
 } // gmtp_drag_data_received()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle the initial drop of data into gmtp.
+ * @param widget
+ * @param context
+ * @param x
+ * @param y
+ * @param selection_data
+ * @param info
+ * @param time
+ * @param user_data
+ */
+
+void gmtpfolders_drag_data_received(GtkWidget * widget, GdkDragContext * context, gint x, gint y,
+        GtkSelectionData * selection_data, guint info, guint time, gpointer user_data) {
+
+    //uint32_t mainFolderID = 0;
+    int64_t targetFolderID = 0;
+
+    g_signal_stop_emission_by_name((gpointer) treeviewFolders, "drag-data-received");
+
+#if GMTP_USE_GTK2
+    if (selection_data->data)
+#else
+    if (gtk_selection_data_get_data(selection_data))
+#endif
+    {
+
+        //mainFolderID = currentFolderID;
+
+        // Get our target folder ID...
+        targetFolderID = folderListGetSelection();
+        if (targetFolderID != -1) {
+            currentFolderID = targetFolderID;
+
+            GSList* files;
+#if GMTP_USE_GTK2
+            files = getFilesListURI((gchar *) selection_data->data);
+#else
+            files = getFilesListURI((gchar *) gtk_selection_data_get_data(selection_data));
+#endif
+            // Set the Playlist ID to be asked if needed.
+            if (Preferences.auto_add_track_to_playlist == TRUE) {
+                addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
+            } else {
+                addTrackPlaylistID = GMTP_NO_PLAYLIST;
+            }
+
+            // Add the files.
+            if (files != NULL) {
+                g_slist_foreach(files, (GFunc) __filesAdd, NULL);
+            }
+            // Now clear the GList;
+            g_slist_foreach(files, (GFunc) g_free, NULL);
+            g_slist_free(files);
+            // Now do a device rescan to see the new files.
+
+            // Restore our current Folder ID.
+            //currentFolderID = mainFolderID;
+        }
+
+        deviceRescan();
+        deviceoverwriteop = MTP_ASK;
+    }
+}
+
+
+// ************************************************************************************************
+
+/**
+ * Handle drag motion across the folder widget.
+ * @param widget
+ * @param context
+ * @param x
+ * @param y
+ * @param time
+ */
+void gmtpfolders_drag_motion_received(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time) {
+    GtkTreePath *path;
+    GtkTreeViewDropPosition pos;
+
+    if (gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(widget), x, y, &path, &pos)) {
+
+        // Highlight the current row...
+        gtk_tree_selection_select_path(folderSelection, path);
+
+        // Get our folder ID in to which to drop the file.
+/*
+        GtkTreeModel *sortmodel;
+        GtkTreeIter iter;
+        uint32_t objectID;
+        gchar *filename = NULL;
+        sortmodel = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+        path = gtk_tree_model_sort_convert_path_to_child_path(GTK_TREE_MODEL_SORT(sortmodel), path);
+        gtk_tree_model_get_iter(GTK_TREE_MODEL(folderList), &iter, path);
+        gtk_tree_model_get(GTK_TREE_MODEL(folderList), &iter, COL_FOL_ID, &objectID,
+                COL_FOL_NAME_HIDDEN, &filename, -1);
+
+        printf("X: %d, Y: %d, Object: %d , Name: %s\n", x, y, objectID, filename);
+*/
+
+    }
+}
 
 // ************************************************************************************************
 
@@ -205,7 +305,7 @@ void addFilesinFolder(gchar* foldername) {
         }
     }
     // Set the Playlist ID to be asked if needed.
-    if(Preferences.auto_add_track_to_playlist == TRUE){
+    if (Preferences.auto_add_track_to_playlist == TRUE) {
         addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
     } else {
         addTrackPlaylistID = GMTP_NO_PLAYLIST;

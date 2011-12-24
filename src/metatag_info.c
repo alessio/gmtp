@@ -62,6 +62,14 @@ int mp3_bitrate[2][3][15] = {
     }
 };
 
+int mp3_sampleperframe[3][4] = {
+    // MP2.5 , res , MP2,  MP1
+       {576,    0,   576,  1152}, // Layer 3
+       {1152,   0,   1152, 1152}, // Layer 2
+       {384,    0,   384,  384} // Layer 1
+
+};
+
 // ************************************************************************************************
 
 /**
@@ -85,22 +93,26 @@ gchar * ID3_getFrameText(struct id3_tag *tag, char *frame_name) {
     if (id3_field && (id3_field_type(id3_field) == ID3_FIELD_TYPE_TEXTENCODING)) {
         id3_field_encoding = id3_field->number.value;
     }
-    if (frame_name == ID3_FRAME_COMMENT) {
+    //if (frame_name == ID3_FRAME_COMMENT) {
+    if(g_ascii_strcasecmp(frame_name, ID3_FRAME_COMMENT) == 0){
         id3_field = id3_frame_field(id3_frame, 3);
     } else {
         id3_field = id3_frame_field(id3_frame, 1);
     }
     if (id3_field == NULL)
         return NULL;
-    if (frame_name == ID3_FRAME_COMMENT) {
+        
+    if (g_ascii_strcasecmp(frame_name, ID3_FRAME_COMMENT) == 0) {
         id3_string = id3_field_getfullstring(id3_field);
     } else {
         id3_string = id3_field_getstrings(id3_field, 0);
     }
     if (id3_string == NULL)
         return NULL;
-    if (frame_name == ID3_FRAME_GENRE)
+        
+    if (g_ascii_strcasecmp(frame_name, ID3_FRAME_GENRE) == 0)
         id3_string = id3_genre_name(id3_string);
+        
     if (id3_field_encoding == ID3_FIELD_TEXTENCODING_ISO_8859_1) {
         rtn_string = (gchar *) id3_ucs4_latin1duplicate(id3_string);
     } else {
@@ -123,10 +135,20 @@ gboolean get_mp3_header(FILE * mp3_file, MP3_header * header_info) {
     uint32_t id3_footer = 0;
     uint32_t id3_size = 0;
 
+resync:
     if (fread(&raw_header, sizeof (uint8_t)*10, 1, mp3_file) < 1) {
         header_info->header_sync = 0;
         return FALSE;
     }
+    /*
+        // Print header info for debugging
+        printf("Offset: %llx : ", ftell(mp3_file) - 10);
+        for (int i = 0; i < 10; i++) {
+            printf("0x%x ", raw_header[i]);
+        }
+        printf("\n");
+     */
+
     header_info->header_sync = ((raw_header[0] << 4) | ((raw_header[1]&0xE0) >> 4));
 
     // Check for ID3 Tags
@@ -149,11 +171,22 @@ gboolean get_mp3_header(FILE * mp3_file, MP3_header * header_info) {
                 header_info->header_sync = 0;
                 return FALSE;
             }
+            /*
+                        // Print header info for debugging
+                        printf("Offset: %llx : ", ftell(mp3_file) - 10);
+                        for (int i = 0; i < 10; i++) {
+                            printf("0x%x ", raw_header[i]);
+                        }
+                        printf("\n");
+             */
             header_info->header_sync = ((raw_header[0] << 4) | ((raw_header[1]&0xE0) >> 4));
         } else {
             // Not a valid frame, nor an ID3 frame?
+            // Attempt resync;
             header_info->header_sync = 0;
-            return FALSE;
+            fseek(mp3_file, -9, SEEK_CUR);
+            goto resync;
+            //return FALSE;
         }
     }
 
@@ -177,16 +210,27 @@ gboolean get_mp3_header(FILE * mp3_file, MP3_header * header_info) {
         || (header_info->bitrate == 0xF) // Bad value
         || (header_info->samplerate == 0x3)) { // Reserved value
         header_info->header_sync = 0;
-        return FALSE;
+        // Attempt resync;
+        header_info->header_sync = 0;
+        fseek(mp3_file, -9, SEEK_CUR);
+        goto resync;
+        //return FALSE;
     }
     // We have a valid header, so forward to next possible frame.
-    // FrameSize = 144 * BitRate / (SampleRate + Padding).
+    // FrameSize = (samples per sec / 8)  * BitRate / (SampleRate + Padding).
 
-    framesize = 144
-        * mp3_bitrate[header_info->version & 0x1][header_info->layer - 1][header_info->bitrate] * 1000 // Bitrate
-        / (mp3_samplerate[header_info->version & 0x1][header_info->samplerate] // Sample Rate
-        + header_info->padding) + header_info->padding; // Padding bit
-
+    // Layer I
+    if (header_info->layer == 3) {
+        framesize = ((12 * mp3_bitrate[header_info->version & 0x1][header_info->layer - 1][header_info->bitrate] * 1000
+            / mp3_samplerate[header_info->version & 0x1][header_info->samplerate]
+            ) + header_info->padding) * 4;
+    } else {
+        // Layer 2 and Layer 3
+        framesize = (mp3_sampleperframe[header_info->layer - 1][header_info->version] / 8 )     // Samples per frame.
+            * mp3_bitrate[header_info->version & 0x1][header_info->layer - 1][header_info->bitrate] * 1000 // Bitrate
+            / (mp3_samplerate[header_info->version & 0x1][header_info->samplerate] // Sample Rate
+            ) + header_info->padding; // Padding bit
+    }
     fseek(mp3_file, (framesize - 10), SEEK_CUR);
     return TRUE;
 }
@@ -238,7 +282,7 @@ void get_mp3_info(gchar *filename, MP3_Info *mp3_struct) {
             mp3_struct->channels = 2;
         }
         // Scan the full file for all frames.
-        while ((get_mp3_header(mp3_file, &header_info) == TRUE) && (ftell(mp3_file) < (filesize - 128))) {
+        while ((ftell(mp3_file) < (int64_t) (filesize - 128)) && (get_mp3_header(mp3_file, &header_info) == TRUE)) {
             new_bitrate = mp3_bitrate[header_info.version & 0x1][header_info.layer - 1][header_info.bitrate];
             total_bitrate += new_bitrate;
             frames_sampled++;

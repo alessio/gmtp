@@ -166,6 +166,17 @@
       </locale>
     </schema>
     <schema>
+      <key>/schemas/apps/gMTP/viewFolders</key>
+      <applyto>/apps/gMTP/viewFolders</applyto>
+      <owner>gMTP</owner>
+      <type>bool</type>
+      <locale name="C">
+        <default>false</default>
+        <short>Toggle to view folder tree list in main window</short>
+        <long>Toggle to view folder tree list in main window</long>
+      </locale>
+    </schema>
+    <schema>
       <key>/schemas/apps/gMTP/autoAddTrackPlaylist</key>
       <applyto>/apps/gMTP/autoAddTrackPlaylist</applyto>
       <owner>gMTP</owner>

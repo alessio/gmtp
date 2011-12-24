@@ -42,7 +42,16 @@ extern "C" {
         COL_DURATION,
         COL_DURATION_HIDDEN,
         COL_ICON,
+        COL_LOCATION,
         NUM_COLUMNS
+    };
+
+    enum folderListID {
+        COL_FOL_NAME = 0,
+        COL_FOL_NAME_HIDDEN,
+        COL_FOL_ID,
+        COL_FOL_ICON,
+        NUM_FOL_COLUMNS
     };
 
     // Playlist windows lists.
@@ -71,6 +80,8 @@ extern "C" {
         gboolean isFolder;
         gchar *filename;
         uint64_t filesize;
+        LIBMTP_filetype_t filetype;
+        gchar *location;
     } FileListStruc;
 
     typedef struct {
@@ -90,11 +101,19 @@ extern "C" {
 
     // Main Window widgets
     GtkListStore *fileList;
+    GtkTreeStore *folderList;
+    GtkTreeSelection *fileSelection;
+    GtkTreeSelection *folderSelection;
+    gulong folderSelectHandler;
+    gulong fileSelectHandler;
 
     GtkWidget* create_windowMain(void);
+    void setWindowTitle(gchar *foldername);
     GtkWidget* create_windowPreferences(void);
     GtkWidget* create_windowProperties(void);
     GtkWidget* create_windowMainContextMenu(void);
+    GtkWidget* create_windowMainColumnContextMenu(void);
+    GtkWidget* create_windowFolderContextMenu(void);
     GtkWidget* create_windowPlaylist(void);
     GtkWidget* create_windowFormat(void);
 
@@ -110,13 +129,32 @@ extern "C" {
     gboolean fileListDownload(GList *List);
     GList* fileListGetSelection();
     gboolean fileListClearSelection();
+    gboolean fileListSelectAll(void);
 
     gboolean folderListRemove(GList *List);
+    gboolean folderListClear();
+    gboolean folderListAdd(LIBMTP_folder_t *folders, GtkTreeIter *parent);
+    int64_t folderListGetSelection(void);
+    gchar *folderListGetSelectionName(void);
+    gboolean folderListDownload(gchar *foldername, uint32_t folderid);
+
+    int64_t getTargetFolderLocation(void);
+    gboolean folderListAddDialog(LIBMTP_folder_t *folders, GtkTreeIter *parent, GtkTreeStore *fl);
+    void __fileMove(GtkTreeRowReference *Row);
 
     // Flags for overwriting files of host PC and device.
     gint fileoverwriteop;
     // Flag to allow overwrite of files on device.
     gint deviceoverwriteop;
+
+    // Find options and variables.
+    gboolean inFindMode;
+    GSList *searchList;
+    void g_free_search(FileListStruc *file);
+    GtkWidget *FindToolbar_entry_FindText;
+    GtkWidget *FindToolbar_checkbutton_FindFiles;
+    GtkWidget *FindToolbar_checkbutton_TrackInformation;
+
     // Aggreegate function for adding a file to the device.
     void __filesAdd(gchar* filename);
 
@@ -182,8 +220,16 @@ extern "C" {
 
     void playlist_SavePlaylist(gint PlayListID);
 
+    gboolean fileListAddToPlaylist(GList *List, uint32_t PlaylistID);
+    gboolean fileListRemoveFromPlaylist(GList *List, uint32_t PlaylistID);
+    void __fileAddToPlaylist(GtkTreeRowReference *Row, LIBMTP_playlist_t **playlist);
+    void __fileRemoveFromPlaylist(GtkTreeRowReference *Row, LIBMTP_playlist_t **playlist);
+
     // Add track to playlist dialog;
-    uint32_t displayAddTrackPlaylistDialog(void);
+    int32_t displayAddTrackPlaylistDialog(gboolean showNew /* = TRUE */);
+
+    // Widget for find toolbar
+    GtkWidget *findToolbar;
 
     // Widgets for menu items;
     GtkWidget *fileConnect;
@@ -191,13 +237,21 @@ extern "C" {
     GtkWidget *fileDownload;
     GtkWidget *fileRemove;
     GtkWidget *fileRename;
+    GtkWidget *fileMove;
     GtkWidget *fileNewFolder;
     GtkWidget *fileRemoveFolder;
     GtkWidget *fileRescan;
     GtkWidget *editDeviceName;
     GtkWidget *editFormatDevice;
     GtkWidget *editAddAlbumArt;
+    GtkWidget *editFind;
+    GtkWidget *editSelectAll;
     GtkWidget *contextMenu;
+    GtkWidget *contextMenuColumn;
+    GtkWidget *contestMenuFolder;
+    GtkWidget* cfileAdd;
+    GtkWidget* cfileNewFolder;
+    GtkWidget *toolbuttonAddFile;
 #if GMTP_USE_GTK2
     GtkTooltips *tooltipsToolbar;
 #endif
@@ -212,6 +266,7 @@ extern "C" {
     GtkTreeViewColumn *column_Year;
     GtkTreeViewColumn *column_Genre;
     GtkTreeViewColumn *column_Duration;
+    GtkTreeViewColumn *column_Location;
 
     // Main menu widgets
     GtkWidget *menu_view_filesize;
@@ -223,6 +278,18 @@ extern "C" {
     GtkWidget *menu_view_year;
     GtkWidget *menu_view_genre;
     GtkWidget *menu_view_duration;
+    GtkWidget *menu_view_folders;
+
+    // Column view context menu;
+    GtkWidget* cViewSize;
+    GtkWidget* cViewType;
+    GtkWidget* cViewTrackName;
+    GtkWidget* cViewTrackNumber;
+    GtkWidget* cViewArtist;
+    GtkWidget* cViewAlbum;
+    GtkWidget* cViewYear;
+    GtkWidget* cViewGenre;
+    GtkWidget* cViewDuration;
 
     // Widgets for preferences buttons;
     GtkWidget *checkbuttonDeviceConnect;
@@ -263,6 +330,8 @@ extern "C" {
 
     // Combobox used in AddTrackPlaylist feature.
     GtkWidget *combobox_AddTrackPlaylist;
+
+    int64_t fileMoveTargetFolder;
 
 #ifdef  __cplusplus
 }

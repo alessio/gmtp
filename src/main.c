@@ -50,6 +50,7 @@ GtkWidget *windowPlaylistDialog;
 GtkWidget *windowStatusBar;
 GtkWidget *toolbuttonConnect;
 GtkWidget *treeviewFiles;
+GtkWidget *treeviewFolders;
 
 // The device which we are connected with.
 Device_Struct DeviceMgr;
@@ -96,8 +97,11 @@ int main(int argc, char *argv[]) {
 #if GMTP_USE_GTK2
     gtk_set_locale();
 #endif
-    gtk_init(&argc, &argv);
+    g_set_prgname(PACKAGE_TITLE);
+    g_set_application_name(PACKAGE_TITLE);
 
+    gtk_init(&argc, &argv);
+    
 #ifdef ENABLE_NLS
     bindtextdomain(PACKAGE, g_strconcat(applicationpath, "/../share/locale", NULL));
     bind_textdomain_codeset(PACKAGE, "UTF-8");

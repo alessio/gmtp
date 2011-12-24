@@ -26,6 +26,7 @@
 #include <gtk/gtk.h>
 #include <libmtp.h>
 #include <id3tag.h>
+#include <stdlib.h>
 
 #include "main.h"
 #include "callbacks.h"
@@ -77,16 +78,16 @@ void on_deviceProperties_activate(GtkMenuItem *menuitem, gpointer user_data) {
     // Update the status bar with our information.
     if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
         tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-            (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
     } else {
         if (DeviceMgr.devicestorage->StorageDescription != NULL) {
             tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"),
-                DeviceMgr.devicename->str,
-                DeviceMgr.devicestorage->StorageDescription,
-                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                    DeviceMgr.devicename->str,
+                    DeviceMgr.devicestorage->StorageDescription,
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
         } else {
             tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
         }
     }
     statusBarSet(tmp_string);
@@ -138,14 +139,22 @@ void on_deviceRescan_activate(GtkMenuItem *menuitem, gpointer user_data) {
  */
 void on_filesAdd_activate(GtkMenuItem *menuitem, gpointer user_data) {
     GSList* files;
+    int64_t targetFol = 0;
+    //uint32_t tmpFolderID = 0;
     // Set the Playlist ID to be asked if needed.
-    if(Preferences.auto_add_track_to_playlist == TRUE){
+    if (Preferences.auto_add_track_to_playlist == TRUE) {
         addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
     } else {
         addTrackPlaylistID = GMTP_NO_PLAYLIST;
     }
     // Get the files, and add them.
     files = getFileGetList2Add();
+
+    // See if a folder is selected in the folder view, and if so add the files to that folder.
+    if ((targetFol = folderListGetSelection()) != -1) {
+        //tmpFolderID = currentFolderID;
+        currentFolderID = (uint32_t) targetFol;
+    }
     if (files != NULL)
         g_slist_foreach(files, (GFunc) __filesAdd, NULL);
 
@@ -153,6 +162,11 @@ void on_filesAdd_activate(GtkMenuItem *menuitem, gpointer user_data) {
     g_slist_foreach(files, (GFunc) g_free, NULL);
     g_slist_free(files);
 
+    // Restore the current folder ID is we added to another folder.
+    if (targetFol != -1) {
+        // Disable this, so the user is taken to the folder in which the files were added to.
+        //currentFolderID = tmpFolderID;
+    }
     // Now do a device rescan to see the new files.
     deviceRescan();
     deviceoverwriteop = MTP_ASK;
@@ -176,7 +190,13 @@ void on_fileRenameFile_activate(GtkMenuItem *menuitem, gpointer user_data) {
 
     // Let's check to see if we have anything selected in our treeview?
     if (fileListGetSelection() == NULL) {
-        displayInformation(_("No files/folders selected?"));
+
+        // See if anything is selected in the folder view, if so use that as our source.
+        if (folderListGetSelection() != -1) {
+            on_folderRenameFolder_activate(menuitem, user_data);
+        } else {
+            displayInformation(_("No files/folders selected?"));
+        }
         return;
     }
     GList *List = fileListGetSelection();
@@ -188,7 +208,7 @@ void on_fileRenameFile_activate(GtkMenuItem *menuitem, gpointer user_data) {
     // We have our Iter now.
     // Before we download, is it a folder ?
     gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_FILENAME_ACTUAL, &filename, COL_ISFOLDER, &isFolder,
-        COL_FILEID, &ObjectID, -1);
+            COL_FILEID, &ObjectID, -1);
 
     // Make sure we are not attempting to edit the parent link folder.
     if (g_ascii_strcasecmp(filename, "..") == 0) {
@@ -210,6 +230,45 @@ void on_fileRenameFile_activate(GtkMenuItem *menuitem, gpointer user_data) {
 // ************************************************************************************************
 
 /**
+ * Callback to handle the Move File menu option.
+ * @param menuitem
+ * @param user_data
+ */
+void on_fileMoveFile_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    GList *List = NULL;
+    int64_t targetfolder = 0;
+
+    // Let's check to see if we have anything selected in our treeview?
+    if ((List = fileListGetSelection()) == NULL) {
+        if (folderListGetSelection() != -1) {
+            on_folderRemoveFolder_activate(menuitem, user_data);
+        } else {
+            displayInformation(_("No files/folders selected?"));
+        }
+        return;
+    }
+
+    // Prompt for the target folder location.
+    targetfolder = getTargetFolderLocation();
+    if ((targetfolder == -1) || (targetfolder == currentFolderID)) {
+        // If the user didn't select a folder, or the target folder is the current selected folder
+        // then do nothing.
+        return;
+    }
+    fileMoveTargetFolder = targetfolder;
+    fileListClearSelection();
+    // List is a list of Iter's to be moved
+    g_list_foreach(List, (GFunc) __fileMove, NULL);
+    // We have 2 options, manually scan the file structure for that file and manually fix up...
+    // or do a rescan...
+    // I'll be cheap, and do a full rescan of the device.
+    deviceRescan();
+}
+
+
+// ************************************************************************************************
+
+/**
  * on_filesDelete_activate - Callback to initiate a Delete Files operation.
  * @param menuitem
  * @param user_data
@@ -219,7 +278,11 @@ void on_filesDelete_activate(GtkMenuItem *menuitem, gpointer user_data) {
 
     // Let's check to see if we have anything selected in our treeview?
     if (fileListGetSelection() == NULL) {
-        displayInformation(_("No files/folders selected?"));
+        if (folderListGetSelection() != -1) {
+            on_folderRemoveFolder_activate(menuitem, user_data);
+        } else {
+            displayInformation(_("No files/folders selected?"));
+        }
         return;
     }
 
@@ -229,10 +292,10 @@ void on_filesDelete_activate(GtkMenuItem *menuitem, gpointer user_data) {
         fileListRemove(fileListGetSelection());
     } else {
         dialog = gtk_message_dialog_new(GTK_WINDOW(windowMain),
-            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-            GTK_MESSAGE_WARNING,
-            GTK_BUTTONS_YES_NO,
-            _("Are you sure you want to delete these files?"));
+                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                GTK_MESSAGE_WARNING,
+                GTK_BUTTONS_YES_NO,
+                _("Are you sure you want to delete these files?"));
         gtk_window_set_title(GTK_WINDOW(dialog), _("Confirm Delete"));
 
         // Run the Dialog and get our result.
@@ -253,10 +316,14 @@ void on_filesDelete_activate(GtkMenuItem *menuitem, gpointer user_data) {
  * @param user_data
  */
 void on_filesDownload_activate(GtkMenuItem *menuitem, gpointer user_data) {
-
+    int64_t targetfolder = 0;
     // Let's check to see if we have anything selected in our treeview?
     if (fileListGetSelection() == NULL) {
-        displayInformation(_("No files/folders selected?"));
+        if ((targetfolder = folderListGetSelection()) != -1) {
+            folderListDownload(folderListGetSelectionName(), targetfolder);
+        } else {
+            displayInformation(_("No files/folders selected?"));
+        }
         return;
     }
 
@@ -289,17 +356,17 @@ void on_deviceConnect_activate(GtkMenuItem *menuitem, gpointer user_data) {
         // Now update the status bar;
         if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
             tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
         } else {
             if (DeviceMgr.devicestorage->StorageDescription != NULL) {
                 tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"),
-                    DeviceMgr.devicename->str,
-                    DeviceMgr.devicestorage->StorageDescription,
-                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                        DeviceMgr.devicename->str,
+                        DeviceMgr.devicestorage->StorageDescription,
+                        (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
             } else {
                 tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"),
-                    DeviceMgr.devicename->str,
-                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+                        DeviceMgr.devicename->str,
+                        (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
             }
         }
         statusBarSet(tmp_string);
@@ -309,8 +376,9 @@ void on_deviceConnect_activate(GtkMenuItem *menuitem, gpointer user_data) {
         menuText = gtk_bin_get_child(GTK_BIN(fileConnect));
         gtk_label_set_text(GTK_LABEL(menuText), _("Disconnect Device"));
 
-        // Enable the Drag'n'Drop interface for the main window.
-        gmtp_drag_dest_set(windowMain);
+        // Enable the Drag'n'Drop interface for the main window and folder window.
+        gmtp_drag_dest_set(scrolledwindowMain);
+        gmtp_drag_dest_set(treeviewFolders);
 
     } else {
 
@@ -326,7 +394,15 @@ void on_deviceConnect_activate(GtkMenuItem *menuitem, gpointer user_data) {
 
         // Now update the file list area and disable Drag'n'Drop.
         fileListClear();
-        gtk_drag_dest_unset(windowMain);
+        folderListClear();
+        gtk_drag_dest_unset(scrolledwindowMain);
+        gtk_drag_dest_unset(treeviewFolders);
+        setWindowTitle(NULL);
+        // Hide the find toolbar if open and force search mode to false.
+        gtk_widget_hide(findToolbar);
+        gtk_widget_set_sensitive(GTK_WIDGET(cfileAdd), TRUE);
+        gtk_widget_set_sensitive(GTK_WIDGET(cfileNewFolder), TRUE);
+        inFindMode = FALSE;
     }
 
     // Update the Toolbar and Menus enabling/disabling the menu items.
@@ -501,10 +577,10 @@ void on_PrefsDownloadPath_activate(GtkMenuItem *menuitem, gpointer user_data) {
     GtkWidget *FileDialog;
     // First of all, lets set the download path.
     FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Download to"),
-        GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-        NULL);
+            GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+            NULL);
     gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemDownloadPath->str);
     if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
         savepath = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
@@ -536,10 +612,10 @@ void on_PrefsUploadPath_activate(GtkMenuItem *menuitem, gpointer user_data) {
     GtkWidget *FileDialog;
     // First of all, lets set the upload path.
     FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Upload From"),
-        GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-        NULL);
+            GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+            NULL);
     gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemUploadPath->str);
     if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
         savepath = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
@@ -570,28 +646,85 @@ void on_PrefsUploadPath_activate(GtkMenuItem *menuitem, gpointer user_data) {
  */
 void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data) {
     GtkTreeModel *model;
+    GtkTreeModel *sortmodel;
     GtkTreeIter iter;
 
     gchar *filename = NULL;
     gboolean isFolder;
     uint32_t objectID;
 
+    GtkWidget *FileDialog;
+    gchar *savepath = NULL;
+
     // Obtain the iter, and the related objectID.
-    model = gtk_tree_view_get_model(treeview);
-    if (gtk_tree_model_get_iter(model, &iter, path)) {
+    sortmodel = gtk_tree_view_get_model(treeview);
+    model = gtk_tree_model_sort_get_model(GTK_TREE_MODEL_SORT(sortmodel));
+    if (gtk_tree_model_get_iter(model, &iter, gtk_tree_model_sort_convert_path_to_child_path(GTK_TREE_MODEL_SORT(sortmodel), path))) {
         gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME_ACTUAL, &filename, COL_FILEID, &objectID, -1);
         if (isFolder == FALSE) {
             // Now download the actual file from the MTP device.
-            filesDownload(filename, objectID);
+
+            savepath = g_malloc0(8192);
+            // Let's confirm our download path.
+            if (Preferences.ask_download_path == TRUE) {
+                FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Download"),
+                        GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                        NULL);
+
+                gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemDownloadPath->str);
+                if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
+                    savepath = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
+                    // Save our download path.
+                    Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, savepath);
+                    // We do the deed.
+                    filesDownload(filename, objectID);
+                }
+                gtk_widget_destroy(FileDialog);
+            } else {
+                // We do the deed.
+                filesDownload(filename, objectID);
+            }
+            g_free(savepath);
+
         } else {
             // We have a folder so change to it?
             currentFolderID = objectID;
-            fileListClear();
-            fileListAdd();
+            on_editFindClose_activate(NULL, NULL);
         }
     }
     g_free(filename);
 } // end fileListRowActivated()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle double click on item in folder main window.
+ * @param treeview
+ * @param path
+ * @param column
+ * @param data
+ */
+void folderListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data) {
+    GtkTreeModel *model;
+    GtkTreeModel *sortmodel;
+    GtkTreeIter iter;
+
+    uint32_t objectID;
+
+    // Obtain the iter, and the related objectID.
+    sortmodel = gtk_tree_view_get_model(treeview);
+    model = gtk_tree_model_sort_get_model(GTK_TREE_MODEL_SORT(sortmodel));
+    if (gtk_tree_model_get_iter(model, &iter, gtk_tree_model_sort_convert_path_to_child_path(GTK_TREE_MODEL_SORT(sortmodel), path))) {
+        gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, COL_FOL_ID, &objectID, -1);
+        // We have a folder so change to it?
+        currentFolderID = objectID;
+        on_editFindClose_activate(NULL, NULL);
+    }
+} // end folderListRowActivated()
+
 
 // ************************************************************************************************
 
@@ -602,7 +735,10 @@ void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewC
  */
 void on_fileNewFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
     gchar *foldername = NULL;
-
+    if (folderListGetSelection() != -1) {
+        on_folderNewFolder_activate(menuitem, user_data);
+        return;
+    }
     // Get the folder name by displaying a dialog.
     foldername = displayFolderNewDialog();
     if (foldername != NULL) {
@@ -612,6 +748,206 @@ void on_fileNewFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
         deviceRescan();
     }
 } // end on_fileNewFolder_activate()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle selecting NewFolder from menu or toolbar.
+ * @param menuitem
+ * @param user_data
+ */
+void on_folderNewFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    gchar *foldername = NULL;
+    uint32_t tmpFolderID = 0;
+    // Get the folder name by displaying a dialog.
+    foldername = displayFolderNewDialog();
+    if (foldername != NULL) {
+        // Let's see if we have anything selected in the folder view, and if not, then we add the
+        // folder to the current Folder.
+        if (gtk_tree_selection_count_selected_rows(folderSelection) == 0) {
+            // Add in folder to MTP device.
+            folderAdd(foldername);
+        } else {
+            // We have selected a folder in the folder view, so let's get it's ID.
+            tmpFolderID = currentFolderID;
+            currentFolderID = folderListGetSelection();
+            folderAdd(foldername);
+            currentFolderID = tmpFolderID;
+        }
+        g_free(foldername);
+        deviceRescan();
+    }
+} // end on_folderNewFolder_activate()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle selecting RemoveFolder from menu or toolbar.
+ * @param menuitem
+ * @param user_data
+ */
+void on_folderRemoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    GtkWidget *dialog;
+    GtkTreeModel *sortmodel;
+    GtkTreeIter iter;
+    GtkTreeIter childiter;
+
+    uint32_t objectID;
+
+    // Let's see if we have anything selected in the folder view, and if not let the user know, and return
+    if (gtk_tree_selection_count_selected_rows(folderSelection) == 0) {
+        // Add in folder to MTP device.
+        displayInformation(_("No files/folders selected?"));
+        return;
+    } else {
+        // We have selected a folder in the folder view, so let's get it's ID.
+        sortmodel = gtk_tree_view_get_model(GTK_TREE_VIEW(treeviewFiles));
+        gtk_tree_selection_get_selected(folderSelection, &sortmodel, &iter);
+        gtk_tree_model_sort_convert_iter_to_child_iter(GTK_TREE_MODEL_SORT(sortmodel), &childiter, &iter);
+        gtk_tree_model_get(GTK_TREE_MODEL(folderList), &childiter, COL_FOL_ID, &objectID, -1);
+
+        // Now we prompt to confirm delete?
+        if (Preferences.confirm_file_delete_op == FALSE) {
+            // Now download the actual file from the MTP device.
+            folderDelete(getCurrentFolderPtr(deviceFolders, objectID), 0);
+        } else {
+            dialog = gtk_message_dialog_new(GTK_WINDOW(windowMain),
+                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                    GTK_MESSAGE_WARNING,
+                    GTK_BUTTONS_YES_NO,
+                    _("Are you sure you want to delete this folder (and all contents)?"));
+            gtk_window_set_title(GTK_WINDOW(dialog), _("Confirm Delete"));
+            gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+            if (result == GTK_RESPONSE_YES)
+                folderDelete(getCurrentFolderPtr(deviceFolders, objectID), 0);
+            gtk_widget_destroy(dialog);
+        }
+
+        //folderDelete(getCurrentFolderPtr(deviceFolders, objectID), 0);
+    }
+    deviceRescan();
+} // end on_folderRemoveFolder_activate()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle selecting MoveFolder from context menu.
+ * @param menuitem
+ * @param user_data
+ */
+void on_folderMoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    GtkTreeModel *sortmodel;
+    GtkTreeIter iter;
+    GtkTreeIter childiter;
+    int64_t targetfolder = 0;
+    uint32_t objectID;
+
+    LIBMTP_folder_t *currentFolder = NULL;
+    LIBMTP_folder_t *newFolder = NULL;
+    int error;
+
+    // Let's see if we have anything selected in the folder view, and if not let the user know, and return
+    if (gtk_tree_selection_count_selected_rows(folderSelection) == 0) {
+        // Add in folder to MTP device.
+        displayInformation(_("No files/folders selected?"));
+        return;
+    } else {
+        // We have selected a folder in the folder view, so let's get it's ID.
+        sortmodel = gtk_tree_view_get_model(GTK_TREE_VIEW(treeviewFiles));
+        gtk_tree_selection_get_selected(folderSelection, &sortmodel, &iter);
+        gtk_tree_model_sort_convert_iter_to_child_iter(GTK_TREE_MODEL_SORT(sortmodel), &childiter, &iter);
+        gtk_tree_model_get(GTK_TREE_MODEL(folderList), &childiter, COL_FOL_ID, &objectID, -1);
+
+        // Prompt for the target folder location.
+        targetfolder = getTargetFolderLocation();
+        if ((targetfolder == -1)) {
+            // If the user didn't select a folder, or the target folder is the current selected folder
+            // then do nothing.
+            return;
+        }
+        fileMoveTargetFolder = targetfolder;
+        gtk_tree_selection_unselect_all(folderSelection);
+
+        // Make sure we don't want to move the folder into itself?
+        if (objectID == fileMoveTargetFolder) {
+            displayError(_("Unable to move the selected folder into itself?\n"));
+            g_fprintf(stderr, _("Unable to move the selected folder into itself?\n"));
+            return;
+        }
+        // We have the target folder, so let's check to ensure that we will not create a circular
+        // reference by moving a folder underneath it self.
+        currentFolder = getCurrentFolderPtr(deviceFolders, objectID);
+        if (currentFolder == NULL) {
+            // WTF?
+            g_fprintf(stderr, "File Move Error: Can't get current folder pointer\n");
+            return;
+        }
+        // Use currentFolder as the starting point, and simply attempt to get the ptr to the new
+        // folder based on this point.
+        newFolder = getCurrentFolderPtr(currentFolder->child, fileMoveTargetFolder);
+        if (newFolder == NULL) {
+            // We are alright to proceed.
+            if ((error = setNewParentFolderID(objectID, fileMoveTargetFolder)) != 0) {
+                displayError(_("Unable to move the selected folder?\n"));
+                g_fprintf(stderr, "File Move Error: %d\n", error);
+                LIBMTP_Dump_Errorstack(DeviceMgr.device);
+                LIBMTP_Clear_Errorstack(DeviceMgr.device);
+            }
+        } else {
+            displayError(_("Unable to move the selected folder underneath itself?\n"));
+            g_fprintf(stderr, _("Unable to move the selected folder underneath itself?\n"));
+        }
+
+
+    }
+    deviceRescan();
+} // end on_folderMoveFolder_activate()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle selecting Rename Folder from menu
+ * @param menuitem
+ * @param user_data
+ */
+void on_folderRenameFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    gchar *newfilename = NULL;
+    gchar *filename = NULL;
+    GtkTreeModel *sortmodel;
+    GtkTreeIter iter;
+    GtkTreeIter childiter;
+
+    uint32_t objectID;
+
+    // Let's see if we have anything selected in the folder view, and if not let the user know, and return
+    if (gtk_tree_selection_count_selected_rows(folderSelection) == 0) {
+        // Add in folder to MTP device.
+        displayInformation(_("No files/folders selected?"));
+        return;
+    } else {
+        // We have selected a folder in the folder view, so let's get it's ID.
+        sortmodel = gtk_tree_view_get_model(GTK_TREE_VIEW(treeviewFiles));
+        gtk_tree_selection_get_selected(folderSelection, &sortmodel, &iter);
+        gtk_tree_model_sort_convert_iter_to_child_iter(GTK_TREE_MODEL_SORT(sortmodel), &childiter, &iter);
+        gtk_tree_model_get(GTK_TREE_MODEL(folderList), &childiter, COL_FOL_ID, &objectID,
+                COL_FOL_NAME_HIDDEN, &filename, -1);
+
+        // Get our new folder name.
+        newfilename = displayRenameFileDialog(filename);
+
+        // If the user supplied something, then update the name of the device.
+        if (newfilename != NULL) {
+            filesRename(newfilename, objectID);
+            g_free(newfilename);
+            deviceRescan();
+        }
+    }
+} // end on_folderRenameFolder_activate()
+
 
 // ************************************************************************************************
 
@@ -625,7 +961,11 @@ void on_fileRemoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
 
     // Let's check to see if we have anything selected in our treeview?
     if (fileListGetSelection() == NULL) {
-        displayInformation(_("No files/folders selected?"));
+        if (folderListGetSelection() != -1) {
+            on_folderRemoveFolder_activate(menuitem, user_data);
+        } else {
+            displayInformation(_("No files/folders selected?"));
+        }
         return;
     }
 
@@ -635,10 +975,10 @@ void on_fileRemoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
         folderListRemove(fileListGetSelection());
     } else {
         dialog = gtk_message_dialog_new(GTK_WINDOW(windowMain),
-            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-            GTK_MESSAGE_WARNING,
-            GTK_BUTTONS_YES_NO,
-            _("Are you sure you want to delete this folder (and all contents)?"));
+                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                GTK_MESSAGE_WARNING,
+                GTK_BUTTONS_YES_NO,
+                _("Are you sure you want to delete this folder (and all contents)?"));
         gtk_window_set_title(GTK_WINDOW(dialog), _("Confirm Delete"));
         gint result = gtk_dialog_run(GTK_DIALOG(dialog));
         if (result == GTK_RESPONSE_YES)
@@ -689,10 +1029,10 @@ void on_editDeviceName_activate(GtkMenuItem *menuitem, gpointer user_data) {
 void on_editFormatDevice_activate(GtkMenuItem *menuitem, gpointer user_data) {
     GtkWidget *dialog;
     dialog = gtk_message_dialog_new(GTK_WINDOW(windowMain),
-        GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-        GTK_MESSAGE_WARNING,
-        GTK_BUTTONS_YES_NO,
-        _("Are you sure you want to format this device?"));
+            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+            GTK_MESSAGE_WARNING,
+            GTK_BUTTONS_YES_NO,
+            _("Are you sure you want to format this device?"));
     gtk_window_set_title(GTK_WINDOW(dialog), _("Format Device"));
     gint result = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_hide(GTK_WIDGET(dialog));
@@ -769,12 +1109,155 @@ gboolean on_windowMainContextMenu_activate(GtkWidget *widget, GdkEvent *event) {
         event_button = (GdkEventButton *) event;
         if (event_button->button == 3) {
             gtk_menu_popup(menu, NULL, NULL, NULL, NULL,
-                event_button->button, event_button->time);
+                    event_button->button, event_button->time);
             return TRUE;
         }
     }
     return FALSE;
 } // end on_windowMainContextMenu_activate()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle the displaying of the context menu.
+ * @param widget
+ * @param event
+ * @return
+ */
+gboolean on_windowViewContextMenu_activate(GtkWidget *widget, GdkEvent *event) {
+    GtkMenu *menu;
+    GdkEventButton *event_button;
+    g_return_val_if_fail(event != NULL, FALSE);
+
+    /* The "widget" is the menu that was supplied when
+     * g_signal_connect_swapped() was called.
+     */
+    menu = GTK_MENU(contextMenuColumn);
+    if (event->type == GDK_BUTTON_PRESS) {
+        event_button = (GdkEventButton *) event;
+        if (event_button->button == 3) {
+            gtk_menu_popup(menu, NULL, NULL, NULL, NULL,
+                    event_button->button, event_button->time);
+            return TRUE;
+        }
+    }
+    return FALSE;
+} // end on_windowMainContextMenu_activate()
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle the Find menu option.
+ * @param menuitem
+ * @param user_data
+ */
+void on_editFind_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    if (inFindMode == FALSE) {
+
+        gtk_widget_show(findToolbar);
+        gtk_widget_hide(scrolledwindowFolders);
+
+        fileListClear();
+        //folderListClear();
+        inFindMode = TRUE;
+        statusBarSet(_("Please enter search item."));
+        setWindowTitle(_("Search"));
+        gtk_tree_view_column_set_visible(column_Location, TRUE);
+
+        //Disable some of the menu options, while in search mode.
+        gtk_widget_set_sensitive(GTK_WIDGET(cfileAdd), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(cfileNewFolder), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(fileAdd), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(fileNewFolder), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(toolbuttonAddFile), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(menu_view_folders), FALSE);
+        // Get focus on text entry box.
+
+        gtk_widget_grab_focus(GTK_WIDGET(FindToolbar_entry_FindText));
+    } else {
+        on_editFindClose_activate(menuitem, user_data);
+    }
+
+} // end on_editFind_activate()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle the Find menu option.
+ * @param menuitem
+ * @param user_data
+ */
+void on_editSelectAll_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    fileListSelectAll();
+} // end on_editSelectAll_activate()
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle the Find toolbar close option.
+ * @param menuitem
+ * @param user_data
+ */
+void on_editFindClose_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    gtk_widget_hide(findToolbar);
+    if (Preferences.view_folders == TRUE) {
+        gtk_widget_show(scrolledwindowFolders);
+    }
+    fileListClear();
+    inFindMode = FALSE;
+    gtk_tree_view_column_set_visible(column_Location, FALSE);
+    deviceRescan();
+    // Now clear the Search GList;
+    if (searchList != NULL) {
+        g_slist_foreach(searchList, (GFunc) g_free_search, NULL);
+        g_slist_free(searchList);
+        searchList = NULL;
+    }
+    //Enable some of the menu options, while in search mode.
+    gtk_widget_set_sensitive(GTK_WIDGET(cfileAdd), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(cfileNewFolder), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(fileAdd), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(fileNewFolder), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(toolbuttonAddFile), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(menu_view_folders), TRUE);
+
+} // end on_editFindClose_activate()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle the actual searching of files/folders.
+ * @param menuitem
+ * @param user_data
+ */
+void on_editFindSearch_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    gchar *searchstring = NULL;
+    gboolean searchfiles = FALSE;
+    gboolean searchmeta = FALSE;
+
+    statusBarSet(_("Searching..."));
+    // Now clear the Search GList;
+    if (searchList != NULL) {
+        g_slist_foreach(searchList, (GFunc) g_free_search, NULL);
+        g_slist_free(searchList);
+        searchList = NULL;
+    }
+
+    // Set to upper case to perform case insensitive searches.
+    searchstring = g_utf8_strup(gtk_entry_get_text(GTK_ENTRY(FindToolbar_entry_FindText)), -1);
+    searchfiles = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FindToolbar_checkbutton_FindFiles));
+    searchmeta = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FindToolbar_checkbutton_TrackInformation));
+
+    // Let's start our search.
+    searchList = filesSearch(searchstring, searchfiles, searchmeta);
+    inFindMode = TRUE;
+    fileListClear();
+    fileListAdd();
+    g_free(searchstring);
+} // end on_editFindSearch_activate()
 
 // ************************************************************************************************
 
@@ -786,15 +1269,6 @@ gboolean on_windowMainContextMenu_activate(GtkWidget *widget, GdkEvent *event) {
 void on_editAddAlbumArt_activate(GtkMenuItem *menuitem, gpointer user_data) {
     // Get a filename of the album art.
     displayAddAlbumArtDialog();
-
-    // If the user supplied a filename, then attempt to upload the image.
-    /*if (albumart != NULL) {
-        albumAddArt(albumart->album_id, albumart->filename);
-
-        // Free our memory allocations
-        g_free(albumart->filename);
-        g_free(albumart);
-    }*/
 } // end on_editAddAlbumArt_activate()
 
 // ************************************************************************************************
@@ -821,10 +1295,10 @@ void on_buttonAlbumArtAdd_activate(GtkWidget *button, gpointer user_data) {
     gchar *filename = NULL;
     GtkWidget *FileDialog;
     FileDialog = gtk_file_chooser_dialog_new(_("Select Album Art File"),
-        GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_OPEN,
-        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-        NULL);
+            GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_OPEN,
+            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+            NULL);
 
     gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(FileDialog), TRUE);
 
@@ -909,7 +1383,7 @@ void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
     FILE* fd;
     gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(textboxAlbumArt));
     gint count = 0;
-    GtkWidget *FileDialog;
+    GtkWidget *FileDialog = NULL;
     gchar *filename = NULL;
     LIBMTP_filesampledata_t *imagedata = NULL;
     LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
@@ -923,20 +1397,20 @@ void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
             if (imagedata != NULL) {
 
                 FileDialog = gtk_file_chooser_dialog_new(_("Save Album Art File"),
-                    GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_SAVE,
-                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                    GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-                    NULL);
+                        GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_SAVE,
+                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                        GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                        NULL);
 
                 gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(FileDialog), TRUE);
 
                 // Set the default path to be the normal download folder.
                 gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(FileDialog),
-                    Preferences.fileSystemDownloadPath->str);
+                        Preferences.fileSystemDownloadPath->str);
 
                 // Set a default name to be the album.JPG
                 gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(FileDialog),
-                    g_strdup_printf("%s.jpg", albuminfo->name));
+                        g_strdup_printf("%s.jpg", albuminfo->name));
 
                 if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
                     filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
@@ -1078,19 +1552,19 @@ void on_Playlist_ImportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer u
     // Get our filename...
 
     FileDialog = gtk_file_chooser_dialog_new(_("Select Playlist to Import"),
-        GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_OPEN,
-        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-        NULL);
+            GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_OPEN,
+            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+            NULL);
     gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(FileDialog), FALSE);
     OpenFormFilter = gtk_file_filter_new();
     gtk_file_filter_add_pattern(OpenFormFilter, "*.m3u");
     gtk_file_filter_set_name(OpenFormFilter, "m3u Playlists");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(FileDialog), OpenFormFilter );
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(FileDialog), OpenFormFilter);
     OpenFormFilter2 = gtk_file_filter_new();
     gtk_file_filter_add_pattern(OpenFormFilter2, "*");
     gtk_file_filter_set_name(OpenFormFilter2, "All Files");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(FileDialog), OpenFormFilter2 );
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(FileDialog), OpenFormFilter2);
 
     if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
         playlistfilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
@@ -1104,17 +1578,17 @@ void on_Playlist_ImportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer u
         playlistname = playlistImport(playlistfilename);
 
         // If our name is NULL, then the import failed...
-        if(playlistname != NULL){
+        if (playlistname != NULL) {
             // Refresh our playlist information.
             devicePlayLists = getPlaylists();
             gtk_list_store_clear(GTK_LIST_STORE(playlist_PL_List));
             // Add it to our combobox
 
-    #if GMTP_USE_GTK2
+#if GMTP_USE_GTK2
             gtk_combo_box_append_text(GTK_COMBO_BOX(comboboxentry_playlist), g_strdup(playlistname));
-    #else
+#else
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboboxentry_playlist), g_strdup(playlistname));
-    #endif
+#endif
 
             // Set the active combobox item.
             comboboxentry_playlist_entries++;
@@ -1142,7 +1616,7 @@ void on_Playlist_ImportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer u
  * @param menuitem
  * @param user_data
  */
-void on_Playlist_ExportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data){
+void on_Playlist_ExportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
     gchar *playlistfilename = NULL;
     GtkWidget *FileDialog;
 
@@ -1165,11 +1639,11 @@ void on_Playlist_ExportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer u
         playlistfilename = g_strdup_printf("%s.%s", tmpplaylist->name, "m3u");
 
         FileDialog = gtk_file_chooser_dialog_new(_("Save as..."),
-        GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_SAVE,
-        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-        NULL);
-        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(FileDialog), playlistfilename );
+                GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_SAVE,
+                GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                NULL);
+        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(FileDialog), playlistfilename);
 
         if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
             playlistfilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
@@ -1289,6 +1763,7 @@ void on_view_activate(GtkMenuItem *menuitem, gpointer user_data) {
 #if GMTP_USE_GTK2
     gchar *gconf_path = NULL;
     gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem));
+    // Main menu.
     if ((void *) menuitem == (void *) menu_view_filesize) gconf_path = g_strdup("/apps/gMTP/viewFileSize");
     if ((void *) menuitem == (void *) menu_view_filetype) gconf_path = g_strdup("/apps/gMTP/viewFileType");
     if ((void *) menuitem == (void *) menu_view_track_number) gconf_path = g_strdup("/apps/gMTP/viewTrackNumber");
@@ -1298,6 +1773,17 @@ void on_view_activate(GtkMenuItem *menuitem, gpointer user_data) {
     if ((void *) menuitem == (void *) menu_view_year) gconf_path = g_strdup("/apps/gMTP/viewYear");
     if ((void *) menuitem == (void *) menu_view_genre) gconf_path = g_strdup("/apps/gMTP/viewGenre");
     if ((void *) menuitem == (void *) menu_view_duration) gconf_path = g_strdup("/apps/gMTP/viewDuration");
+    if ((void *) menuitem == (void *) menu_view_folders) gconf_path = g_strdup("/apps/gMTP/viewFolders");
+    // context menu
+    if ((void *) menuitem == (void *) cViewSize) gconf_path = g_strdup("/apps/gMTP/viewFileSize");
+    if ((void *) menuitem == (void *) cViewType) gconf_path = g_strdup("/apps/gMTP/viewFileType");
+    if ((void *) menuitem == (void *) cViewTrackNumber) gconf_path = g_strdup("/apps/gMTP/viewTrackNumber");
+    if ((void *) menuitem == (void *) cViewTrackName) gconf_path = g_strdup("/apps/gMTP/viewTitle");
+    if ((void *) menuitem == (void *) cViewArtist) gconf_path = g_strdup("/apps/gMTP/viewArtist");
+    if ((void *) menuitem == (void *) cViewAlbum) gconf_path = g_strdup("/apps/gMTP/viewAlbum");
+    if ((void *) menuitem == (void *) cViewYear) gconf_path = g_strdup("/apps/gMTP/viewYear");
+    if ((void *) menuitem == (void *) cViewGenre) gconf_path = g_strdup("/apps/gMTP/viewGenre");
+    if ((void *) menuitem == (void *) cViewDuration) gconf_path = g_strdup("/apps/gMTP/viewDuration");
 
     if ((gconfconnect != NULL) && (gconf_path != NULL)) {
         gconf_client_set_bool(gconfconnect, gconf_path, state, NULL);
@@ -1306,6 +1792,7 @@ void on_view_activate(GtkMenuItem *menuitem, gpointer user_data) {
 #else
     gchar *gsetting_path = NULL;
     gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem));
+    // main menu
     if ((void *) menuitem == (void *) menu_view_filesize) gsetting_path = g_strdup("viewfilesize");
     if ((void *) menuitem == (void *) menu_view_filetype) gsetting_path = g_strdup("viewfiletype");
     if ((void *) menuitem == (void *) menu_view_track_number) gsetting_path = g_strdup("viewtracknumber");
@@ -1315,6 +1802,18 @@ void on_view_activate(GtkMenuItem *menuitem, gpointer user_data) {
     if ((void *) menuitem == (void *) menu_view_year) gsetting_path = g_strdup("viewyear");
     if ((void *) menuitem == (void *) menu_view_genre) gsetting_path = g_strdup("viewgenre");
     if ((void *) menuitem == (void *) menu_view_duration) gsetting_path = g_strdup("viewduration");
+    if ((void *) menuitem == (void *) menu_view_folders) gsetting_path = g_strdup("viewfolders");
+
+    //context menu.
+    if ((void *) menuitem == (void *) cViewSize) gsetting_path = g_strdup("viewfilesize");
+    if ((void *) menuitem == (void *) cViewType) gsetting_path = g_strdup("viewfiletype");
+    if ((void *) menuitem == (void *) cViewTrackNumber) gsetting_path = g_strdup("viewtracknumber");
+    if ((void *) menuitem == (void *) cViewTrackName) gsetting_path = g_strdup("viewtitle");
+    if ((void *) menuitem == (void *) cViewArtist) gsetting_path = g_strdup("viewartist");
+    if ((void *) menuitem == (void *) cViewAlbum) gsetting_path = g_strdup("viewalbum");
+    if ((void *) menuitem == (void *) cViewYear) gsetting_path = g_strdup("viewyear");
+    if ((void *) menuitem == (void *) cViewGenre) gsetting_path = g_strdup("viewgenre");
+    if ((void *) menuitem == (void *) cViewDuration) gsetting_path = g_strdup("viewduration");
 
     if ((gsettings_connect != NULL) && (gsetting_path != NULL)) {
         g_settings_set_boolean(gsettings_connect, gsetting_path, state);
@@ -1384,3 +1883,72 @@ void on_TrackPlaylist_NewPlaylistButton_activate(GtkWidget *button, gpointer use
     }
 }
 
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle adding file to playlist.
+ * @param menuitem
+ * @param user_data
+ */
+void on_fileAddToPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    // Let's check to see if we have anything selected in our treeview?
+    if (fileListGetSelection() == NULL) {
+        displayInformation(_("No files/folders selected?"));
+        return;
+    }
+    // Display the select playlist dialog;
+    int32_t addTrackPlaylistID = displayAddTrackPlaylistDialog(TRUE);
+
+    // Now add the actual files from the MTP device.
+    if (addTrackPlaylistID != GMTP_NO_PLAYLIST) {
+        fileListAddToPlaylist(fileListGetSelection(), addTrackPlaylistID);
+    }
+}
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle removing file from playlist.
+ * @param menuitem
+ * @param user_data
+ */
+void on_fileRemoveFromPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    // Let's check to see if we have anything selected in our treeview?
+    if (fileListGetSelection() == NULL) {
+        displayInformation(_("No files/folders selected?"));
+        return;
+    }
+    // Display the select playlist dialog;
+    int32_t addTrackPlaylistID = displayAddTrackPlaylistDialog(FALSE);
+
+    // Now remove the actual files from the MTP device.
+    if (addTrackPlaylistID != GMTP_NO_PLAYLIST) {
+        fileListRemoveFromPlaylist(fileListGetSelection(), addTrackPlaylistID);
+    }
+}
+
+
+// ************************************************************************************************
+
+/**
+ * Callback to handle when a row is selected in the folder list.
+ * @param treeselection
+ * @param user_data
+ */
+void on_treeviewFolders_rowactivated(GtkTreeSelection *treeselection, gpointer user_data) {
+    // Block the handler from running ...
+    g_signal_handler_block((gpointer) fileSelection, fileSelectHandler);
+    g_signal_handler_block((gpointer) folderSelection, folderSelectHandler);
+
+    if ((void *) treeselection == (void *) fileSelection) {
+        gtk_tree_selection_unselect_all(folderSelection);
+    } else {
+        gtk_tree_selection_unselect_all(fileSelection);
+    }
+
+    // Unblock the handler from running ...
+    g_signal_handler_unblock((gpointer) fileSelection, fileSelectHandler);
+    g_signal_handler_unblock((gpointer) folderSelection, folderSelectHandler);
+}

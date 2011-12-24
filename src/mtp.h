@@ -27,6 +27,12 @@ extern "C" {
         MTP_NO_MTP_DEVICE
     };
 
+    enum MTP_PLAYLIST_INSTANCES {
+        MTP_PLAYLIST_ALL_INSTANCES,
+        MTP_PLAYLIST_FIRST_INSTANCE,
+        MTP_PLAYLIST_LAST_INSTANCE
+    };
+
 #define MTP_DEVICE_SINGLE_STORAGE -1
 
     typedef struct {
@@ -62,6 +68,7 @@ extern "C" {
     LIBMTP_filetype_t find_filetype(const gchar * filename);
     gchar* find_filetype_ext(LIBMTP_filetype_t filetype);
     LIBMTP_devicestorage_t* getCurrentDeviceStoragePtr(gint StorageID);
+    int setNewParentFolderID(uint32_t objectID, uint32_t folderID);
 
     // Playlist support.
     LIBMTP_playlist_t* getPlaylists(void);
@@ -70,6 +77,7 @@ extern "C" {
     void playlistDelete(LIBMTP_playlist_t * tmpplaylist);
     void playlistUpdate(LIBMTP_playlist_t * tmpplaylist);
     void playlistAddTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track);
+    void playlistRemoveTrack(LIBMTP_playlist_t* playlist, LIBMTP_track_t* track, uint32_t instances);
     gchar* playlistImport(gchar * filename);
     void playlistExport(gchar * filename, LIBMTP_playlist_t * playlist);
 
@@ -80,6 +88,9 @@ extern "C" {
     gchar* getFullFilename(uint32_t item_id);
     uint32_t getFileID(gchar* filename, gboolean ignorepath);
     uint32_t getFolderID(LIBMTP_folder_t* folderptr, gchar* foldername);
+    gchar* getFullFolderPath(uint32_t folderid);
+    GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchmeta);
+    void folderSearch(GPatternSpec *pspec, GSList **list, LIBMTP_folder_t* folderptr);
 
 #ifdef  __cplusplus
 }

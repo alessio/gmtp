@@ -2,7 +2,7 @@
 
 PKG_NAME = gmtp
 PREFIX ?= /usr/local
-VER = 1.2.0
+VER = 1.3.0
 # Note: If you update above, please update the config.h and pkginfo file as well.
 
 PKG = gmtp
@@ -15,12 +15,20 @@ UNAME = $(shell uname)
 # See what OS we are, and set things for Solaris, otherwise use a default
 # that should work.
 ifeq ($(UNAME), SunOS)
-CC ?= cc
+CC = cc
+CFLAGS += -Xc -v -xc99 #-native -fast
+SUNVERSION = $(shell uname -r)
+ifeq ($(SUNVERSION), 5.11)
+INSTALL = ginstall -c
+MSGFMT = msgfmt --strict
+else
 INSTALL = /usr/ucb/install -c
 MSGFMT = /usr/bin/msgfmt --strict
 LDFLAGS += -L/usr/sfw/lib -R/usr/sfw/lib
+endif
 else
-CC ?= gcc
+CC = gcc
+CFLAGS += -std=c99 -Wall
 INSTALL = install -c
 MSGFMT = msgfmt
 endif
@@ -28,7 +36,7 @@ endif
 GCONFTOOL = gconftool-2
 TAR = tar
 
-CFLAGS += -c -g -O
+CFLAGS += -c -g #-O
 LDFLAGS += 
 LIBS +=
 

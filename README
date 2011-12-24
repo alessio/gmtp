@@ -1,4 +1,4 @@
-gMTP v1.2.0
+gMTP v1.3.0
 
 A basic MP3 Player client for Oracle Solaris 10.
 
@@ -100,6 +100,20 @@ A. This is due to an idiosyncrasy on Solaris 10 and language translations.
 Q. The column view options do not appear to be working?
 A. The gconf schema was updated in v0.8. Please update your local schema
    file.
+   
+Q. I'm attempting to move some files, and I always get an error. What's the 
+   issue?
+A. gMTP uses the MTP function 'moveObject' to perform move operations. 
+   However only a few devices actually support this function, and if they
+   do actually advertise it supports the function, it may be horribly
+   broken. Basically complain to your device manufacturer that it doesn't
+   support this function, and that they should add it in.
+   To see if you device has this option available, run 'mtp-detect' and look
+   under the supported commands for command '1019: MoveObject'.
+   The other method I could use is to download the files/folders to your
+   PC, re-upload them again and delete the originals, however this is very
+   time intensive, and in these cases it's better than the user do this 
+   themselves.
 
 TODO List
 

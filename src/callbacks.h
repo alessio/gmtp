@@ -34,15 +34,30 @@ extern "C" {
     void on_fileNewFolder_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_fileRemoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_fileRenameFile_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_fileMoveFile_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_editDeviceName_activate(GtkMenuItem *menuitem, gpointer user_data);
-    void  on_editFormatDevice_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_editFind_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_editSelectAll_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_editFormatDevice_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_editAddAlbumArt_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_editPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_view_activate(GtkMenuItem *menuitem, gpointer user_data);
 
+    void on_fileAddToPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_fileRemoveFromPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
+
     // Treeview handling.
     void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data);
     gboolean on_windowMainContextMenu_activate(GtkWidget *widget, GdkEvent *event);
+    gboolean on_windowViewContextMenu_activate(GtkWidget *widget, GdkEvent *event);
+    void on_treeviewFolders_rowactivated(GtkTreeSelection *treeselection, gpointer user_data);
+
+    // Folder Treeview handling.
+    void folderListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data);
+    void on_folderNewFolder_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_folderRemoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_folderRenameFolder_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_folderMoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data);
 
     // Preferences Dialog
     void on_quitPrefs_activate(GtkMenuItem *menuitem, gpointer user_data);
@@ -62,7 +77,7 @@ extern "C" {
     void on_buttonAlbumArtAdd_activate(GtkWidget *button, gpointer user_data);
     void on_buttonAlbumArtDelete_activate(GtkWidget *button, gpointer user_data);
     void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data);
-    void on_albumtextbox_activate (GtkComboBox *combobox, gpointer user_data);
+    void on_albumtextbox_activate(GtkComboBox *combobox, gpointer user_data);
 
     // Playlist Dialog
     void on_quitPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
@@ -85,6 +100,10 @@ extern "C" {
 
     // Add Track to Playlist option.
     void on_TrackPlaylist_NewPlaylistButton_activate(GtkWidget *button, gpointer user_data);
+
+    // Search function;
+    void on_editFindSearch_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_editFindClose_activate(GtkMenuItem *menuitem, gpointer user_data);
 
 #ifdef  __cplusplus
 }

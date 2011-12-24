@@ -1,3 +1,26 @@
+-- v1.3.0 - 25 Dec 2011
++ Added folder name to title bar as per Gnome 2.0 HIG Section 2.1.
++ Added search toolbar for searching for files/tracks/folders on the device.
++ Added add to playlist and remove from playlist options in context menu.
++ Added column selection context menu.
++ Added folder view to main window pane. (updated gconf/gsetting schema).
++ Extended drag'n'drop support to include folder view. ie, drag files/folders from Nautilus onto a
+  folder in the folder view, and upload to that particular folder.
++ Added support for Solaris 11.
++ Updated German translation - thanks to Laurenz Kamp.
++ Added a few keyboard shortcuts.
++ Added Select All function.
+* Fix javascript issue on website (duplicate function name with an imported JS library).
+* Fix mp3 track length calculation on "MPEG2 - Layer 3" files. (All others were correct).
+* Fix 'doesn't prompt for download path on doubleclick when prompt for download path option enabled'.
+* Fix non-display of default image art if album has no album art attached, in cases when
+  album representative data is found, but is not valid image data.
+* Fix WM_CLASS for Gnome 3 environments.
+* Fix Properties dialog with GTK 3.2+.
+* Fix a few very minor compiler warnings.
+* Using GTK About Dialog on supported platforms.
+* SYSV Solaris package is now for Solaris 11.
+
 -- v1.2.0 - 4 Aug 2011
 + Added ability to download entire folder tree in one operation.
 + Added import and export of playlists in m3u format. (updated gconf/gsetting schema).

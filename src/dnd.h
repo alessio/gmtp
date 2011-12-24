@@ -27,7 +27,7 @@ extern "C" {
     };
 
     /* Drag data format listing for gtk_drag_dest_set() */
-    const GtkTargetEntry _gmtp_drop_types[3];
+   GtkTargetEntry _gmtp_drop_types[3];
 
 #define gmtp_drag_dest_set(widget) gtk_drag_dest_set(widget, \
 		GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP, \
@@ -41,6 +41,21 @@ extern "C" {
         guint info,
         guint time,
         gpointer user_data);
+
+    void gmtpfolders_drag_data_received(GtkWidget * widget,
+        GdkDragContext * context,
+        gint x,
+        gint y,
+        GtkSelectionData * selection_data,
+        guint info,
+        guint time,
+        gpointer user_data);
+
+    void gmtpfolders_drag_motion_received (GtkWidget *widget,
+             GdkDragContext *context,
+             gint x,
+             gint y,
+             guint time);
 
     GSList* getFilesListURI(gchar* rawdata);
     void addFilesinFolder(gchar* foldername);

@@ -99,7 +99,7 @@ msgstr
 msgid  "<b>Vendor:</b>"
 msgstr
 # File:interface.c, line:1767
-msgid  "<small>Copyright 2009-2011, Darran Kartaschew\nReleased under the BSD Licence</small>\n"
+msgid  "<small>Copyright 2009-2011, Darran Kartaschew</small>\n<small>Released under the BSD Licence</small>\n"
 msgstr
 # File:interface.c, line:1759
 msgid  "A simple MP3 Player Client for Solaris 10\nand other UNIX / UNIX-like systems\n"
@@ -273,7 +273,7 @@ msgstr
 msgid  "Download Path:"
 msgstr
 # File:interface.c, line:325
-msgid  "Download files from your device to your PC. Default Download path is set in the prefernces dialog."
+msgid  "Download files from your device to your PC. Default Download path is set in the preferences dialog."
 msgstr
 # File:interface.c, line:2550
 msgid  "Duration"
@@ -601,4 +601,47 @@ msgid "Found no tracks within the playlist that exist on this device. Did not im
 msgstr ""
 msgid "Playlist imported.\n"
 msgstr ""
-
+###########################################################
+msgid "Find:"
+msgstr ""
+msgid "Filenames"
+msgstr ""
+msgid "Track Information"
+msgstr ""
+msgid "Please enter search item."
+msgstr ""
+msgid "Search"
+msgstr ""
+msgid "Location"
+msgstr ""
+msgid "Found %d items"
+msgstr ""
+msgid "Found %d item"
+msgstr ""
+msgid "Searching..."
+msgstr ""
+msgid "Add To Playlist"
+msgstr ""
+msgid "Remove From Playlist"
+msgstr ""
+msgid "Columns"
+msgstr ""
+###########################################################
+msgid "Folders"
+msgstr ""
+msgid "Folder"
+msgstr ""
+msgid "Rename Folder"
+msgstr ""
+msgid "Move To..."
+msgstr ""
+msgid "Unable to move the selected folder underneath itself?\n"
+msgstr ""
+msgid "Unable to move the selected folder into itself?\n"
+msgstr ""
+msgid "Unable to move the selected file?\n"
+msgstr ""
+msgid "Unable to move the selected folder?\n"
+msgstr ""
+msgid "Select All"
+msgstr ""

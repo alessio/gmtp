@@ -58,12 +58,17 @@ extern "C" {
 
     // Main Window Widgets.
     GtkWidget *windowMain;
+    GtkWidget *scrolledwindowMain;
     GtkWidget *windowPrefsDialog;
     GtkWidget *windowPropDialog;
     GtkWidget *windowPlaylistDialog;
     GtkWidget *windowStatusBar;
     GtkWidget *toolbuttonConnect;
     GtkWidget *treeviewFiles;
+    GtkWidget *treeviewFolders;
+    // Folder view;
+    GtkWidget *scrolledwindowFolders;
+    GtkTreeSelection *folderSelection;
 
     // Device information struct
     Device_Struct DeviceMgr;
