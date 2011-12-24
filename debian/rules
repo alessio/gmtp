@@ -13,6 +13,3 @@ override_dh_auto_install:
 	dh_auto_install
 	rm debian/gmtp/usr/share/gconf/schemas/gmtp.schemas
 	find debian/gmtp -type d -empty -delete
-
-override_dh_clean:
-	dh_clean -XMakefile~
