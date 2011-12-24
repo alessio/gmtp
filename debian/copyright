@@ -1,4 +1,4 @@
-Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=174
+Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=204
 Upstream-Name: gMTP
 Upstream-Contact: Darran Kartaschew <chewy509@mailcity.com>
 Source: http://sf.net/projects/gmtp/files/
@@ -33,11 +33,11 @@ License: BSD-3-clause
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-Files: ./icon*.png
+Files: icon*.png
 Copyright: Oliver Scholtz
 License: GPL-2
 
-Files: ./stock-about-16.png
+Files: stock-about-16.png
 Copyright: 2009, Victor Castillejo <perfectska04@gmail.com>
            2002-2008, Ulisse Perusin <uli.peru@gmail.com>
            2002-2008, Riccardo Buzzotta <raozuzu@yahoo.it>
