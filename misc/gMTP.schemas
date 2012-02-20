@@ -17,7 +17,7 @@
       <owner>gMTP</owner>
       <type>bool</type>
       <locale name="C">
-        <default>false</default>
+        <default>true</default>
         <short>Always Prompt for Download Path</short>
         <long>Always Prompt for Download Path</long>
       </locale>

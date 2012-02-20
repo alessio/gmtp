@@ -80,6 +80,7 @@ void gmtp_drag_data_received(GtkWidget *widget, GdkDragContext *context, gint x,
         } else {
             addTrackPlaylistID = GMTP_NO_PLAYLIST;
         }
+        AlbumErrorIgnore = FALSE;
         // Add the files.
         if (files != NULL) {
             g_slist_foreach(files, (GFunc) __filesAdd, NULL);
@@ -142,7 +143,7 @@ void gmtpfolders_drag_data_received(GtkWidget * widget, GdkDragContext * context
             } else {
                 addTrackPlaylistID = GMTP_NO_PLAYLIST;
             }
-
+            AlbumErrorIgnore = FALSE;
             // Add the files.
             if (files != NULL) {
                 g_slist_foreach(files, (GFunc) __filesAdd, NULL);
@@ -310,6 +311,7 @@ void addFilesinFolder(gchar* foldername) {
     } else {
         addTrackPlaylistID = GMTP_NO_PLAYLIST;
     }
+    AlbumErrorIgnore = FALSE;
     // Upload our given files in the current selected folder.
     if (filelist != NULL) {
         g_slist_foreach(filelist, (GFunc) __filesAdd, NULL);

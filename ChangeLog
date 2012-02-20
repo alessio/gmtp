@@ -1,3 +1,8 @@
+-- v1.3.1 - 20 Feb 2012
+* Change default to ask for Download folder upon initial installation.
+* Fix folder view on devices with multiple storage pools (Android enhancement).
+* Change album metadata update error only once during file upload session. (Android enhancement).
+
 -- v1.3.0 - 25 Dec 2011
 + Added folder name to title bar as per Gnome 2.0 HIG Section 2.1.
 + Added search toolbar for searching for files/tracks/folders on the device.

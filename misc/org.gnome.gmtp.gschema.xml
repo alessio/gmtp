@@ -6,7 +6,7 @@
             <description>Auto Connect Device on Start</description>
         </key>
         <key name="promptdownloadpath" type="b">
-            <default>false</default>
+            <default>true</default>
             <summary>Always Prompt for Download Path</summary>
             <description>Always Prompt for Download Path</description>
         </key>
