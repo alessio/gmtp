@@ -1,8 +1,10 @@
 gmtp (1.3.1-2) unstable; urgency=low
 
-  * 
+  * Fix 0001-missing_linker_flag.patch, it wasn't actually applied when
+    linked against GTK3.
+  * Really build with --as-needed.
 
- -- Alessio Treglia <alessio@debian.org>  Mon, 20 Feb 2012 15:24:29 +0100
+ -- Alessio Treglia <alessio@debian.org>  Mon, 20 Feb 2012 15:44:30 +0100
 
 gmtp (1.3.1-1) unstable; urgency=low
 
