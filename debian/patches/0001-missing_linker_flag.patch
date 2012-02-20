@@ -1,0 +1,15 @@
+---
+ Makefile |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- gmtp.orig/Makefile
++++ gmtp/Makefile
+@@ -43,7 +43,7 @@ LIBS +=
+ .SUFFIXES: .c .o .po .mo
+ 
+ GTK_CFLAGS = `pkg-config --cflags gtk+-2.0 gconf-2.0 libmtp id3tag flac vorbisfile`
+-GTK_LDFLAGS = `pkg-config --libs gtk+-2.0 gconf-2.0 libmtp id3tag flac vorbisfile`
++GTK_LDFLAGS = `pkg-config --libs gtk+-2.0 gconf-2.0 libmtp id3tag flac vorbisfile gthread-2.0`
+ 
+ ifeq ($(MAKECMDGOALS),gtk3)
+ GTK_CFLAGS = `pkg-config --cflags gtk+-3.0 gio-2.0 libmtp id3tag flac vorbisfile`
