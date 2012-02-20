@@ -1,3 +1,11 @@
+gmtp (1.3.1-1) unstable; urgency=low
+
+  * New upstream bugfix release:
+    - Change default to ask for Download folder upon initial installation.
+  * Link against gthread-2.0 to prevent FTBFS; patch taken from Ubuntu.
+
+ -- Alessio Treglia <alessio@debian.org>  Mon, 20 Feb 2012 14:25:15 +0100
+
 gmtp (1.3.0-1) unstable; urgency=low
 
   * New upstream release.
