@@ -155,6 +155,7 @@ void on_filesAdd_activate(GtkMenuItem *menuitem, gpointer user_data) {
         //tmpFolderID = currentFolderID;
         currentFolderID = (uint32_t) targetFol;
     }
+    AlbumErrorIgnore = FALSE;
     if (files != NULL)
         g_slist_foreach(files, (GFunc) __filesAdd, NULL);
 

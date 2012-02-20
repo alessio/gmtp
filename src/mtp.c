@@ -96,6 +96,10 @@ MTP_file_ext_struct file_ext[] = {
 
 static gchar* blank_ext = "";
 
+// Ignore Album errors?
+
+gboolean AlbumErrorIgnore = FALSE;
+
 // ************************************************************************************************
 
 /**
@@ -1261,8 +1265,13 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo) 
         albuminfo->tracks = NULL;
     }
     if (ret != 0) {
-        displayError(_("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
-        g_fprintf(stderr, _("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
+
+        if (AlbumErrorIgnore == FALSE) {
+            displayError(_("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
+            g_fprintf(stderr, _("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
+        } 
+        // Displayed the message once already per transfer...
+        AlbumErrorIgnore = TRUE;
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
     }

@@ -35,6 +35,8 @@ extern "C" {
 
 #define MTP_DEVICE_SINGLE_STORAGE -1
 
+    gboolean AlbumErrorIgnore;
+
     typedef struct {
         gchar* file_extension;
         LIBMTP_filetype_t file_type;
