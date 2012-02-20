@@ -1,3 +1,5 @@
+Description: Link against gthread-2.0 to avoid build failure.
+Origin: Ubuntu
 ---
  Makefile |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
