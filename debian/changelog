@@ -1,4 +1,4 @@
-gmtp (1.3.2-1) UNRELEASED; urgency=low
+gmtp (1.3.2-1) unstable; urgency=low
 
   * New upstream bugfix release:
     - Correct Makefile to fix when building with GTK+-3.4.
@@ -18,7 +18,7 @@ gmtp (1.3.2-1) UNRELEASED; urgency=low
   * Add 0002-format_security.patch to prevent build failure with the flag
     '-Werror=format-security' enabled.
 
- -- Alessio Treglia <alessio@debian.org>  Thu, 14 Jun 2012 10:06:50 +0200
+ -- Alessio Treglia <alessio@debian.org>  Thu, 14 Jun 2012 10:12:49 +0200
 
 gmtp (1.3.1-2) unstable; urgency=low
 
