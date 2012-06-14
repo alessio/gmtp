@@ -1,11 +1,37 @@
-Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=204
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: gMTP
 Upstream-Contact: Darran Kartaschew <chewy509@mailcity.com>
 Source: http://sf.net/projects/gmtp/files/
-Copyright: 2009-2011, Darran Kartaschew.
+Copyright: 2009-2012, Darran Kartaschew.
 
 Files: *
-Copyright: 2009-2011, Darran Kartaschew <chewy509@mailcity.com>
+Copyright: 2009-2012, Darran Kartaschew <chewy509@mailcity.com>
+License: BSD-3-clause
+
+Files: icon*.png
+Copyright: Oliver Scholtz
+License: GPL-2
+
+Files: stock-about-16.png
+Copyright: 2009, Victor Castillejo <perfectska04@gmail.com>
+           2002-2008, Ulisse Perusin <uli.peru@gmail.com>
+           2002-2008, Riccardo Buzzotta <raozuzu@yahoo.it>
+           2002-2008, Josef Vybíral <cornelius@vybiral.info>
+           2002-2008, Hylke Bons <h.bons@student.rug.nl>
+           2002-2008, Ricardo González <rick@jinlabs.com>
+           2002-2008, Lapo Calamandrei <calamandrei@gmail.com>
+           2002-2008, Rodney Dawes <dobey@novell.com>
+           2002-2008, Luca Ferretti <elle.uca@libero.it>
+           2002-2008, Tuomas Kuosmanen <tigert@gimp.org>
+           2002-2008, Andreas Nilsson <nisses.mail@home.se>
+           2002-2008, Jakub Steiner <jimmac@novell.com>
+License: GPL-2
+Comment: The icon is also included in the gnome-colors-common package.
+
+Files: debian/*
+Copyright: 2009-2012, Alessio Treglia <alessio@debian.org>
+License: GPL-2
+
 License: BSD-3-clause
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
@@ -32,30 +58,6 @@ License: BSD-3-clause
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
-Files: icon*.png
-Copyright: Oliver Scholtz
-License: GPL-2
-
-Files: stock-about-16.png
-Copyright: 2009, Victor Castillejo <perfectska04@gmail.com>
-           2002-2008, Ulisse Perusin <uli.peru@gmail.com>
-           2002-2008, Riccardo Buzzotta <raozuzu@yahoo.it>
-           2002-2008, Josef Vybíral <cornelius@vybiral.info>
-           2002-2008, Hylke Bons <h.bons@student.rug.nl>
-           2002-2008, Ricardo González <rick@jinlabs.com>
-           2002-2008, Lapo Calamandrei <calamandrei@gmail.com>
-           2002-2008, Rodney Dawes <dobey@novell.com>
-           2002-2008, Luca Ferretti <elle.uca@libero.it>
-           2002-2008, Tuomas Kuosmanen <tigert@gimp.org>
-           2002-2008, Andreas Nilsson <nisses.mail@home.se>
-           2002-2008, Jakub Steiner <jimmac@novell.com>
-License: GPL-2
-Comment: The icon is also included in the gnome-colors-common package.
-
-Files: debian/*
-Copyright: 2009-2011, Alessio Treglia <alessio@debian.org>
-License: GPL-2
 
 License: GPL-2
  This program is free software; you can redistribute it and/or modify
