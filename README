@@ -1,4 +1,4 @@
-gMTP v1.3.1
+gMTP v1.3.2
 
 A basic MP3 Player client for Oracle Solaris 10.
 
@@ -114,6 +114,31 @@ A. gMTP uses the MTP function 'moveObject' to perform move operations.
    PC, re-upload them again and delete the originals, however this is very
    time intensive, and in these cases it's better than the user do this 
    themselves.
+
+Q. I have an Android device and .... isn't working?
+A. There are a few answers or explanations with Android.
+   1. Some device vendors have opted to use their own MTP software stack with
+      their device, and some of these implementations are horribly broken.
+      Contact your device manufacturer for further assistance. (AFAIK, this is
+      primarily Samsung with Android 2.x devices, and some lesser known Chinese
+      developed handsets often rebadged as Carrier own-brand handsets).
+   2. Android 1.x-2.x doesn't have a native MTP implementation, so if your
+      device has MTP functionality, see the above comment.
+   3. Android 3.x-4.x has native MTP functionality, but is missing some 
+      features and does have some bugs in the implementation. Some noted 
+      issues:
+      a. Does not support albums or album metadata. So you can't upload custom
+         album art.
+      b. Some users have reported issues with Playlist support. (Try to get a
+         newer revision of your version of Android).
+      c. Android 3.2 has a nasty bug, in that an application is unable to 
+         call the Storage APIs more than once in a session. gMTP 1.3.2 works 
+         around this by caching the device storage information. (but not the 
+         file listing or related metadata).
+      d. Samsung Galaxy and Google Nexus devices have connectivity issues, that
+         I'm hoping can be resolved via patches to libmtp. Sorry, there is 
+         nothing I can do about that situation. Complain to Samsung and Google, 
+         and try to get them actively involved in libmtp.
 
 TODO List
 

@@ -35,11 +35,14 @@ package in the 'misc' directory.
 
 Known to compile with:
 gcc v3.4.3
+gcc v4.2.1
 gcc v4.5.0
 gcc v4.5.2
 gcc v4.6.2
 Sun Studio 12u1
 Oracle Studio 12.2
+Oracle Studio 12.3
+clang 3.1
 
 Known to work on:
 Solaris 10 u8 and Solaris 10 u9
@@ -49,3 +52,4 @@ Arch Linux
 Ubuntu 10.04
 Debian Sid
 Gentoo Linux
+FreeBSD 8.1

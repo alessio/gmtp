@@ -2,7 +2,7 @@
  *
  *   File: metatag_info.c
  *
- *   Copyright (C) 2009-2011 Darran Kartaschew
+ *   Copyright (C) 2009-2012 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -507,17 +507,22 @@ void get_flac_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
     }
 
     // Duration, bitrate and other information
+    if((streaminfo.data.stream_info.sample_rate != 0)&&(streaminfo.data.stream_info.total_samples != 0)){
     trackinformation->duration = (streaminfo.data.stream_info.total_samples /
         streaminfo.data.stream_info.sample_rate) * 1000;
     trackinformation->bitrate = 8.0 * (float) (trackinformation->filesize) /
         (1000.0 * (float) streaminfo.data.stream_info.total_samples
         / (float) streaminfo.data.stream_info.sample_rate);
+    } else {
+        trackinformation->duration = 0;
+        trackinformation->bitrate = 0;
+    }
     trackinformation->bitratetype = 0; // Not used
     trackinformation->nochannels = streaminfo.data.stream_info.channels;
 
     //trackinformation->tracknumber = atoi(FLAC_getFieldText(tags, "TRACKNUMBER"));
     FLAC__metadata_object_delete(tags);
-    FLAC__metadata_object_delete(&streaminfo);
+    //FLAC__metadata_object_delete(&streaminfo);
     return;
 }
 

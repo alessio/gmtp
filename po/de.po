@@ -1,10 +1,10 @@
 domain "gmtp"
 # File:mtp.c, line:544
 msgid  "\nError getting file from MTP device.\n"
-msgstr "\nFehler beim Abrufen der Datei aus MTP-Ger��t.\n"
+msgstr "\nFehler beim Abrufen der Datei aus MTP-Gerät.\n"
 # File:mtp.c, line:529
 msgid  "\nFailed to delete file %s\n"
-msgstr "\nKonnte die Datei nicht lȵschen %s\n"
+msgstr "\nKonnte die Datei nicht löschen %s\n"
 # File:interface.c, line:1922
 msgid  "   %s %s : (%04x:%04x) @ bus %d, dev %d"
 msgstr "   %s %s : (%04x:%04x) @ bus %d, dev %d"
@@ -37,7 +37,7 @@ msgid  "<b><big>"
 msgstr "<b><big>"
 # File:interface.c, line:1346
 msgid  "<b>Battery Level:</b>"
-msgstr "<b>Batterie-Fȭllstand:</b>"
+msgstr "<b>Batterie-Füllstand:</b>"
 # File:interface.c, line:1501
 msgid  "<b>Bus Location:</b>"
 msgstr "<b>Bus Adresse:</b>"
@@ -58,7 +58,7 @@ msgid  "<b>Filepaths on PC</b>"
 msgstr "<b>Dateipfade auf dem PC</b>"
 # File:interface.c, line:1433
 msgid  "<b>MTP Device Properties</b>"
-msgstr "<b>MTP-Ger��t Eigenschaften</b>"
+msgstr "<b>MTP-Gerät Eigenschaften</b>"
 # File:interface.c, line:1337
 msgid  "<b>Manufacturer:</b>"
 msgstr "<b>Hersteller:</b>"
@@ -76,7 +76,7 @@ msgid  "<b>Product:</b>"
 msgstr "<b>Produkt:</b>"
 # File:interface.c, line:1551
 msgid  "<b>Raw Device Information</b>"
-msgstr "<b>Rohe Ger��te-Informationen</b>"
+msgstr "<b>Rohe Geräte-Informationen</b>"
 # File:interface.c, line:1386
 msgid  "<b>Secure Time:</b>"
 msgstr "<b>Sichere Zeit:</b>"
@@ -88,7 +88,7 @@ msgid  "<b>Storage:</b>"
 msgstr "<b>Speicherplatz:</b>"
 # File:interface.c, line:1371
 msgid  "<b>Supported Formats:</b>"
-msgstr "<b>Unterstȭtzte Formate:</b>"
+msgstr "<b>Unterstützte Formate:</b>"
 # File:interface.c, line:1395
 msgid  "<b>Sync Partner:</b>"
 msgstr "<b>Synchronisations-Partner:</b>"
@@ -99,41 +99,41 @@ msgstr "<b>Vendor-ID:</b>"
 msgid  "<b>Vendor:</b>"
 msgstr "<b>Hersteller:</b>"
 # File:interface.c, line:1767
-msgid  "<small>Copyright 2009-2011, Darran Kartaschew</small>\n<small>Released under the BSD Licence</small>\n"
-msgstr "<small>Copyright 2009-2011, Darran Kartaschew</small>\n<small>unter der BSD Licence verȵffentlicht</small>\n"
+msgid  "<small>Copyright 2009-2011, Darran Kartaschew\nReleased under the BSD Licence</small>\n"
+msgstr "<small>Copyright 2009-2011, Darran Kartaschew\nunter der BSD Licence veröffentlicht</small>\n"
 # File:interface.c, line:1759
 msgid  "A simple MP3 Player Client for Solaris 10\nand other UNIX / UNIX-like systems\n"
-msgstr "Ein einfacher MP3-Player-Client fȭr Solaris 10\nund andere UNIX/UNIX-��hnlichen Systeme\n"
+msgstr "Ein einfacher MP3-Player-Client für Solaris 10\nund andere UNIX/UNIX-ähnlichen Systeme\n"
 # File:interface.c, line:1737
 msgid  "About gMTP"
-msgstr "ȣber gMTP"
+msgstr "Über gMTP"
 # File:interface.c, line:308
 msgid  "Add"
-msgstr "Hinzufȭgen"
+msgstr "Hinzufügen"
 # File:interface.c, line:249
 msgid  "Add Album Art"
-msgstr "Album-Cover hinzufȭgen"
+msgstr "Album-Cover hinzufügen"
 # File:interface.c, line:2358
 msgid  "Add File"
-msgstr "Datei hinzufȭgen"
+msgstr "Datei hinzufügen"
 # File:interface.c, line:179
 msgid  "Add Files"
-msgstr "Dateien hinzufȭgen"
+msgstr "Dateien hinzufügen"
 # File:interface.c, line:311
 msgid  "Add Files to your device."
-msgstr "Hinzufȭgen von Dateien zu Ihrem Ger��t."
+msgstr "Hinzufügen von Dateien zu Ihrem Gerät."
 # File:interface.c, line:2273
 msgid  "Add New Playlist"
-msgstr "Neue Playlist einfȭgen"
+msgstr "Neue Playlist einfügen"
 # File:interface.c, line:311
 msgid  "Add a varity of Files to your device in the current folder."
-msgstr "Fȭge mehrere Dateien auf Ihr Ger��t im aktuellen Ordner hinzu."
+msgstr "Füge mehrere Dateien auf Ihr Gerät im aktuellen Ordner hinzu."
 # File:interface.c, line:344
 msgid  "Add and Modify Playlists."
-msgstr "Hinzufȭgen und ��ndern von Playlisten."
+msgstr "Hinzufügen und Ändern von Playlisten."
 # File:interface.c, line:2344
 msgid  "Add file to playlist"
-msgstr "Datei zu Playlist hinzufȭgen"
+msgstr "Datei zu Playlist hinzufügen"
 # File:interface.c, line:2522
 msgid  "Album"
 msgstr "Album"
@@ -148,40 +148,40 @@ msgid  "Always show Download Path?"
 msgstr "Download-Pfad immer anzeigen?"
 # File:callbacks.c, line:111
 msgid  "Are you sure you want to delete these files?"
-msgstr "Sind Sie sicher, dass Sie diese Dateien lȵschen mȵchten?"
+msgstr "Sind Sie sicher, dass Sie diese Dateien löschen möchten?"
 # File:callbacks.c, line:342
 msgid  "Are you sure you want to delete this folder (and all contents)?"
-msgstr "Sie sind sicher, dass Sie diesen Ordner lȵschen mȵchten (und alle Inhalte)?"
+msgstr "Sie sind sicher, dass Sie diesen Ordner löschen möchten (und alle Inhalte)?"
 # File:interface.c, line:2512
 msgid  "Artist"
-msgstr "Kȭnstler"
+msgstr "Künstler"
 # File:interface.c, line:1005
 msgid  "Attempt to connect to Device on startup"
-msgstr "Versuchen, beim Start zum Ger��t zu verbinden"
+msgstr "Versuchen, beim Start zum Gerät zu verbinden"
 # File:interface.c, line:241
 msgid  "Change Device Name"
-msgstr "Ger��te-Namen ��ndern"
+msgstr "Geräte-Namen ändern"
 # File:callbacks.c, line:112
 msgid  "Confirm Delete"
-msgstr "Lȵschen best��tigen"
+msgstr "Löschen bestätigen"
 # File:interface.c, line:1033
 msgid  "Confirm File/Folder Delete"
-msgstr "Lȵschen von Datei/Ordner best��tigen"
+msgstr "Löschen von Datei/Ordner bestätigen"
 # File:callbacks.c, line:165
 msgid  "Connect"
 msgstr "Verbinden"
 # File:callbacks.c, line:170
 msgid  "Connect Device"
-msgstr "Ger��t verbinden"
+msgstr "Gerät verbinden"
 # File:interface.c, line:1897
 msgid  "Connect to which device?"
-msgstr "Verbinden mit welchem Ger��t?"
+msgstr "Verbinden mit welchem Gerät?"
 # File:interface.c, line:1957
 msgid  "Connect to which storage device?"
-msgstr "Verbinden mit welchem Speicherger��t?"
+msgstr "Verbinden mit welchem Speichergerät?"
 # File:interface.c, line:299
 msgid  "Connect/Disconnect to your device."
-msgstr "Verbinden/Trennen von Ger��t."
+msgstr "Verbinden/Trennen von Gerät."
 # File:callbacks.c, line:47
 msgid  "Connected to %s (%s) - %d MB free"
 msgstr "Verbunden mit %s (%s) - %d MB frei"
@@ -193,10 +193,10 @@ msgid  "Couldn't create playlist object\n"
 msgstr "Playlist konnte nicht erstellt werden\n"
 # File:mtp.c, line:585
 msgid  "Couldn't delete folder %s (%x)\n"
-msgstr "Ordner konnte nicht gelȵscht werden %s (%x)\n"
+msgstr "Ordner konnte nicht gelöscht werden %s (%x)\n"
 # File:mtp.c, line:760
 msgid  "Couldn't open image file %s\n"
-msgstr "Bild-Datei konnte nicht geȵffnet werden %s\n"
+msgstr "Bild-Datei konnte nicht geöffnet werden %s\n"
 # File:mtp.c, line:777
 msgid  "Couldn't send album art\n"
 msgstr "Album-Cover konnte nicht gesendet werden\n"
@@ -208,58 +208,58 @@ msgid  "Current Playlist: "
 msgstr "Aktuelle Playlist: "
 # File:interface.c, line:2309
 msgid  "Del"
-msgstr "Lȵschen"
+msgstr "Löschen"
 # File:interface.c, line:2379
 msgid  "Del File"
-msgstr "Datei lȵschen"
+msgstr "Datei löschen"
 # File:interface.c, line:315
 msgid  "Delete"
-msgstr "Lȵschen"
+msgstr "Löschen"
 # File:interface.c, line:185
 msgid  "Delete Files"
-msgstr "Dateien lȵschen"
+msgstr "Dateien löschen"
 # File:interface.c, line:318
 msgid  "Delete Files/Folders from your device."
-msgstr "Lȵschen von Dateien/Ordnern vom Ger��t."
+msgstr "Löschen von Dateien/Ordnern vom Gerät."
 # File:interface.c, line:206
 msgid  "Delete Folder"
-msgstr "Ordner lȵschen"
+msgstr "Ordner löschen"
 # File:mtp.c, line:825
 msgid  "Deleting playlist failed?\n"
-msgstr "Lȵschen von Playlist gescheitert?\n"
+msgstr "Löschen von Playlist gescheitert?\n"
 # File:mtp.c, line:92
 msgid  "Detect: Encountered a Memory Allocation Error. \n"
 msgstr "Fehler: Speicherzugriffsfehler.\n"
 # File:mtp.c, line:84
 msgid  "Detect: No raw devices found.\n"
-msgstr "Fehler: Kein Ger��t gefunden.\n"
+msgstr "Fehler: Kein Gerät gefunden.\n"
 # File:mtp.c, line:88
 msgid  "Detect: There has been an error connecting. \n"
 msgstr "Fehler: Fehler beim verbinden.\n"
 # File:mtp.c, line:106
 msgid  "Detect: Unable to open raw device?\n"
-msgstr "Fehler: Verbindung zu Ger��t nicht mȵglich.\n"
+msgstr "Fehler: Verbindung zu Gerät nicht möglich.\n"
 # File:interface.c, line:2326
 msgid  "Device Audio Tracks"
 msgstr "Audio-Dateien"
 # File:interface.c, line:1861
 msgid  "Device Name:"
-msgstr "Ger��tename:"
+msgstr "Gerätename:"
 # File:interface.c, line:222
 msgid  "Device Properties"
-msgstr "Ger��teeigenschaften"
+msgstr "Geräteeigenschaften"
 # File:interface.c, line:1908
 msgid  "Device:"
-msgstr "Ger��t:"
+msgstr "Gerät:"
 # File:mtp.c, line:259
 msgid  "DevicePropeties: How did I get called?\n"
-msgstr "Ger��teeigenschaften: Wie werde ich genannt?\n"
+msgstr "Geräteeigenschaften: Wie werde ich genannt?\n"
 # File:callbacks.c, line:146
 msgid  "Disconnect"
 msgstr "Trennen"
 # File:callbacks.c, line:161
 msgid  "Disconnect Device"
-msgstr "Ger��t trennen"
+msgstr "Gerät trennen"
 # File:interface.c, line:322
 msgid  "Download"
 msgstr "Download"
@@ -268,13 +268,13 @@ msgid  "Download Files"
 msgstr "Dateien herunterladen"
 # File:interface.c, line:325
 msgid  "Download Files from your device to your Host PC."
-msgstr "Dateien vom Ger��t zum PC herunterladen."
+msgstr "Dateien vom Gerät zum PC herunterladen."
 # File:interface.c, line:1071
 msgid  "Download Path:"
 msgstr "Download-Pfad:"
 # File:interface.c, line:325
-msgid  "Download files from your device to your PC. Default Download path is set in the preferences dialog."
-msgstr "Herunterladen von Dateien von Ihrem Ger��t auf Ihren PC. Standard Download-Pfad ist im Einstellungen-Dialog eingestellt."
+msgid  "Download files from your device to your PC. Default Download path is set in the prefernces dialog."
+msgstr "Herunterladen von Dateien von Ihrem Gerät auf Ihren PC. Standard Download-Pfad ist im Einstellungen-Dialog eingestellt."
 # File:interface.c, line:2550
 msgid  "Duration"
 msgstr "Dauer"
@@ -292,13 +292,13 @@ msgid  "Error"
 msgstr "Fehler"
 # File:mtp.c, line:482
 msgid  "Error code %d sending track to device: <b>%s</b>"
-msgstr "Fehlercode %d beim Senden zum Ger��t: <b>%s</b>"
+msgstr "Fehlercode %d beim Senden zum Gerät: <b>%s</b>"
 # File:mtp.c, line:732
 msgid  "Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"
-msgstr "Fehler beim Erstellen oder Aktualisieren von Album.\n(Dies kȵnnte darauf zurȭckzufȭhren sein, dass Ihr Ger��t keine Alben unterstȭtzt.)\n"
+msgstr "Fehler beim Erstellen oder Aktualisieren von Album.\n(Dies könnte darauf zurückzuführen sein, dass Ihr Gerät keine Alben unterstützt.)\n"
 # File:mtp.c, line:545
 msgid  "Error getting file from MTP device."
-msgstr "Fehler beim Abrufen der Datei vom MTP-Ger��t."
+msgstr "Fehler beim Abrufen der Datei vom MTP-Gerät."
 # File:mtp.c, line:503
 msgid  "Error sending file %s.\n"
 msgstr "Fehler beim Senden der Datei %s.\n"
@@ -310,10 +310,10 @@ msgid  "Error sending track.\n"
 msgstr "Fehler beim Senden der Musiktitel.\n"
 # File:mtp.c, line:637
 msgid  "Error: Couldn't set device name to %s\n"
-msgstr "Fehler: Konnte Ger��tenamen nicht setzen zu %s\n"
+msgstr "Fehler: Konnte Gerätenamen nicht setzen zu %s\n"
 # File:mtp.c, line:530
 msgid  "Failed to delete file"
-msgstr "Konnte die Datei nicht lȵschen"
+msgstr "Konnte die Datei nicht löschen"
 # File:interface.c, line:2004
 msgid  "File <b>%s</b> already exists in target folder.\nDo you want to:"
 msgstr "Datei <b>%s</b> existiert bereits in Zielordner.\nWollen Sie:"
@@ -325,7 +325,7 @@ msgid  "File download"
 msgstr "Datei herunterladen"
 # File:interface.c, line:604
 msgid  "FileSize Hidden"
-msgstr "DateigrȵȖe versteckt"
+msgstr "Dateigröße versteckt"
 # File:interface.c, line:568
 msgid  "Filename"
 msgstr "Dateiname"
@@ -343,16 +343,16 @@ msgid  "Folder creation failed: %s\n"
 msgstr "Ordner erstellen fehlgeschlagen: %s\n"
 # File:interface.c, line:864
 msgid  "I don't know how to delete a parent folder reference?\n"
-msgstr "Ich weiȖ nicht, wie man einen ȭbergeordneten Ordnerverweis lȵsche?\n"
+msgstr "Ich weiß nicht, wie man einen übergeordneten Ordnerverweis lösche?\n"
 # File:interface.c, line:1796
 msgid  "Information"
 msgstr "Information"
 # File:interface.c, line:2415
 msgid  "Move selected file down in the playlist"
-msgstr "Bewege die ausgew��hlte Datei herunter in der Playlist"
+msgstr "Bewege die ausgewählte Datei herunter in der Playlist"
 # File:interface.c, line:2410
 msgid  "Move selected file up in the playlist"
-msgstr "Bewege die ausgew��hlte Datei herauf in der Playlist"
+msgstr "Bewege die ausgewählte Datei herauf in der Playlist"
 # File:callbacks.c, line:367
 msgid  "N/A"
 msgstr "N/A"
@@ -364,13 +364,13 @@ msgid  "New Playlist"
 msgstr "Neue Playlist"
 # File:interface.c, line:2054
 msgid  "No Albums available to set Album Art with. Either:\n1. You have no music files uploaded?\n2. Your device does not support Albums?\n3. Previous applications used to upload files do not autocreate albums for you or support the metadata for those files in order to create the albums for you?\n"
-msgstr "Keine Alben zur Verfȭgung um Cover zu ��ndern. Entweder:\n1. Sie haben keine Musik-Dateien hochgeladen?\n2. Ihr Ger��t unterstȭtzt keine Alben?\n3. Vorherige Anwendungen haben Dateien hochgeladen ohne Alben zu erstellen oder unterstȭtzen keine Meta-Daten, um Alben zu erstellen?\n"
+msgstr "Keine Alben zur Verfügung um Cover zu ändern. Entweder:\n1. Sie haben keine Musik-Dateien hochgeladen?\n2. Ihr Gerät unterstützt keine Alben?\n3. Vorherige Anwendungen haben Dateien hochgeladen ohne Alben zu erstellen oder unterstützen keine Meta-Daten, um Alben zu erstellen?\n"
 # File:callbacks.c, line:167
 msgid  "No device attached"
-msgstr "Kein Ger��t angeschlossen"
+msgstr "Kein Gerät angeschlossen"
 # File:callbacks.c, line:99
 msgid  "No files/folders selected?"
-msgstr "Keine Dateien/Ordner ausgew��hlt?"
+msgstr "Keine Dateien/Ordner ausgewählt?"
 # File:interface.c, line:2566
 msgid  "Num"
 msgstr "Nummer"
@@ -379,13 +379,13 @@ msgid  "Object ID"
 msgstr "Objekt-ID"
 # File:interface.c, line:2008
 msgid  "Overwrite"
-msgstr "ȣberschreiben"
+msgstr "Überschreiben"
 # File:interface.c, line:2009
 msgid  "Overwrite All"
-msgstr "Alle ȭberschreiben"
+msgstr "Alle überschreiben"
 # File:interface.c, line:318
 msgid  "Permanently remove files/folders from your device. Note: Albums are stored as *.alb files."
-msgstr "Dateien/Ordner dauerhaft von Ihrem Ger��t entfernen. Hinweis: Die Alben werden als *.alb-Dateien gespeichert."
+msgstr "Dateien/Ordner dauerhaft von Ihrem Gerät entfernen. Hinweis: Die Alben werden als *.alb-Dateien gespeichert."
 # File:interface.c, line:2392
 msgid  "Playlist Audio Tracks"
 msgstr "Titel in Playlist"
@@ -400,13 +400,13 @@ msgid  "Preferences"
 msgstr "Einstellungen"
 # File:interface.c, line:1037
 msgid  "Prompt if to Overwrite file if already exists"
-msgstr "Fragen, wenn Dateien ȭberschrieben werden, die bereits existieren"
+msgstr "Fragen, wenn Dateien überschrieben werden, die bereits existieren"
 # File:interface.c, line:360
 msgid  "Properties"
 msgstr "Eigenschaften"
 # File:interface.c, line:2011
 msgid  "Question: Confirm Overwrite of Existing File?"
-msgstr "Frage: Best��tigen beim ȣberschreiben von Dateien?"
+msgstr "Frage: Bestätigen beim Überschreiben von Dateien?"
 # File:interface.c, line:379
 msgid  "Quit"
 msgstr "Beenden"
@@ -418,13 +418,13 @@ msgid  "Refresh"
 msgstr "Aktualisieren"
 # File:interface.c, line:216
 msgid  "Refresh Device"
-msgstr "Ger��t aktualisieren"
+msgstr "Gerät aktualisieren"
 # File:interface.c, line:351
 msgid  "Refresh File/Folder listing."
 msgstr "Aktualisieren von Dateien und Ordnern."
 # File:interface.c, line:2295
 msgid  "Remove Current Selected Playlist"
-msgstr "Entfernen Sie aktuell ausgew��hlte Playlist"
+msgstr "Entfernen Sie aktuell ausgewählte Playlist"
 # File:interface.c, line:2365
 msgid  "Remove file from playlist"
 msgstr "Entferne Datei von Playlist"
@@ -433,40 +433,40 @@ msgid  "Rescan: How did I get called?\n"
 msgstr "Rescan: Wie wurde ich genannt?\n"
 # File:callbacks.c, line:418
 msgid  "Select Album Art File"
-msgstr "W��hlen Sie die Cover-Datei"
+msgstr "Wählen Sie die Cover-Datei"
 # File:interface.c, line:624
 msgid  "Select Files to Add"
-msgstr "Dateien zum Hinzufȭgen ausw��hlen"
+msgstr "Dateien zum Hinzufügen auswählen"
 # File:interface.c, line:711
 msgid  "Select Path to Download"
-msgstr "W��hlen Sie den Pfad zum Herunterladen"
+msgstr "Wählen Sie den Pfad zum Herunterladen"
 # File:callbacks.c, line:238
 msgid  "Select Path to Download to"
-msgstr "W��hlen Sie Pfad, zu dem heruntergeladen werden soll"
+msgstr "Wählen Sie Pfad, zu dem heruntergeladen werden soll"
 # File:callbacks.c, line:264
 msgid  "Select Path to Upload From"
-msgstr "W��hlen Sie Pfad, von dem hochgeladen werden soll"
+msgstr "Wählen Sie Pfad, von dem hochgeladen werden soll"
 # File:interface.c, line:578
 msgid  "Size"
-msgstr "GrȵȖe"
+msgstr "Größe"
 # File:interface.c, line:2006
 msgid  "Skip"
-msgstr "ȣberspringen"
+msgstr "Überspringen"
 # File:interface.c, line:2007
 msgid  "Skip All"
-msgstr "Alle ȭberspringen"
+msgstr "Alle überspringen"
 # File:interface.c, line:1968
 msgid  "Storage Device:"
-msgstr "Speicherger��t:"
+msgstr "Speichergerät:"
 # File:interface.c, line:2540
 msgid  "Track"
 msgstr "Titel"
 # File:mtp.c, line:399
 msgid  "Unable to add %s due to insufficient space: filesize = %lu, freespace = %lu\n"
-msgstr "Kann %s nicht hinzuzufȭgen wegen Platzmangels: DateigrȵȖe = %lu, freier Speicherplatz = %lu\n"
+msgstr "Kann %s nicht hinzuzufügen wegen Platzmangels: Dateigröße = %lu, freier Speicherplatz = %lu\n"
 # File:mtp.c, line:400
 msgid  "Unable to add file due to insufficient space"
-msgstr "Datei konnte wegen Platzmangels nicht hinzugefȭgt werden"
+msgstr "Datei konnte wegen Platzmangels nicht hinzugefügt werden"
 # File:mtp.c, line:158
 msgid  "Unknown"
 msgstr "Unbekannt"
@@ -493,22 +493,22 @@ msgid  "Upload an image file as Album Art."
 msgstr "Hochladen einer Bilddatei als Album-Cover."
 # File:interface.c, line:363
 msgid  "View Device Properties."
-msgstr "Ger��te Eigenschaften."
+msgstr "Geräte Eigenschaften."
 # File:interface.c, line:370
 msgid  "View/Change gMTP Preferences."
-msgstr "Anzeigen/��ndern von gMTP Einstellungen."
+msgstr "Anzeigen/ändern von gMTP Einstellungen."
 # File:prefs.c, line:57
 msgid  "WARNING: gconf schema invalid, reverting to defaults. Please ensure schema is loaded in gconf database.\n"
-msgstr "WARNUNG: gconf Schema ungȭltig, Rȭckgriff auf Standardwerte. Bitte stellen Sie sicher dass das Schema in der gconf-Datenbank geladen ist.\n"
+msgstr "WARNUNG: gconf Schema ungültig, Rückgriff auf Standardwerte. Bitte stellen Sie sicher dass das Schema in der gconf-Datenbank geladen ist.\n"
 # File:prefs.c, line:76
 msgid  "WARNING: gconf schema invalid, unable to save! Please ensure schema is loaded in gconf database.\n"
-msgstr "WARNUNG: gconf Schema ungȭltig, kann nicht speichern! Bitte stellen Sie sicher dass das Schema in der gconf-Datenbank geladen ist.\n"
+msgstr "WARNUNG: gconf Schema ungültig, kann nicht speichern! Bitte stellen Sie sicher dass das Schema in der gconf-Datenbank geladen ist.\n"
 # File:prefs.c, line:127
 msgid  "WARNING: gconf_callback_func() failed - we got a callback for a key thats not ours?\n"
-msgstr "WARNUNG: gconf_callback_func () failed - wir haben einen Callback fȭr einen Key der nicht uns gehȵrt?\n"
+msgstr "WARNUNG: gconf_callback_func () failed - wir haben einen Callback für einen Key der nicht uns gehört?\n"
 # File:interface.c, line:274
 msgid  "_About"
-msgstr "_ȣber"
+msgstr "_Über"
 # File:interface.c, line:234
 msgid  "_Edit"
 msgstr "_Bearbeiten"
@@ -539,7 +539,7 @@ msgstr "Jahr"
 msgid "_View"
 msgstr "_Anzeigen"
 msgid "File Size"
-msgstr "Datei-GrȵȖe"
+msgstr "Datei-Größe"
 msgid "Track Number"
 msgstr "Titelnummer"
 msgid "Genre"
@@ -552,7 +552,7 @@ msgstr "Konnte Bild-Datei %s nicht speichern\n"
 msgid "Couldn't save image file\n"
 msgstr "Konnte Bild-Datei nicht speichern\n"
 msgid "Failed to get storage parameters from the device - need to disconnect."
-msgstr "Fehler beim Abrufen von Speicher-Parametern vom Ger��t - Verbindung muss getrennt werden."
+msgstr "Fehler beim Abrufen von Speicher-Parametern vom Gerät - Verbindung muss getrennt werden."
 msgid "Couldn't remove album art\n"
 msgstr "Konnte Album-Cover nicht entfernen\n"
 msgid "Rename File"
@@ -566,20 +566,20 @@ msgstr "Hochladen"
 msgid "Remove"
 msgstr "Entfernen"
 msgid "Format Device"
-msgstr "Ger��t formatieren"
+msgstr "Gerät formatieren"
 msgid "Are you sure you want to format this device?"
-msgstr "Sind Sie sicher, dass Sie dieses Ger��t formatieren mȵchten?"
+msgstr "Sind Sie sicher, dass Sie dieses Gerät formatieren möchten?"
 msgid "Format Device failed?\n"
 msgstr "Formatierung gescheitert?\n"
 msgid "Prompt to add New Music track to existing playlist"
-msgstr "Fragen beim Hinzufȭgen von neuen Titeln zu bestehender Playlist"
+msgstr "Fragen beim Hinzufügen von neuen Titeln zu bestehender Playlist"
 ###########################################################
 msgid "Import Playlist"
 msgstr "Playlist importieren"
 msgid "Export Playlist"
 msgstr "Playlist exportieren"
 msgid "Select Playlist to Import"
-msgstr "W��hlen Sie die zu importierende Playlist"
+msgstr "Wählen Sie die zu importierende Playlist"
 msgid "The playlist failed to import correctly.\n"
 msgstr "Die Playlist konnte nicht korrekt importiert werden.\n"
 msgid "Ignore path information when importing playlist"
@@ -591,11 +591,11 @@ msgstr "Konnte Playlist-Datei nicht speichern\n"
 msgid "Couldn't save playlist file %s\n"
 msgstr "Konnte Playlist-Datei %s  nicht speichern\n"
 msgid "Couldn't open playlist file\n"
-msgstr "Konnte Playlist-Datei nicht ȵffnen\n"
+msgstr "Konnte Playlist-Datei nicht öffnen\n"
 msgid "Couldn't open playlist file %s\n"
-msgstr "Konnte Playlist-Datei %s nicht ȵffnen\n"
+msgstr "Konnte Playlist-Datei %s nicht öffnen\n"
 msgid "Found no tracks within the playlist that exist on this device. Did not import the playlist.\n"
-msgstr "Konnte keine Titel in der Playlist finden, die auf dem Ger��t existieren. Playlist wurde nicht importiert.\n"
+msgstr "Konnte keine Titel in der Playlist finden, die auf dem Gerät existieren. Playlist wurde nicht importiert.\n"
 msgid "Playlist imported.\n"
 msgstr "Playlist importiert.\n"
 ###########################################################

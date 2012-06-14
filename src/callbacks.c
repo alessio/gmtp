@@ -2,7 +2,7 @@
  *
  *   File: callbacks.c
  *
- *   Copyright (C) 2009-2011 Darran Kartaschew
+ *   Copyright (C) 2009-2012 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -1202,6 +1202,8 @@ void on_editSelectAll_activate(GtkMenuItem *menuitem, gpointer user_data) {
  * @param user_data
  */
 void on_editFindClose_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    gchar* tmp_string;
+
     gtk_widget_hide(findToolbar);
     if (Preferences.view_folders == TRUE) {
         gtk_widget_show(scrolledwindowFolders);
@@ -1209,7 +1211,31 @@ void on_editFindClose_activate(GtkMenuItem *menuitem, gpointer user_data) {
     fileListClear();
     inFindMode = FALSE;
     gtk_tree_view_column_set_visible(column_Location, FALSE);
-    deviceRescan();
+
+    // First we clear the file and folder list...
+    fileListClear();
+    folderListClear();
+    // Refresh the file listings.
+    fileListAdd();
+    folderListAdd(deviceFolders, NULL);
+
+    // Update the status bar.
+    if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
+        tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
+                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+    } else {
+        if (DeviceMgr.devicestorage->StorageDescription != NULL) {
+            tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"), DeviceMgr.devicename->str,
+                    DeviceMgr.devicestorage->StorageDescription,
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+        } else {
+            tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
+                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
+        }
+    }
+    statusBarSet(tmp_string);
+    g_free(tmp_string);
+
     // Now clear the Search GList;
     if (searchList != NULL) {
         g_slist_foreach(searchList, (GFunc) g_free_search, NULL);
