@@ -2,7 +2,7 @@
  *
  *   File: interface.c
  *
- *   Copyright (C) 2009-2011 Darran Kartaschew
+ *   Copyright (C) 2009-2012 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -3258,13 +3258,13 @@ void displayAbout(void) {
     gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_TITLE);
     gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
     gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
-            "Copyright 2009-2011, Darran Kartaschew\nReleased under the BSD Licence");
+            "Copyright 2009-2012, Darran Kartaschew\nReleased under the BSD Licence");
     gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
             _("A simple MP3 Player Client for Solaris 10\nand other UNIX / UNIX-like systems\n"));
     gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(dialog),
             "gMTP Licence\n"
             "------------\n\n"
-            "Copyright (C) 2009-2011, Darran Kartaschew.\n"
+            "Copyright (C) 2009-2012, Darran Kartaschew.\n"
             "All rights reserved.\n\n"
             "Redistribution and use in source and binary forms, with or without "
             "modification, are permitted provided that the following conditions are met:\n\n"
@@ -3341,7 +3341,7 @@ void displayAbout(void) {
     gtk_widget_show(label5);
     gtk_container_add(GTK_CONTAINER(vbox), label5);
 
-    label3 = gtk_label_new(_("<small>Copyright 2009-2011, Darran Kartaschew</small>\n<small>Released under the BSD Licence</small>"));
+    label3 = gtk_label_new(_("<small>Copyright 2009-2012, Darran Kartaschew</small>\n<small>Released under the BSD Licence</small>"));
     gtk_label_set_use_markup(GTK_LABEL(label3), TRUE);
     gtk_widget_show(label3);
     gtk_container_add(GTK_CONTAINER(vbox), label3);

@@ -2,7 +2,7 @@
  *
  *   File: interface.h
  *
- *   Copyright (C) 2009-2011 Darran Kartaschew
+ *   Copyright (C) 2009-2012 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *

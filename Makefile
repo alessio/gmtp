@@ -2,7 +2,7 @@
 
 PKG_NAME = gmtp
 PREFIX ?= /usr/local
-VER = 1.3.1
+VER = 1.3.2
 # Note: If you update above, please update the config.h and pkginfo file as well.
 
 PKG = gmtp
@@ -39,17 +39,21 @@ TAR = tar
 CFLAGS += -c -g #-O
 LDFLAGS += 
 LIBS +=
+PKG_CONFIG ?= pkg-config
 
 .SUFFIXES: .c .o .po .mo
 
-GTK_CFLAGS = `pkg-config --cflags gtk+-2.0 gconf-2.0 libmtp id3tag flac vorbisfile`
-GTK_LDFLAGS = `pkg-config --libs gtk+-2.0 gconf-2.0 libmtp id3tag flac vorbisfile`
-
 ifeq ($(MAKECMDGOALS),gtk3)
-GTK_CFLAGS = `pkg-config --cflags gtk+-3.0 gio-2.0 libmtp id3tag flac vorbisfile`
-GTK_LDFLAGS = `pkg-config --libs gtk+-3.0 gio-2.0 libmtp id3tag flac vorbisfile`
+PKGS = gtk+-3.0 gio-2.0
 CFLAGS += -DGMTP_USE_GTK3
+else
+PKGS = gtk+-2.0 gconf-2.0
 endif
+
+PKGS += gthread-2.0 libmtp id3tag flac vorbisfile
+
+GTK_CFLAGS = `$(PKG_CONFIG) --cflags $(PKGS)`
+GTK_LDFLAGS = `$(PKG_CONFIG) --libs $(PKGS)`
 
 objects = src/main.o src/mtp.o src/interface.o src/callbacks.o src/prefs.o src/dnd.o src/metatag_info.o
 headers = src/main.h src/mtp.h src/interface.h src/callbacks.h src/prefs.h src/dnd.h src/metatag_info.h src/config.h

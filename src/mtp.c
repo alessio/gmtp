@@ -2,7 +2,7 @@
  *
  *   File: mtp.c
  *
- *   Copyright (C) 2009-2011 Darran Kartaschew
+ *   Copyright (C) 2009-2012 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -114,6 +114,8 @@ guint deviceConnect() {
     } else {
         error = LIBMTP_Detect_Raw_Devices(&DeviceMgr.rawdevices, &DeviceMgr.numrawdevices);
         switch (error) {
+            case LIBMTP_ERROR_NONE:
+                break;
             case LIBMTP_ERROR_NO_DEVICE_ATTACHED:
                 g_fprintf(stderr, _("Detect: No raw devices found.\n"));
                 displayError(_("Detect: No raw devices found.\n"));
@@ -125,6 +127,11 @@ guint deviceConnect() {
             case LIBMTP_ERROR_MEMORY_ALLOCATION:
                 g_fprintf(stderr, _("Detect: Encountered a Memory Allocation Error. \n"));
                 displayError(_("Detect: Encountered a Memory Allocation Error. \n"));
+                return MTP_GENERAL_FAILURE;
+            default:
+                // Some other generic error, so let's exit.
+                g_fprintf(stderr, _("Detect: There has been an error connecting. \n"));
+                displayError(_("Detect: There has been an error connecting. \n"));
                 return MTP_GENERAL_FAILURE;
         }
         // We have at least 1 raw device, so we connect to the first device.
@@ -167,6 +174,7 @@ guint deviceConnect() {
         DeviceMgr.devcert = NULL;
         DeviceMgr.Vendor = NULL;
         DeviceMgr.Product = NULL;
+        DeviceMgr.devicestorage = NULL;
         return MTP_SUCCESS;
     }
 }
@@ -299,23 +307,24 @@ void deviceProperties() {
         }
 
         // Storage.
-        if (LIBMTP_Get_Storage(DeviceMgr.device, 0) != 0) {
-            // We have an error getting our storage, so let the user know and then disconnect the device.
-            displayError("Failed to get storage parameters from the device - need to disconnect.");
-            on_deviceConnect_activate(NULL, NULL);
-            return;
-        }
-        if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
-            DeviceMgr.devicestorage = DeviceMgr.device->storage;
-        } else {
-            DeviceMgr.devicestorage = getCurrentDeviceStoragePtr(DeviceMgr.storagedeviceID);
-        }
-
-        // Supported filetypes;
-        ret = LIBMTP_Get_Supported_Filetypes(DeviceMgr.device, &DeviceMgr.filetypes, &DeviceMgr.filetypes_len);
-        if (ret != 0) {
-            LIBMTP_Dump_Errorstack(DeviceMgr.device);
-            LIBMTP_Clear_Errorstack(DeviceMgr.device);
+        if (DeviceMgr.devicestorage == NULL) {
+            if (LIBMTP_Get_Storage(DeviceMgr.device, 0) < 0) {
+                // We have an error getting our storage, so let the user know and then disconnect the device.
+                displayError("Failed to get storage parameters from the device - need to disconnect.");
+                on_deviceConnect_activate(NULL, NULL);
+                return;
+            }
+            if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
+                DeviceMgr.devicestorage = DeviceMgr.device->storage;
+            } else {
+                DeviceMgr.devicestorage = getCurrentDeviceStoragePtr(DeviceMgr.storagedeviceID);
+            }
+            // Supported filetypes;
+            ret = LIBMTP_Get_Supported_Filetypes(DeviceMgr.device, &DeviceMgr.filetypes, &DeviceMgr.filetypes_len);
+            if (ret != 0) {
+                LIBMTP_Dump_Errorstack(DeviceMgr.device);
+                LIBMTP_Clear_Errorstack(DeviceMgr.device);
+            }
         }
     } else {
         // Set to to none.
@@ -426,16 +435,18 @@ void deviceRescan() {
         fileListAdd();
         folderListAdd(deviceFolders, NULL);
         // Now update the storage...
-        if (LIBMTP_Get_Storage(DeviceMgr.device, 0) != 0) {
-            // We have an error getting our storage, so let the user know and then disconnect the device.
-            displayError(_("Failed to get storage parameters from the device - need to disconnect."));
-            on_deviceConnect_activate(NULL, NULL);
-            return;
-        }
-        if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
-            DeviceMgr.devicestorage = DeviceMgr.device->storage;
-        } else {
-            DeviceMgr.devicestorage = getCurrentDeviceStoragePtr(DeviceMgr.storagedeviceID);
+        if (DeviceMgr.devicestorage == NULL) {
+            if (LIBMTP_Get_Storage(DeviceMgr.device, 0) < 0) {
+                // We have an error getting our storage, so let the user know and then disconnect the device.
+                displayError(_("Failed to get storage parameters from the device - need to disconnect."));
+                on_deviceConnect_activate(NULL, NULL);
+                return;
+            }
+            if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
+                DeviceMgr.devicestorage = DeviceMgr.device->storage;
+            } else {
+                DeviceMgr.devicestorage = getCurrentDeviceStoragePtr(DeviceMgr.storagedeviceID);
+            }
         }
         // Update the status bar.
         if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
@@ -668,6 +679,10 @@ void filesAdd(gchar* filename) {
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
         } else {
+            // Adjust device storage.
+            DeviceMgr.devicestorage->FreeSpaceInBytes -= filesize;
+            DeviceMgr.devicestorage->FreeSpaceInObjects--;
+
             // Only update Album data if transfer was successful.
             if (trackfile->album != NULL) {
                 albumAddTrackToAlbum(albuminfo, trackfile);
@@ -711,22 +726,30 @@ void filesAdd(gchar* filename) {
                 displayError(g_strconcat(_("Error sending file:"), " <b>", filename, "</b>", NULL));
                 LIBMTP_Dump_Errorstack(DeviceMgr.device);
                 LIBMTP_Clear_Errorstack(DeviceMgr.device);
+            } else {
+                // Adjust device storage.
+                DeviceMgr.devicestorage->FreeSpaceInBytes -= filesize;
+                DeviceMgr.devicestorage->FreeSpaceInObjects--;
             }
         }
         LIBMTP_destroy_file_t(genfile);
     }
+
+
     destroyProgressBar();
     // Now update the storage...
-    if (LIBMTP_Get_Storage(DeviceMgr.device, 0) != 0) {
-        // We have an error getting our storage, so let the user know and then disconnect the device.
-        displayError("Failed to get storage parameters from the device - need to disconnect.");
-        on_deviceConnect_activate(NULL, NULL);
-        return;
-    }
-    if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
-        DeviceMgr.devicestorage = DeviceMgr.device->storage;
-    } else {
-        DeviceMgr.devicestorage = getCurrentDeviceStoragePtr(DeviceMgr.storagedeviceID);
+    if (DeviceMgr.devicestorage == NULL) {
+        if (LIBMTP_Get_Storage(DeviceMgr.device, 0) < 0) {
+            // We have an error getting our storage, so let the user know and then disconnect the device.
+            displayError("Failed to get storage parameters from the device - need to disconnect.");
+            on_deviceConnect_activate(NULL, NULL);
+            return;
+        }
+        if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
+            DeviceMgr.devicestorage = DeviceMgr.device->storage;
+        } else {
+            DeviceMgr.devicestorage = getCurrentDeviceStoragePtr(DeviceMgr.storagedeviceID);
+        }
     }
 }
 
@@ -741,6 +764,7 @@ void filesDelete(gchar* filename, uint32_t objectID) {
     gint ret = 1;
     GSList *node;
     FileListStruc *fileptr;
+    uint64_t filesize = 0;
     // Maybe something went wrong, so we disconnected. If so, then simple exit....
     if (DeviceMgr.deviceConnected == FALSE)
         return;
@@ -761,6 +785,17 @@ void filesDelete(gchar* filename, uint32_t objectID) {
             }
         }
     }
+    // Get the filesize of the object.
+    LIBMTP_file_t * files = deviceFiles;
+    while (files != NULL) {
+        if (files->item_id == objectID) {
+            filesize = files->filesize;
+            files = NULL;
+        } else {
+            files = files->next;
+        }
+    }
+
     // Delete the file based on the object ID.
     ret = LIBMTP_Delete_Object(DeviceMgr.device, objectID);
     if (ret != 0) {
@@ -768,6 +803,10 @@ void filesDelete(gchar* filename, uint32_t objectID) {
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
         g_fprintf(stderr, _("\nFailed to delete file %s\n"), filename);
         displayError(g_strconcat(_("Failed to delete file"), " <b>", filename, "</b>", NULL));
+    } else {
+        // Adjust device storage.
+        DeviceMgr.devicestorage->FreeSpaceInBytes += filesize;
+        DeviceMgr.devicestorage->FreeSpaceInObjects++;
     }
 }
 
@@ -957,6 +996,9 @@ void folderDelete(LIBMTP_folder_t* folderptr, guint level) {
         g_fprintf(stderr, _("Couldn't delete folder %s (%x)\n"), folderptr->name, folderptr->folder_id);
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
+    } else {
+        // Adjust device storage.
+        DeviceMgr.devicestorage->FreeSpaceInObjects++;
     }
 }
 
@@ -1269,7 +1311,7 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo) 
         if (AlbumErrorIgnore == FALSE) {
             displayError(_("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
             g_fprintf(stderr, _("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
-        } 
+        }
         // Displayed the message once already per transfer...
         AlbumErrorIgnore = TRUE;
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
@@ -1327,6 +1369,10 @@ void albumAddArt(guint32 album_id, gchar* filename) {
     }
     g_free(imagedata);
     albumart->data = NULL;
+
+    // Adjust device storage.
+    DeviceMgr.devicestorage->FreeSpaceInBytes -= filesize;
+    DeviceMgr.devicestorage->FreeSpaceInObjects--;
     LIBMTP_destroy_filesampledata_t(albumart);
 }
 

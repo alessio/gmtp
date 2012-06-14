@@ -1,3 +1,18 @@
+-- v1.3.2 - 14 Jun 2012
+* Correct Makefile to fix when building with GTK+-3.4. (Missing gthread-2.0 from pkg-config).
+* Reworked pkg-config handling to respect $(PKG_CONFIG) in Makefile. (Thank you Mike Frysinger
+  for pointing this out, and supplying a patch).
+* Add additional error checking on connection of new devices, to hopefully avoid seg-fault with
+  some very problematic devices. (Ubuntu Bug #917314, #948621, #968798, #995503)
+* Fix issue with some Android 3.2 implementations and GetStorage() MTP API function. (Uses cached
+  information, rather than full item rescan in some instances).
+  (Debian bug #667795 - http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=667795 )
+* Correct German Translations. (Something went wrong in saving the file, and was changed from being
+  recognised as UTF-8 to being recognised as ASCII - My apologies). 
+  (Debian bug #672298 - http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672298)
+* Fix FLAC file handling. (Bug only showed up in Gentoo Linux for some reason)? (Thank you 
+  Martin Benirschka for helping troubleshoot this one).
+
 -- v1.3.1 - 20 Feb 2012
 * Change default to ask for Download folder upon initial installation.
 * Fix folder view on devices with multiple storage pools (Android enhancement).

@@ -2,7 +2,7 @@
  *
  *   File: config.h
  *
- *   Copyright (C) 2009-2011 Darran Kartaschew
+ *   Copyright (C) 2009-2012 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -21,7 +21,7 @@ extern "C" {
 
 #define PACKAGE "gmtp"
 #define PACKAGE_TITLE "gMTP"
-#define PACKAGE_VERSION "1.3.1"
+#define PACKAGE_VERSION "1.3.2"
 
 #define GMTP_GSETTINGS_SCHEMA "org.gnome.gmtp"
 
