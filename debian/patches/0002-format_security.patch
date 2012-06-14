@@ -1,0 +1,27 @@
+Description: Fix build failure with the -Werror=format-security flag enabled.
+Author: Alessio Treglia <alessio@debian.org>
+Forwarded: Darran Kartaschew <chewy509@mailcity.com>
+---
+ src/interface.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- gmtp.orig/src/interface.c
++++ gmtp/src/interface.c
+@@ -3371,7 +3371,7 @@ void displayError(gchar* msg) {
+             GTK_DIALOG_DESTROY_WITH_PARENT,
+             GTK_MESSAGE_ERROR,
+             GTK_BUTTONS_OK,
+-            msg);
++            "%s", msg);
+     gtk_window_set_title(GTK_WINDOW(dialog), _("Error"));
+     gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
+     gtk_dialog_run(GTK_DIALOG(dialog));
+@@ -3390,7 +3390,7 @@ void displayInformation(gchar* msg) {
+             GTK_DIALOG_DESTROY_WITH_PARENT,
+             GTK_MESSAGE_INFO,
+             GTK_BUTTONS_OK,
+-            msg);
++            "%s", msg);
+     gtk_window_set_title(GTK_WINDOW(dialog), _("Information"));
+     gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
+     gtk_dialog_run(GTK_DIALOG(dialog));
