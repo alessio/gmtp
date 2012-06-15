@@ -2,7 +2,7 @@
 
 PKG_NAME = gmtp
 PREFIX ?= /usr/local
-VER = 1.3.2
+VER = 1.3.3
 # Note: If you update above, please update the config.h and pkginfo file as well.
 
 PKG = gmtp

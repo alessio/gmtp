@@ -1,3 +1,6 @@
+-- v1.3.3 - 15 Jun 2012
+* Correct handling of delete and download operation when '..' folder is selected.
+
 -- v1.3.2 - 14 Jun 2012
 * Correct Makefile to fix when building with GTK+-3.4. (Missing gthread-2.0 from pkg-config).
 * Reworked pkg-config handling to respect $(PKG_CONFIG) in Makefile. (Thank you Mike Frysinger

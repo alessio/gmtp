@@ -642,3 +642,6 @@ msgid "Unable to move the selected folder?\n"
 msgstr "Impossible de déplacer le dossier sélectionné?\n"
 msgid "Select All"
 msgstr "Sélectionner tout"
+###########################################################
+msgid "I don't know how to download a parent folder reference?\n"
+msgstr "Je ne sais pas comment télécharger un dossier parent de référence?\n"

@@ -619,3 +619,6 @@ msgid "translator-credits"
 msgstr "Laurenz Kamp"
 msgid "Select All"
 msgstr "Select All"
+###########################################################
+msgid "I don't know how to download a parent folder reference?\n"
+msgstr "Ich weiß nicht, wie man einen übergeordneten Ordner Referenz herunterladen?\n"

@@ -644,3 +644,6 @@ msgid "translator-credits"
 msgstr "Google"
 msgid "Select All"
 msgstr "Seleccionar todo"
+###########################################################
+msgid "I don't know how to download a parent folder reference?\n"
+msgstr "No sé cómo descargar una referencia carpeta principal?\n"
