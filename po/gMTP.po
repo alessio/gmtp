@@ -645,3 +645,6 @@ msgid "Unable to move the selected folder?\n"
 msgstr ""
 msgid "Select All"
 msgstr ""
+###########################################################
+msgid "I don't know how to download a parent folder reference?\n"
+msgstr ""

@@ -644,3 +644,6 @@ msgid "translator-credits"
 msgstr "Cai Andersen"
 msgid "Select All"
 msgstr "Vælg alle"
+###########################################################
+msgid "I don't know how to download a parent folder reference?\n"
+msgstr "Jeg ved ikke, hvordan du henter en overordnet mappe reference?\n"

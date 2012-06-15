@@ -644,3 +644,6 @@ msgid "translator-credits"
 msgstr "Francesca Ciceri"
 msgid "Select All"
 msgstr "Seleziona tutto"
+###########################################################
+msgid "I don't know how to download a parent folder reference?\n"
+msgstr "Non so come scaricare un riferimento cartella principale?\n"
