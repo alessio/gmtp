@@ -63,6 +63,9 @@ LIBMTP_playlist_t *devicePlayLists = NULL;
 uint32_t currentFolderID = 0;
 int32_t addTrackPlaylistID = GMTP_REQUIRE_PLAYLIST;
 
+GQueue *stackFolderIDs = NULL;
+GQueue *stackFolderNames = NULL;
+
 // Paths to the application, and images used within the application.
 gchar *applicationpath = NULL;
 gchar *file_logo_png = NULL;
@@ -110,7 +113,6 @@ int main(int argc, char *argv[]) {
 
     // Initialise libmtp library
     LIBMTP_Init();
-    //LIBMTP_Set_Debug(LIBMTP_DEBUG_ALL);
 
     // Create our main window for the application.
     windowMain = create_windowMain();

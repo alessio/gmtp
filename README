@@ -1,4 +1,4 @@
-gMTP v1.3.3
+gMTP v1.3.4
 
 A basic MP3 Player client for Oracle Solaris 10.
 
@@ -138,7 +138,36 @@ A. There are a few answers or explanations with Android.
       d. Samsung Galaxy and Google Nexus devices have connectivity issues, that
          I'm hoping can be resolved via patches to libmtp. Sorry, there is 
          nothing I can do about that situation. Complain to Samsung and Google, 
-         and try to get them actively involved in libmtp.
+         and try to get them actively involved in libmtp. Also try the 
+         alternate access method, as this may improve things.
+
+Q. What is the alternate access method?
+A. There are two main methods of accessing MTP based devices, either cached or 
+   uncached. gMTP originally only used the cached method as this worked well for 
+   the majority of devices. (All device information including file/track 
+   information was cached in the application for performance reasons). With the 
+   introduction of Google's MTP stack in Android 3.x, it changed many things, in
+   particular that it only worked well in uncached mode. (Android's MTP stack as 
+   far as I know is server implementation that shares the underlying resource 
+   with the device and the host PC, unlike the usual MP3 scenario, where the 
+   once the host device took connect it was given sole access to the media 
+   storage). Because of this shared nature, using cached information in the 
+   application is a "really bad idea", since you're relying on information that 
+   may change. So gMTP now has the ability to use the uncached mode as well, which
+   should improve stability with Android 3.x and newer devices that use MTP. The 
+   downside to the uncached mode, is that every action now requires getting data 
+   from the device, which may be painful on slower or congested USB busses...
+   (I would rather stability for users, and have them wait 0.5secs over an 
+   unstable and poor experience using the application). (Alternate access 
+   method = uncached mode).
+
+Q. What does the "g" part in gMTP stand for? It isn't to denote that you're a 
+   GNOME based application, is it? (If it does, that's lame).
+A. While many GNOME applications have a leading G, and likewise many KDE
+   applications have a K, the "g" actually stands for "graphical", as in:
+   "graphical MTP", since its a graphical interface for MTP based devices...
+   Sorry to disappoint people.
+
 
 TODO List
 

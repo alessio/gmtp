@@ -1,3 +1,14 @@
+-- v1.3.4 - 14 Nov 2012
++ Add new preference to ignore album handling errors (Android enhancement). Note: updated gconf/gsettings
+  schema.
++ Add new preference to use alternate access method for devices (uncached mode and as needed file data). 
+  (Android enhancement). This may slow done gMTP as it no longer caches file information and will get file
+  information each time the folder is changed. 
++ Added note for new Slackware version on gMTP home page.
+* Fix date handling for some devices, ensuring date format is as per MTP v1.0 Specification Section 3.2.5.
+* Modify GTK3 version to remove some depreciated GTK widgets. (Still have to consider boxes vs grid).
+* WARNING: gMTP now requires libmtp 1.1.5 or newer due to the alternate access method.
+
 -- v1.3.3 - 15 Jun 2012
 * Correct handling of delete and download operation when '..' folder is selected.
 

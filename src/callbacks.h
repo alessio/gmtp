@@ -69,6 +69,8 @@ extern "C" {
     void on_PrefsConfirmOverWriteFileOp_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_PrefsAutoAddTrackPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
     void on_PrefsIgnorePathInPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_PrefsSuppressAlbumError_activate(GtkMenuItem *menuitem, gpointer user_data);
+    void on_PrefsUseAltAccessMethod_activate(GtkMenuItem *menuitem, gpointer user_data);
 
     // Properties Dialog
     void on_quitProp_activate(GtkMenuItem *menuitem, gpointer user_data);

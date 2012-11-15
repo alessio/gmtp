@@ -137,10 +137,18 @@ guint deviceConnect() {
         // We have at least 1 raw device, so we connect to the first device.
         if (DeviceMgr.numrawdevices > 1) {
             DeviceMgr.rawdeviceID = displayMultiDeviceDialog();
-            DeviceMgr.device = LIBMTP_Open_Raw_Device(&DeviceMgr.rawdevices[DeviceMgr.rawdeviceID]);
+            if (!Preferences.use_alt_access_method) {
+                DeviceMgr.device = LIBMTP_Open_Raw_Device(&DeviceMgr.rawdevices[DeviceMgr.rawdeviceID]);
+            } else {
+                DeviceMgr.device = LIBMTP_Open_Raw_Device_Uncached(&DeviceMgr.rawdevices[DeviceMgr.rawdeviceID]);
+            }
         } else {
             // Connect to the first device.
-            DeviceMgr.device = LIBMTP_Open_Raw_Device(&DeviceMgr.rawdevices[0]);
+            if (!Preferences.use_alt_access_method) {
+                DeviceMgr.device = LIBMTP_Open_Raw_Device(&DeviceMgr.rawdevices[0]);
+            } else {
+                DeviceMgr.device = LIBMTP_Open_Raw_Device_Uncached(&DeviceMgr.rawdevices[0]);
+            }
             DeviceMgr.rawdeviceID = 0;
         }
         if (DeviceMgr.device == NULL) {
@@ -157,6 +165,14 @@ guint deviceConnect() {
         DeviceMgr.deviceConnected = TRUE;
 
         // We have a successful device connect, but lets check for multiple storageIDs.
+        if (DeviceMgr.device->storage == NULL) {
+            g_fprintf(stderr, _("Detect: No available Storage found on device?\n"));
+            displayError(_("Detect: No available Storage found on device?\n"));
+            LIBMTP_Dump_Errorstack(DeviceMgr.device);
+            LIBMTP_Clear_Errorstack(DeviceMgr.device);
+            deviceDisconnect();
+            return MTP_GENERAL_FAILURE;
+        }
         if (DeviceMgr.device->storage->next != NULL) {
             // Oops we have multiple storage IDs.
             DeviceMgr.storagedeviceID = displayDeviceStorageDialog();
@@ -175,6 +191,18 @@ guint deviceConnect() {
         DeviceMgr.Vendor = NULL;
         DeviceMgr.Product = NULL;
         DeviceMgr.devicestorage = NULL;
+
+        // if in alt connection mode;
+        if (Preferences.use_alt_access_method) {
+            if (stackFolderIDs != NULL) {
+                g_queue_free(stackFolderIDs);
+            }
+            stackFolderIDs = g_queue_new();
+            if (stackFolderNames != NULL) {
+                g_queue_free(stackFolderNames);
+            }
+            stackFolderNames = g_queue_new();
+        }
         return MTP_SUCCESS;
     }
 }
@@ -399,6 +427,16 @@ void clearDeviceTracks(LIBMTP_track_t * tracklist) {
 
 // ************************************************************************************************
 
+void printFolders(LIBMTP_folder_t *fold) {
+    while (fold != NULL) {
+        g_printf("folder: %s\n", fold->name);
+        if (fold->child != NULL) {
+            printFolders(fold->child);
+        }
+        fold = fold->sibling;
+    }
+}
+
 /**
  * Perform a rescan of the device, recreating any device properties or device information.
  */
@@ -419,13 +457,18 @@ void deviceRescan() {
     // Now get started.
     if (DeviceMgr.deviceConnected) {
         // Get a list of folder on the device.
-        deviceFolders = LIBMTP_Get_Folder_List(DeviceMgr.device);
+        deviceFolders = LIBMTP_Get_Folder_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
         if (deviceFolders == NULL) {
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
         }
         // Now get a list of files from the device.
-        deviceFiles = LIBMTP_Get_Filelisting_With_Callback(DeviceMgr.device, NULL, NULL);
+        if (!Preferences.use_alt_access_method) {
+            deviceFiles = LIBMTP_Get_Filelisting_With_Callback(DeviceMgr.device, NULL, NULL);
+        } else {
+            // Alternate access method ONLY gets the files for the CURRENT FOLDER ONLY. This should help some Android based devices.
+            deviceFiles = LIBMTP_Get_Files_And_Folders(DeviceMgr.device, DeviceMgr.devicestorage->id, currentFolderID);
+        }
         if (deviceFiles == NULL) {
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
             LIBMTP_Clear_Errorstack(DeviceMgr.device);
@@ -565,6 +608,23 @@ LIBMTP_folder_t* getCurrentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t Folder
 // ************************************************************************************************
 
 /**
+ * Get the list of files for the device.
+ */
+void filesUpateFileList() {
+    if (deviceFiles != NULL) {
+        clearDeviceFiles(deviceFiles);
+    }
+    deviceFiles = LIBMTP_Get_Files_And_Folders(DeviceMgr.device, DeviceMgr.devicestorage->id, currentFolderID);
+    if (deviceFiles == NULL) {
+        LIBMTP_Dump_Errorstack(DeviceMgr.device);
+        LIBMTP_Clear_Errorstack(DeviceMgr.device);
+    }
+}
+
+
+// ************************************************************************************************
+
+/**
  * Add a single file to the current connected device.
  * @param filename
  */
@@ -652,8 +712,14 @@ void filesAdd(gchar* filename) {
             trackfile->title = g_strdup(filename_stripped);
         if (trackfile->artist == NULL)
             trackfile->artist = g_strdup(_("<Unknown>"));
-        if (trackfile->date == NULL)
+        if (trackfile->date == NULL) {
             trackfile->date = g_strdup(_(""));
+        } else {
+            if (strlen(trackfile->date) == 4) {
+                // only have year part, so extend it.
+                trackfile->date = g_strconcat(trackfile->date, "0101T000000", NULL);
+            }
+        }
         if (trackfile->genre == NULL)
             trackfile->genre = g_strdup(_("<Unknown>"));
 
@@ -1308,9 +1374,11 @@ void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo) 
     }
     if (ret != 0) {
 
-        if (AlbumErrorIgnore == FALSE) {
-            displayError(_("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
-            g_fprintf(stderr, _("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
+        if (Preferences.suppress_album_errors == FALSE) {
+            if (AlbumErrorIgnore == FALSE) {
+                displayError(_("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
+                g_fprintf(stderr, _("Error creating or updating album.\n(This could be due to that your device does not support albums.)\n"));
+            }
         }
         // Displayed the message once already per transfer...
         AlbumErrorIgnore = TRUE;
@@ -1947,6 +2015,7 @@ GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchme
     GSList *list = NULL;
     GPatternSpec *pspec = g_pattern_spec_new(searchstring);
     LIBMTP_file_t *files = deviceFiles;
+    GSList *folderIDs = NULL;
     LIBMTP_track_t *tracks = deviceTracks;
     FileListStruc *filestruc = NULL;
     LIBMTP_track_t *trackinfo;
@@ -1955,12 +2024,28 @@ GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchme
     gchar *tmpstring3 = NULL;
     gchar *tmpstring4 = NULL;
 
+    uint32_t tmpFolderID = currentFolderID;
+
+    // if using alt method, we cycle through all folders on the current storage device...
+    if (Preferences.use_alt_access_method) {
+        currentFolderID = 0;
+        filesUpateFileList();
+        //buildFolderIDs(&folderIDs, deviceFolders);
+    }
+
     if (searchfiles == TRUE) {
         // Search folders
-        folderSearch(pspec, &list, deviceFolders);
-        // Seach files.
+        // ignore folder search in alt access mode...
+        if (!Preferences.use_alt_access_method) {
+            folderSearch(pspec, &list, deviceFolders);
+        }
+        // Search files.
         while (files != NULL) {
             if ((files->storage_id == DeviceMgr.devicestorage->id)) {
+                if (files->filetype == LIBMTP_FILETYPE_FOLDER) {
+                    // Add this folder to the list to be searched.
+                    folderIDs = g_slist_append(folderIDs, &files->item_id);
+                }
                 // Make search case insensitive.
                 tmpstring1 = g_utf8_strup(files->filename, -1);
                 if (g_pattern_match_string(pspec, tmpstring1) == TRUE) {
@@ -1975,7 +2060,11 @@ GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchme
                     }
                     filestruc->filename = g_strdup(files->filename);
                     filestruc->filesize = files->filesize;
-                    filestruc->isFolder = FALSE;
+                    if (files->filetype == LIBMTP_FILETYPE_FOLDER) {
+                        filestruc->isFolder = TRUE;
+                    } else {
+                        filestruc->isFolder = FALSE;
+                    }
                     filestruc->itemid = files->item_id;
                     filestruc->filetype = files->filetype;
                     filestruc->location = getFullFolderPath(files->parent_id);
@@ -2059,6 +2148,20 @@ GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchme
                 }
             }
             files = files->next;
+
+            // Update the file list IFF we are using the alt access method
+            if ((files == NULL) && (Preferences.use_alt_access_method)) {
+                // reached the end of the current folder, so lets move onto the next folder.
+                while (files == NULL) {
+                    // exit searching for file if we run out of folders.
+                    if (folderIDs == NULL) {
+                        break;
+                    }
+                    currentFolderID = *((uint32_t*) folderIDs->data);
+                    filesUpateFileList();
+                    folderIDs = folderIDs->next;
+                }
+            }
         }
     } else if (searchmeta == TRUE) {
         // Search using the Track information only.
@@ -2122,7 +2225,27 @@ GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchme
             tracks = tracks->next;
         }
     }
+    // restore the current folder ID.
+    if (Preferences.use_alt_access_method) {
+        currentFolderID = tmpFolderID;
+    }
     return list;
+}
+
+// ************************************************************************************************
+
+/**
+ * Generate a list of all the folder IDs in the current storage pool.
+ * @return 
+ */
+void buildFolderIDs(GSList **list, LIBMTP_folder_t * folderptr) {
+    while (folderptr != NULL) {
+        *(list) = g_slist_append(*(list), &folderptr->folder_id);
+        if (folderptr->child != NULL) {
+            buildFolderIDs(list, folderptr->child);
+        }
+        folderptr = folderptr->sibling;
+    }
 }
 
 

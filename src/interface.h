@@ -300,6 +300,8 @@ extern "C" {
     GtkWidget *checkbuttonConfirmOverWriteFileOp;
     GtkWidget *checkbuttonAutoAddTrackPlaylist;
     GtkWidget *checkbuttonIgnorePathInPlaylist;
+    GtkWidget *checkbuttonSuppressAlbumErrors;
+    GtkWidget *checkbuttonAltAccessMethod;
 
     // AlbumArt Dialog global pointers
     GtkWidget *AlbumArtDialog;

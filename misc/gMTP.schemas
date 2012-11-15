@@ -198,5 +198,27 @@
         <long>Ignore path in playlist file when importing a playlist</long>
       </locale>
     </schema>
+    <schema>
+      <key>/schemas/apps/gMTP/suppressalbumerrors</key>
+      <applyto>/apps/gMTP/suppressalbumerrors</applyto>
+      <owner>gMTP</owner>
+      <type>bool</type>
+      <locale name="C">
+        <default>false</default>
+        <short>Suppress Album related errors for some devices</short>
+        <long>Suppress Album related errors for some devices</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/gMTP/alternateaccessmethod</key>
+      <applyto>/apps/gMTP/alternateaccessmethod</applyto>
+      <owner>gMTP</owner>
+      <type>bool</type>
+      <locale name="C">
+        <default>false</default>
+        <short>Use alternate access method for Android based devices.</short>
+        <long>Use alternate access method for Android based devices.</long>
+      </locale>
+    </schema>
   </schemalist>
 </gconfschemafile>
