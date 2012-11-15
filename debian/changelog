@@ -1,3 +1,18 @@
+gmtp (1.3.4-1) experimental; urgency=low
+
+  * New upstream release:
+    - Fixes date handling, ensuring date format is as per
+      MTP v1.0 Specification Section 3.2.5.
+    - Cleaned up some minor GTK3 items.
+    - Add new preference to ignore album handling errors (Android
+      enhancement).
+    - Add new preference to use alternate access method for devices
+      (uncached mode and as needed file data). (Android enhancement).
+      This last item should assist with problematic Android based
+      devices.
+
+ -- Alessio Treglia <alessio@debian.org>  Thu, 15 Nov 2012 00:54:00 +0000
+
 gmtp (1.3.3-1) unstable; urgency=low
 
   * New upstream release:
