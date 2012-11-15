@@ -153,6 +153,8 @@ GtkWidget *checkbuttonConfirmFileOp;
 GtkWidget *checkbuttonConfirmOverWriteFileOp;
 GtkWidget *checkbuttonAutoAddTrackPlaylist;
 GtkWidget *checkbuttonIgnorePathInPlaylist;
+GtkWidget *checkbuttonSuppressAlbumErrors;
+GtkWidget *checkbuttonAltAccessMethod;
 
 // Widget for Progress Bar Dialog box.
 GtkWidget *progressDialog;
@@ -1042,7 +1044,10 @@ void SetToolbarButtonState(gboolean state) {
     gtk_widget_set_sensitive(GTK_WIDGET(editSelectAll), state);
     gtk_widget_set_sensitive(GTK_WIDGET(editPlaylist), state);
     gtk_widget_set_sensitive(GTK_WIDGET(treeviewFiles), state);
-    gtk_widget_set_sensitive(GTK_WIDGET(treeviewFolders), state);
+    // Only set this if we are using the normal connection method.
+    if (!Preferences.use_alt_access_method) {
+        gtk_widget_set_sensitive(GTK_WIDGET(treeviewFolders), state);
+    }
 }
 
 // ************************************************************************************************
@@ -1447,9 +1452,14 @@ gboolean fileListAdd() {
     GdkPixbuf *image = NULL;
 
     // Confirm our currentFolder exists otherwise goto the root folder.
-    tmpfolder = getCurrentFolderPtr(deviceFolders, currentFolderID);
-    if (tmpfolder == NULL)
-        currentFolderID = 0;
+    if (!Preferences.use_alt_access_method) {
+        tmpfolder = getCurrentFolderPtr(deviceFolders, currentFolderID);
+        if (tmpfolder == NULL)
+            currentFolderID = 0;
+    } else {
+        // deviceFolders is NULL or has garbage. So assume that we actually do exist!
+        filesUpateFileList();
+    }
     // This ensure that if the current folder or a parent of is deleted in the find mode,
     // the current folder is reset to something sane.
 
@@ -1462,8 +1472,12 @@ gboolean fileListAdd() {
             // If we are not folderID = 0; then...
             image = gdk_pixbuf_new_from_file(file_folder_png, NULL);
             // Scan the folder list for the current folderID, and set the parent ID,
-            tmpfolder = deviceFolders;
-            parentID = getParentFolderID(tmpfolder, currentFolderID);
+            if (!Preferences.use_alt_access_method) {
+                tmpfolder = deviceFolders;
+                parentID = getParentFolderID(tmpfolder, currentFolderID);
+            } else {
+                parentID = *((guint*) g_queue_peek_tail(stackFolderIDs));
+            }
             // Now add in the row information.
             gtk_list_store_append(GTK_LIST_STORE(fileList), &rowIter);
             gtk_list_store_set(GTK_LIST_STORE(fileList), &rowIter,
@@ -1479,38 +1493,42 @@ gboolean fileListAdd() {
 
             // Indicate we are done with this image.
             g_object_unref(image);
-
         }
-        // What we scan for is the folder's details where 'parent_id' == currentFolderID and display those.
-        tmpfolder = getParentFolderPtr(deviceFolders, currentFolderID);
-        while (tmpfolder != NULL) {
-            if ((tmpfolder->parent_id == currentFolderID) && (tmpfolder->storage_id == DeviceMgr.devicestorage->id)) {
-                image = gdk_pixbuf_new_from_file(file_folder_png, NULL);
-                gtk_list_store_append(GTK_LIST_STORE(fileList), &rowIter);
-                //filename = g_strdup_printf("< %s >", tmpfolder->name);
-                filename_hid = g_strdup_printf("     < %s >", tmpfolder->name);
-                gtk_list_store_set(GTK_LIST_STORE(fileList), &rowIter,
-                        //COL_FILENAME, filename,
-                        COL_FILENAME_HIDDEN, filename_hid,
-                        COL_FILENAME_ACTUAL, tmpfolder->name,
-                        COL_FILESIZE, "",
-                        COL_FILEID, tmpfolder->folder_id,
-                        COL_ISFOLDER, TRUE,
-                        COL_FILESIZE_HID, (guint64) 0,
-                        COL_ICON, image,
-                        -1);
-                //g_free(filename);
-                g_free(filename_hid);
-                // Indicate we are done with this image.
-                g_object_unref(image);
+
+        // Only use device folders if using normal display mode.
+        if (!Preferences.use_alt_access_method) {
+            // What we scan for is the folder's details where 'parent_id' == currentFolderID and display those.
+            tmpfolder = getParentFolderPtr(deviceFolders, currentFolderID);
+            while (tmpfolder != NULL) {
+                if ((tmpfolder->parent_id == currentFolderID) && (tmpfolder->storage_id == DeviceMgr.devicestorage->id)) {
+                    image = gdk_pixbuf_new_from_file(file_folder_png, NULL);
+                    gtk_list_store_append(GTK_LIST_STORE(fileList), &rowIter);
+                    //filename = g_strdup_printf("< %s >", tmpfolder->name);
+                    filename_hid = g_strdup_printf("     < %s >", tmpfolder->name);
+                    gtk_list_store_set(GTK_LIST_STORE(fileList), &rowIter,
+                            //COL_FILENAME, filename,
+                            COL_FILENAME_HIDDEN, filename_hid,
+                            COL_FILENAME_ACTUAL, tmpfolder->name,
+                            COL_FILESIZE, "",
+                            COL_FILEID, tmpfolder->folder_id,
+                            COL_ISFOLDER, TRUE,
+                            COL_FILESIZE_HID, (guint64) 0,
+                            COL_ICON, image,
+                            -1);
+                    //g_free(filename);
+                    g_free(filename_hid);
+                    // Indicate we are done with this image.
+                    g_object_unref(image);
+                }
+                tmpfolder = tmpfolder->sibling;
             }
-            tmpfolder = tmpfolder->sibling;
         }
         // We don't destroy the structure, only on a rescan operation.
 
         // We scan for files in the file details we 'parent_id' == currentFolderID and display those.
         tmpfile = deviceFiles;
         while (tmpfile != NULL) {
+
             if ((tmpfile->parent_id == currentFolderID) && (tmpfile->storage_id == DeviceMgr.devicestorage->id)) {
                 gtk_list_store_append(GTK_LIST_STORE(fileList), &rowIter);
 
@@ -1550,7 +1568,12 @@ gboolean fileListAdd() {
                         if (trackinfo->title == NULL) trackinfo->title = g_strdup("");
                         if (trackinfo->artist == NULL) trackinfo->artist = g_strdup("");
                         if (trackinfo->album == NULL) trackinfo->album = g_strdup("");
-                        if (trackinfo->date == NULL) trackinfo->date = g_strdup("");
+                        if (trackinfo->date == NULL) {
+                            trackinfo->date = g_strdup("");
+                        } else {
+                            if (strlen(trackinfo->date) > 4)
+                                trackinfo->date[4] = '\0'; // Shorten the string to year only, yes this is nasty...
+                        }
                         if (trackinfo->genre == NULL) trackinfo->genre = g_strdup("");
 
                         // Icon
@@ -1603,22 +1626,43 @@ gboolean fileListAdd() {
                         image = gdk_pixbuf_new_from_file(file_playlist_png, NULL);
                     } else if (tmpfile->filetype == LIBMTP_FILETYPE_TEXT) {
                         image = gdk_pixbuf_new_from_file(file_textfile_png, NULL);
+                    } else if (tmpfile->filetype == LIBMTP_FILETYPE_FOLDER) {
+                        image = gdk_pixbuf_new_from_file(file_folder_png, NULL);
                     } else {
                         image = gdk_pixbuf_new_from_file(file_generic_png, NULL);
+                    }
+
+                    // let folders through IFF we are in alt connection mode.
+                    if (!Preferences.use_alt_access_method && tmpfile->filetype == LIBMTP_FILETYPE_FOLDER) {
+                        goto skipAdd;
+                    }
+
+                    // Set folder type.
+                    int isFolder = FALSE;
+                    if (tmpfile->filetype == LIBMTP_FILETYPE_FOLDER) {
+                        isFolder = TRUE;
+                        filesize = g_strdup("");
+                        filetype = g_strdup("");
+                        filename_hid = g_strdup_printf("     < %s >", tmpfile->filename);
+                    } else {
+                        filename_hid = g_strdup(tmpfile->filename);
                     }
 
                     // Otherwise just show the file information
                     gtk_list_store_set(GTK_LIST_STORE(fileList), &rowIter,
                             //COL_FILENAME, tmpfile->filename,
-                            COL_FILENAME_HIDDEN, tmpfile->filename,
+                            COL_FILENAME_HIDDEN, filename_hid,
                             COL_FILENAME_ACTUAL, tmpfile->filename,
                             COL_FILESIZE, filesize,
                             COL_FILEID, tmpfile->item_id,
-                            COL_ISFOLDER, FALSE,
+                            COL_ISFOLDER, isFolder,
                             COL_FILESIZE_HID, tmpfile->filesize,
                             COL_TYPE, filetype,
                             COL_ICON, image,
                             -1);
+                    g_free(filename_hid);
+skipAdd:
+
                     // Indicate we are done with this image.
                     g_object_unref(image);
                 }
@@ -1635,7 +1679,34 @@ gboolean fileListAdd() {
         }
 
         // Now update the title bar with our folder name.
-        setWindowTitle(getFullFolderPath(currentFolderID));
+        if (!Preferences.use_alt_access_method) {
+            setWindowTitle(getFullFolderPath(currentFolderID));
+        } else {
+            // Construct the place string based on the contents of the stackFolderNameQueue.
+            gchar* fullfilename = g_strdup("");
+            gchar* tmpfilename = NULL;
+            guint stringlength = 0;
+            int items = g_queue_get_length(stackFolderNames);
+            
+            // Add in our names;
+            while(items-- > 0){
+                tmpfilename = g_strdup_printf("%s/%s", (gchar *)g_queue_peek_nth(stackFolderNames, items), fullfilename);
+                g_free(fullfilename);
+                fullfilename = tmpfilename;
+            }
+            // Add in leading slash if needed
+            if (*fullfilename != '/') {
+                tmpfilename = g_strdup_printf("/%s", fullfilename);
+                g_free(fullfilename);
+                fullfilename = tmpfilename;
+            }
+            // Remove trailing slash if needed.
+            stringlength = strlen(fullfilename);
+            if (stringlength > 1) {
+                fullfilename[stringlength - 1] = '\0';
+            }
+            setWindowTitle(fullfilename);
+        }
     } else {
         // We are in search mode, so use the searchList instead as our source!
         gint item_count = 0;
@@ -1761,8 +1832,26 @@ gboolean fileListAdd() {
                         image = gdk_pixbuf_new_from_file(file_playlist_png, NULL);
                     } else if (itemdata->filetype == LIBMTP_FILETYPE_TEXT) {
                         image = gdk_pixbuf_new_from_file(file_textfile_png, NULL);
+                    } else if (itemdata->filetype == LIBMTP_FILETYPE_FOLDER) {
+                        image = gdk_pixbuf_new_from_file(file_folder_png, NULL);
                     } else {
                         image = gdk_pixbuf_new_from_file(file_generic_png, NULL);
+                    }
+
+                    // let folders through IFF we are in alt connection mode.
+                    if (!Preferences.use_alt_access_method && itemdata->filetype == LIBMTP_FILETYPE_FOLDER) {
+                        goto skipAdd2;
+                    }
+
+                    // Set folder type.
+                    int isFolder = FALSE;
+                    if (itemdata->filetype == LIBMTP_FILETYPE_FOLDER) {
+                        isFolder = TRUE;
+                        filesize = g_strdup("");
+                        filetype = g_strdup("");
+                        filename_hid = g_strdup_printf("     < %s >", itemdata->filename);
+                    } else {
+                        filename_hid = g_strdup(itemdata->filename);
                     }
 
                     // Otherwise just show the file information
@@ -1779,6 +1868,8 @@ gboolean fileListAdd() {
                             COL_LOCATION, itemdata->location,
                             -1);
                     // Indicate we are done with this image.
+                    g_free(filename_hid);
+skipAdd2:
                     g_object_unref(image);
                 }
 
@@ -2353,12 +2444,15 @@ GtkWidget* create_windowPreferences(void) {
     GtkWidget *frame3;
     GtkWidget *alignment3;
     GtkWidget *alignment4;
+    GtkWidget *alignment7;
     GtkWidget *labelPlaylist;
     GtkWidget *frame4;
     GtkWidget *alignment5;
     GtkWidget *alignment6;
     GtkWidget *vbox4;
     GtkWidget *vbox2;
+    GtkWidget *vbox5;
+    GtkWidget *alignment8;
 
     GtkWidget *labelDevice;
     GtkWidget *frame2;
@@ -2395,14 +2489,28 @@ GtkWidget* create_windowPreferences(void) {
     gtk_widget_show(frame1);
     gtk_box_pack_start(GTK_BOX(vbox1), frame1, TRUE, TRUE, 0);
     gtk_frame_set_shadow_type(GTK_FRAME(frame1), GTK_SHADOW_NONE);
+
+    vbox5 = gtk_vbox_new(FALSE, 5);
+    gtk_widget_show(vbox5);
+    gtk_container_add(GTK_CONTAINER(frame1), vbox5);
+
     alignment1 = gtk_alignment_new(0.5, 0.5, 1, 1);
     gtk_widget_show(alignment1);
-    gtk_container_add(GTK_CONTAINER(frame1), alignment1);
+    gtk_container_add(GTK_CONTAINER(vbox5), alignment1);
     gtk_alignment_set_padding(GTK_ALIGNMENT(alignment1), 0, 0, 12, 0);
+
+    alignment8 = gtk_alignment_new(0.5, 0.5, 1, 1);
+    gtk_widget_show(alignment8);
+    gtk_container_add(GTK_CONTAINER(vbox5), alignment8);
+    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment8), 0, 0, 12, 0);
 
     checkbuttonDeviceConnect = gtk_check_button_new_with_mnemonic(_("Attempt to connect to Device on startup"));
     gtk_widget_show(checkbuttonDeviceConnect);
     gtk_container_add(GTK_CONTAINER(alignment1), checkbuttonDeviceConnect);
+
+    checkbuttonAltAccessMethod = gtk_check_button_new_with_mnemonic(_("Utilize alternate access method"));
+    gtk_widget_show(checkbuttonAltAccessMethod);
+    gtk_container_add(GTK_CONTAINER(alignment8), checkbuttonAltAccessMethod);
 
     labelDevice = gtk_label_new(_("<b>Device</b>"));
     gtk_widget_show(labelDevice);
@@ -2428,6 +2536,11 @@ GtkWidget* create_windowPreferences(void) {
     gtk_container_add(GTK_CONTAINER(vbox2), alignment4);
     gtk_alignment_set_padding(GTK_ALIGNMENT(alignment4), 0, 0, 12, 0);
 
+    alignment7 = gtk_alignment_new(0.5, 0.5, 1, 1);
+    gtk_widget_show(alignment7);
+    gtk_container_add(GTK_CONTAINER(vbox2), alignment7);
+    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment7), 0, 0, 12, 0);
+
     checkbuttonConfirmFileOp = gtk_check_button_new_with_mnemonic(_("Confirm File/Folder Delete"));
     gtk_widget_show(checkbuttonConfirmFileOp);
     gtk_container_add(GTK_CONTAINER(alignment3), checkbuttonConfirmFileOp);
@@ -2435,6 +2548,10 @@ GtkWidget* create_windowPreferences(void) {
     checkbuttonConfirmOverWriteFileOp = gtk_check_button_new_with_mnemonic(_("Prompt if to Overwrite file if already exists"));
     gtk_widget_show(checkbuttonConfirmOverWriteFileOp);
     gtk_container_add(GTK_CONTAINER(alignment4), checkbuttonConfirmOverWriteFileOp);
+
+    checkbuttonSuppressAlbumErrors = gtk_check_button_new_with_mnemonic(_("Suppress Album Errors"));
+    gtk_widget_show(checkbuttonSuppressAlbumErrors);
+    gtk_container_add(GTK_CONTAINER(alignment7), checkbuttonSuppressAlbumErrors);
 
     // Playlist Frame.
 
@@ -2554,6 +2671,21 @@ GtkWidget* create_windowPreferences(void) {
     buttonClose = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
     gtk_widget_show(buttonClose);
     gtk_box_pack_end(GTK_BOX(hbox1), buttonClose, FALSE, FALSE, 0);
+    
+    // And now set the fields.
+
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonDeviceConnect), Preferences.attemptDeviceConnectOnStart);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonDownloadPath), Preferences.ask_download_path);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmFileOp), Preferences.confirm_file_delete_op);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmOverWriteFileOp), Preferences.prompt_overwrite_file_op);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAutoAddTrackPlaylist), Preferences.auto_add_track_to_playlist);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonIgnorePathInPlaylist), Preferences.ignore_path_in_playlist_import);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonSuppressAlbumErrors), Preferences.suppress_album_errors);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAltAccessMethod), Preferences.use_alt_access_method);
+    gtk_entry_set_text(GTK_ENTRY(entryDownloadPath), Preferences.fileSystemDownloadPath->str);
+    gtk_entry_set_text(GTK_ENTRY(entryUploadPath), Preferences.fileSystemUploadPath->str);
+    
+    // Enable the callback functions.    
 
     g_signal_connect((gpointer) windowDialog, "destroy",
             G_CALLBACK(on_quitPrefs_activate),
@@ -2583,6 +2715,14 @@ GtkWidget* create_windowPreferences(void) {
             G_CALLBACK(on_PrefsIgnorePathInPlaylist_activate),
             NULL);
 
+    g_signal_connect((gpointer) checkbuttonSuppressAlbumErrors, "toggled",
+            G_CALLBACK(on_PrefsSuppressAlbumError_activate),
+            NULL);
+
+    g_signal_connect((gpointer) checkbuttonAltAccessMethod, "toggled",
+            G_CALLBACK(on_PrefsUseAltAccessMethod_activate),
+            NULL);
+
     g_signal_connect((gpointer) checkbuttonDownloadPath, "toggled",
             G_CALLBACK(on_PrefsAskDownload_activate),
             NULL);
@@ -2594,17 +2734,6 @@ GtkWidget* create_windowPreferences(void) {
     g_signal_connect((gpointer) buttonUploadPath, "clicked",
             G_CALLBACK(on_PrefsUploadPath_activate),
             NULL);
-
-    // And now set the fields.
-
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonDeviceConnect), Preferences.attemptDeviceConnectOnStart);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonDownloadPath), Preferences.ask_download_path);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmFileOp), Preferences.confirm_file_delete_op);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmOverWriteFileOp), Preferences.prompt_overwrite_file_op);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAutoAddTrackPlaylist), Preferences.auto_add_track_to_playlist);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonIgnorePathInPlaylist), Preferences.ignore_path_in_playlist_import);
-    gtk_entry_set_text(GTK_ENTRY(entryDownloadPath), Preferences.fileSystemDownloadPath->str);
-    gtk_entry_set_text(GTK_ENTRY(entryUploadPath), Preferences.fileSystemUploadPath->str);
 
     // To save the fields, we use callbacks on the widgets via gconf.
 
@@ -3264,11 +3393,11 @@ void displayAbout(void) {
     gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_TITLE);
     gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
     gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
-            "Copyright 2009-2012, Darran Kartaschew\nReleased under the BSD Licence");
+            "Copyright 2009-2012, Darran Kartaschew\nReleased under the BSD License");
     gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
             _("A simple MP3 Player Client for Solaris 10\nand other UNIX / UNIX-like systems\n"));
     gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(dialog),
-            "gMTP Licence\n"
+            "gMTP License\n"
             "------------\n\n"
             "Copyright (C) 2009-2012, Darran Kartaschew.\n"
             "All rights reserved.\n\n"
@@ -5683,7 +5812,7 @@ gboolean folderListAddDialog(LIBMTP_folder_t *folders, GtkTreeIter *parent, GtkT
 
         // Only add in folder if it's in the current storage device.
         if (folders->storage_id == DeviceMgr.devicestorage->id) {
-            
+
             image = gdk_pixbuf_new_from_file(file_folder_png, NULL);
             // Now add in the row information.
             gtk_tree_store_append(GTK_TREE_STORE(fl), &rowIter, parent);

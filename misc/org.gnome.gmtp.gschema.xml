@@ -90,5 +90,15 @@
             <summary>Ignore path in playlist file when importing a playlist</summary>
             <description>Ignore path in playlist file when importing a playlist</description>
         </key>
+        <key name="suppressalbumerrors" type="b">
+            <default>false</default>
+            <summary>Suppress Album related errors for some devices</summary>
+            <description>Suppress Album related errors for some devices</description>
+        </key>
+        <key name="alternateaccessmethod" type="b">
+            <default>false</default>
+            <summary>Use alternate access method for Android based devices.</summary>
+            <description>Use alternate access method for Android based devices.</description>
+        </key>
     </schema>
 </schemalist>

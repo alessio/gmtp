@@ -239,6 +239,12 @@ void on_fileMoveFile_activate(GtkMenuItem *menuitem, gpointer user_data) {
     GList *List = NULL;
     int64_t targetfolder = 0;
 
+    // If using alternate connection mode, this is disabled.
+    if(Preferences.use_alt_access_method){
+        displayInformation(_("The move function is disabled when using the alternate access method for your device."));
+        return;
+    }
+    
     // Let's check to see if we have anything selected in our treeview?
     if ((List = fileListGetSelection()) == NULL) {
         if (folderListGetSelection() != -1) {
@@ -548,6 +554,47 @@ void on_PrefsIgnorePathInPlaylist_activate(GtkMenuItem *menuitem, gpointer user_
 // ************************************************************************************************
 
 /**
+ * Callback for Suppress Album Errors toggle in Preferences Dialog Box.
+ * @param menuitem
+ * @param user_data
+ */
+void on_PrefsSuppressAlbumError_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonSuppressAlbumErrors));
+
+#if GMTP_USE_GTK2
+    if (gconfconnect != NULL)
+        gconf_client_set_bool(gconfconnect, "/apps/gMTP/suppressalbumerrors", state, NULL);
+#else
+    if (gsettings_connect != NULL)
+        g_settings_set_boolean(gsettings_connect, "suppressalbumerrors", state);
+    g_settings_sync();
+#endif
+} // end on_PrefsSuppressAlbumError_activate()
+
+
+// ************************************************************************************************
+
+/**
+ * Callback for Suppress Album Errors toggle in Preferences Dialog Box.
+ * @param menuitem
+ * @param user_data
+ */
+void on_PrefsUseAltAccessMethod_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonAltAccessMethod));
+
+#if GMTP_USE_GTK2
+    if (gconfconnect != NULL)
+        gconf_client_set_bool(gconfconnect, "/apps/gMTP/alternateaccessmethod", state, NULL);
+#else
+    if (gsettings_connect != NULL)
+        g_settings_set_boolean(gsettings_connect, "alternateaccessmethod", state);
+    g_settings_sync();
+#endif
+} // end on_PrefsUseAltAccessMethod_activate()
+
+// ************************************************************************************************
+
+/**
  * Callback for Confirm Overwrite of File Operations toggle in Preferences Dialog Box.
  * @param menuitem
  * @param user_data
@@ -690,6 +737,21 @@ void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewC
             g_free(savepath);
 
         } else {
+            // Maintain the stack of folder IDs and names for alt access mode.
+            if(Preferences.use_alt_access_method){
+                if(g_ascii_strcasecmp(filename, "..") == 0){
+                    // going down a level.
+                    g_free(g_queue_pop_tail(stackFolderIDs));
+                    g_free(g_queue_pop_tail(stackFolderNames));
+                } else {
+                    // going up a level
+                    guint *currentFld = g_malloc(sizeof(guint));
+                    *currentFld = currentFolderID;
+                    g_queue_push_tail(stackFolderIDs, currentFld);
+                    g_queue_push_tail(stackFolderNames, g_strdup(filename));
+                }
+            }
+            
             // We have a folder so change to it?
             currentFolderID = objectID;
             on_editFindClose_activate(NULL, NULL);
@@ -1216,6 +1278,12 @@ void on_editFindClose_activate(GtkMenuItem *menuitem, gpointer user_data) {
     fileListClear();
     folderListClear();
     // Refresh the file listings.
+    
+    // If using alternate access method, then get our next list of files for the current folder id.
+    if(Preferences.use_alt_access_method){
+        filesUpateFileList();
+    }
+    
     fileListAdd();
     folderListAdd(deviceFolders, NULL);
 
@@ -1248,7 +1316,7 @@ void on_editFindClose_activate(GtkMenuItem *menuitem, gpointer user_data) {
     gtk_widget_set_sensitive(GTK_WIDGET(fileAdd), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(fileNewFolder), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(toolbuttonAddFile), TRUE);
-    gtk_widget_set_sensitive(GTK_WIDGET(menu_view_folders), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(menu_view_folders), !Preferences.use_alt_access_method);
 
 } // end on_editFindClose_activate()
 

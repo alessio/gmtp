@@ -50,6 +50,7 @@ extern "C" {
     void clearDevicePlaylist(LIBMTP_playlist_t * playlist_list);
     void clearDeviceTracks(LIBMTP_track_t * tracklist);
     void deviceRescan();
+    void filesUpateFileList();
     void filesRename(gchar* filename, uint32_t ObjectID);
     void filesAdd(gchar* filename);
     void filesDelete(gchar* filename, uint32_t objectID);
@@ -64,6 +65,7 @@ extern "C" {
     void albumDeleteArt(guint32 album_id);
     LIBMTP_filesampledata_t * albumGetArt(LIBMTP_album_t* selectedAlbum);
     void setDeviceName(gchar* devicename);
+    void buildFolderIDs(GSList **list, LIBMTP_folder_t * folderptr);
     uint32_t getParentFolderID(LIBMTP_folder_t *tmpfolder, uint32_t currentFolderID);
     LIBMTP_folder_t* getParentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t currentFolderID);
     LIBMTP_folder_t* getCurrentFolderPtr(LIBMTP_folder_t *tmpfolder, uint32_t FolderID);

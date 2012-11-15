@@ -81,6 +81,9 @@ extern "C" {
     uint32_t currentFolderID; // This is the ID of the current folder....
     int32_t addTrackPlaylistID;
 
+    GQueue *stackFolderIDs;
+    GQueue *stackFolderNames;
+
     // Icon file locations.
     gchar *file_logo_png;
     gchar *file_icon48_png;

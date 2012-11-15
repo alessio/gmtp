@@ -50,6 +50,10 @@ dt {
     margin-left: -20px;
 }
 
+.pref {
+    font-weight: bold;
+}
+
 #Logo {
 	width: 100px;
 }

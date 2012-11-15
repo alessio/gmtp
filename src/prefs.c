@@ -56,6 +56,7 @@ void setupPreferences() {
     // We setup default Preferences.
     Preferences.ask_download_path = TRUE;
     Preferences.attemptDeviceConnectOnStart = TRUE;
+    Preferences.suppress_album_errors = FALSE;
 #ifdef WIN32
     Preferences.fileSystemDownloadPath = g_string_new(g_getenv("HOMEPATH"));
     Preferences.fileSystemUploadPath = g_string_new(g_getenv("HOMEPATH"));
@@ -74,8 +75,8 @@ void setupPreferences() {
 #else
     gsettings_connect = g_settings_new(GMTP_GSETTINGS_SCHEMA);
     g_signal_connect((gpointer) gsettings_connect, "changed",
-        G_CALLBACK(gsettings_callback_func),
-        NULL);
+            G_CALLBACK(gsettings_callback_func),
+            NULL);
 #endif
     // Now attempt to read the config file from the user config folder.
     loadPreferences();
@@ -99,6 +100,8 @@ gboolean loadPreferences() {
         Preferences.fileSystemUploadPath = g_string_new(gconf_client_get_string(gconfconnect, "/apps/gMTP/UploadPath", NULL));
         Preferences.auto_add_track_to_playlist = gconf_client_get_bool(gconfconnect, "/apps/gMTP/autoAddTrackPlaylist", NULL);
         Preferences.ignore_path_in_playlist_import = gconf_client_get_bool(gconfconnect, "/apps/gMTP/ignorepathinplaylist", NULL);
+        Preferences.suppress_album_errors = gconf_client_get_bool(gconfconnect, "/apps/gMTP/suppressalbumerrors", NULL);
+        Preferences.use_alt_access_method = gconf_client_get_bool(gconfconnect, "/apps/gMTP/alternateaccessmethod", NULL);
         Preferences.view_size = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewFileSize", NULL);
         Preferences.view_type = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewFileType", NULL);
         Preferences.view_track_number = gconf_client_get_bool(gconfconnect, "/apps/gMTP/viewTrackNumber", NULL);
@@ -123,6 +126,8 @@ gboolean loadPreferences() {
         Preferences.fileSystemUploadPath = g_string_new(g_settings_get_string(gsettings_connect, "uploadpath"));
         Preferences.auto_add_track_to_playlist = g_settings_get_boolean(gsettings_connect, "autoaddtrackplaylist");
         Preferences.ignore_path_in_playlist_import = g_settings_get_boolean(gsettings_connect, "ignorepathinplaylist");
+        Preferences.suppress_album_errors = g_settings_get_boolean(gsettings_connect, "suppressalbumerrors");
+        Preferences.use_alt_access_method = g_settings_get_boolean(gsettings_connect, "alternateaccessmethod");
         Preferences.view_size = g_settings_get_boolean(gsettings_connect, "viewfilesize");
         Preferences.view_type = g_settings_get_boolean(gsettings_connect, "viewfiletype");
         Preferences.view_track_number = g_settings_get_boolean(gsettings_connect, "viewtracknumber");
@@ -167,6 +172,15 @@ gboolean loadPreferences() {
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewGenre), Preferences.view_genre);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewDuration), Preferences.view_duration);
 
+    // Disable the folder view if in alt access mode...
+    if (Preferences.use_alt_access_method) {
+        if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menu_view_folders))) {
+            gtk_menu_item_activate(GTK_MENU_ITEM(menu_view_folders));
+        }
+        gtk_widget_hide(scrolledwindowFolders);
+        gtk_widget_set_sensitive(menu_view_folders, !Preferences.use_alt_access_method);
+    }
+
     return TRUE;
 }
 
@@ -188,6 +202,8 @@ gboolean savePreferences() {
         gconf_client_set_string(gconfconnect, "/apps/gMTP/UploadPath", Preferences.fileSystemUploadPath->str, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/autoAddTrackPlaylist", Preferences.auto_add_track_to_playlist, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/ignorepathinplaylist", Preferences.ignore_path_in_playlist_import, NULL);
+        gconf_client_set_bool(gconfconnect, "/apps/gMTP/suppressalbumerrors", Preferences.suppress_album_errors, NULL);
+        gconf_client_set_bool(gconfconnect, "/apps/gMTP/alternateaccessmethod", Preferences.use_alt_access_method, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewFileSize", Preferences.view_size, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewFileType", Preferences.view_type, NULL);
         gconf_client_set_bool(gconfconnect, "/apps/gMTP/viewTrackNumber", Preferences.view_track_number, NULL);
@@ -213,6 +229,8 @@ gboolean savePreferences() {
         g_settings_set_string(gsettings_connect, "uploadpath", Preferences.fileSystemUploadPath->str);
         g_settings_set_boolean(gsettings_connect, "autoaddtrackplaylist", Preferences.auto_add_track_to_playlist);
         g_settings_set_boolean(gsettings_connect, "ignorepathinplaylist", Preferences.ignore_path_in_playlist_import);
+        g_settings_set_boolean(gsettings_connect, "suppressalbumerrors", Preferences.suppress_album_errors);
+        g_settings_set_boolean(gsettings_connect, "alternateaccessmethod", Preferences.use_alt_access_method);
         g_settings_set_boolean(gsettings_connect, "viewfilesize", Preferences.view_size);
         g_settings_set_boolean(gsettings_connect, "viewfiletype", Preferences.view_type);
         g_settings_set_boolean(gsettings_connect, "viewtracknumber", Preferences.view_track_number);
@@ -360,14 +378,19 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/viewFolders") == 0) {
         //set our promptDownloadPath in Preferences
         Preferences.view_folders = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
-        //gtk_tree_view_column_set_visible(column_Duration, Preferences.view_folders);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_folders), Preferences.view_folders);
-        //gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewDuration), Preferences.view_duration);
-        if (Preferences.view_folders == TRUE) {
-            gtk_widget_show(scrolledwindowFolders);
+
+        if (!Preferences.use_alt_access_method) {
+            if (Preferences.view_folders == TRUE) {
+                gtk_widget_show(scrolledwindowFolders);
+            } else {
+                gtk_widget_hide(scrolledwindowFolders);
+            }
         } else {
+            // hide the folder view
             gtk_widget_hide(scrolledwindowFolders);
         }
+        gtk_widget_set_sensitive(menu_view_folders, !Preferences.use_alt_access_method);
         return;
     }
     if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/autoAddTrackPlaylist") == 0) {
@@ -380,6 +403,29 @@ void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, 
         //set our promptDownloadPath in Preferences
         Preferences.ignore_path_in_playlist_import = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
         if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonIgnorePathInPlaylist), Preferences.ignore_path_in_playlist_import);
+        return;
+    }
+    if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/suppressalbumerrors") == 0) {
+        //set our promptDownloadPath in Preferences
+        Preferences.suppress_album_errors = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
+        if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonSuppressAlbumErrors), Preferences.suppress_album_errors);
+        return;
+    }
+    if (g_ascii_strcasecmp(entry->key, "/apps/gMTP/alternateaccessmethod") == 0) {
+        //set our promptDownloadPath in Preferences
+        Preferences.use_alt_access_method = (gboolean) gconf_value_get_bool((const GConfValue*) gconf_entry_get_value((const GConfEntry*) entry));
+        if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAltAccessMethod), Preferences.use_alt_access_method);
+        // if we are connected, then disconnect the device...
+        if (DeviceMgr.deviceConnected == TRUE) {
+            on_deviceConnect_activate(NULL, NULL);
+            displayInformation(_("Disconnected device due to access method change"));
+        }
+        // Disable the folder view...
+        if (Preferences.use_alt_access_method) {
+            if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menu_view_folders))) {
+                gtk_menu_item_activate(GTK_MENU_ITEM(menu_view_folders));
+            }
+        }
         return;
     }
     g_fprintf(stderr, _("WARNING: gconf_callback_func() failed - we got a callback for a key thats not ours?\n"));
@@ -512,12 +558,17 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         Preferences.view_folders = (gboolean) g_settings_get_boolean(settings, key);
         //gtk_tree_view_column_set_visible(column_Duration, Preferences.view_duration);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_view_folders), Preferences.view_folders);
-        if (Preferences.view_folders == TRUE) {
-            gtk_widget_show(scrolledwindowFolders);
+        if (!Preferences.use_alt_access_method) {
+            if (Preferences.view_folders == TRUE) {
+                gtk_widget_show(scrolledwindowFolders);
+            } else {
+                gtk_widget_hide(scrolledwindowFolders);
+            }
         } else {
+            // hide the folder view
             gtk_widget_hide(scrolledwindowFolders);
         }
-        //gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(cViewDuration), Preferences.view_duration);
+        gtk_widget_set_sensitive(menu_view_folders, !Preferences.use_alt_access_method);
         return;
     }
     if (g_ascii_strcasecmp(key, "autoaddtrackplaylist") == 0) {
@@ -530,6 +581,29 @@ void gsettings_callback_func(GSettings *settings, gchar *key, gpointer user_data
         //set our promptDownloadPath in Preferences
         Preferences.ignore_path_in_playlist_import = (gboolean) g_settings_get_boolean(settings, key);
         if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonIgnorePathInPlaylist), Preferences.ignore_path_in_playlist_import);
+        return;
+    }
+    if (g_ascii_strcasecmp(key, "suppressalbumerrors") == 0) {
+        //set our promptDownloadPath in Preferences
+        Preferences.suppress_album_errors = (gboolean) g_settings_get_boolean(settings, key);
+        if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonSuppressAlbumErrors), Preferences.suppress_album_errors);
+        return;
+    }
+    if (g_ascii_strcasecmp(key, "alternateaccessmethod") == 0) {
+        //set our promptDownloadPath in Preferences
+        Preferences.use_alt_access_method = (gboolean) g_settings_get_boolean(settings, key);
+        if (windowPrefsDialog != NULL) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbuttonAltAccessMethod), Preferences.use_alt_access_method);
+        // if we are connected, then disconnect the device...
+        if (DeviceMgr.deviceConnected == TRUE) {
+            on_deviceConnect_activate(NULL, NULL);
+            displayInformation(_("Disconnected device due to access method change"));
+        }
+        // Disable the folder view...
+        if (Preferences.use_alt_access_method) {
+            if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menu_view_folders))) {
+                gtk_menu_item_activate(GTK_MENU_ITEM(menu_view_folders));
+            }
+        }
         return;
     }
     g_fprintf(stderr, _("WARNING: gsettings_callback_func() failed - we got a callback for a key thats not ours?\n"));
