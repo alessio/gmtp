@@ -2,7 +2,7 @@
  *
  *   File: prefs.h
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2013 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -30,6 +30,7 @@ extern "C" {
         gboolean ignore_path_in_playlist_import;
         gboolean suppress_album_errors;
         gboolean use_alt_access_method;
+        gboolean allmediaasfiles;
         gboolean view_size;
         gboolean view_type;
         gboolean view_track_number;
@@ -40,6 +41,8 @@ extern "C" {
         gboolean view_genre;
         gboolean view_duration;
         gboolean view_folders;
+        GString *toolbarStyle;
+        gboolean view_toolbar;
     } Preferences_Struct;
 
     Preferences_Struct Preferences;
@@ -49,7 +52,7 @@ extern "C" {
     gboolean loadPreferences();
     gboolean savePreferences();
 
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
     GConfClient *gconfconnect;
     void gconf_callback_func(GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data);
 #else

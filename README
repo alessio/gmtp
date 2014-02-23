@@ -1,6 +1,6 @@
-gMTP v1.3.4
+gMTP v1.3.5
 
-A basic MP3 Player client for Oracle Solaris 10.
+A basic MTP client for Oracle Solaris 10.
 
 Supports MTP devices including those with multiple storage devices
 (typically mobile phones). Supports Drag'n'Drop interface for

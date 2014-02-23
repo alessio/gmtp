@@ -2,7 +2,7 @@
  *
  *   File: metatag_info.c
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2013 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -18,7 +18,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #else
@@ -576,38 +576,43 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
         return;
 
     // Get our header GUID and make sure this is it.
-    fread(&Header_GUID, sizeof (GUID), 1, ASF_File);
+    size_t i = fread(&Header_GUID, sizeof (GUID), 1, ASF_File);
     if (!memcmp(&Header_GUID, &ASF_header, sizeof (GUID))) {
+        // If not exit.
+        fclose(ASF_File);
+        return;
+    }
+    if(i != 1){
         // If not exit.
         fclose(ASF_File);
         return;
     }
     // Skip the rest of the header area;
     fseek(ASF_File, 8, SEEK_CUR);
-    fread(&Header_Blocks, sizeof (uint32_t), 1, ASF_File);
+    i = fread(&Header_Blocks, sizeof (uint32_t), 1, ASF_File);
     fseek(ASF_File, 2, SEEK_CUR);
 
     // We should be at the start of the header blocks;
     // Header_blocks has the number of header objects that we can test.
     while (Header_Blocks--) {
-        fread(&Header_GUID, sizeof (GUID), 1, ASF_File);
+        i = fread(&Header_GUID, sizeof (GUID), 1, ASF_File);
         if (memcmp(&Header_GUID, &ASF_comment_header, sizeof (GUID)) == 0) {
             // We have our standard comment header block;
 
             // Get the size of the object, and the current file position.
-            fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
+            i = fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
             ASF_File_Position = ftell(ASF_File);
             // Get our field lengths.
-            fread(&Title_Length, sizeof (uint16_t), 1, ASF_File);
-            fread(&Author_Length, sizeof (uint16_t), 1, ASF_File);
-            fread(&Copyright_Length, sizeof (uint16_t), 1, ASF_File);
-            fread(&Description_Length, sizeof (uint16_t), 1, ASF_File);
-            fread(&Rating_Length, sizeof (uint16_t), 1, ASF_File);
+            i = fread(&Title_Length, sizeof (uint16_t), 1, ASF_File);
+            i = fread(&Author_Length, sizeof (uint16_t), 1, ASF_File);
+            i = fread(&Copyright_Length, sizeof (uint16_t), 1, ASF_File);
+            i = fread(&Description_Length, sizeof (uint16_t), 1, ASF_File);
+            i = fread(&Rating_Length, sizeof (uint16_t), 1, ASF_File);
             // Since we only need Title and Author, we only need to alloc memory for those two.
             Title = g_malloc0(Title_Length + 0x10);
             Author = g_malloc0(Author_Length + 0x10);
-            fread(Title, Title_Length, 1, ASF_File);
-            fread(Author, Author_Length, 1, ASF_File);
+            i = fread(Title, Title_Length, 1, ASF_File);
+            i = fread(Author, Author_Length, 1, ASF_File);
             // Set our track information
             trackinformation->title = g_utf16_to_utf8((const gunichar2 *) Title, Title_Length, NULL, NULL, NULL);
             trackinformation->artist = g_utf16_to_utf8((const gunichar2 *) Author, Author_Length, NULL, NULL, NULL);
@@ -624,10 +629,10 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
                 // We have our standard comment header block;
                 //g_printf("WMA: Found our extended comment block\n");
                 // Get the size of the object, and the current file position.
-                fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
+                i = fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
                 ASF_File_Position = ftell(ASF_File);
                 // Get the number of Descripions field we have, as we will need to cycle through them all.
-                fread(&Content_Descriptors_Count, sizeof (uint16_t), 1, ASF_File);
+                i = fread(&Content_Descriptors_Count, sizeof (uint16_t), 1, ASF_File);
                 while (Content_Descriptors_Count--) {
                     // These themselves are Objects within the main extended content header, which we need to handle.
                     // Format is:
@@ -645,19 +650,19 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
                     Descriptor_Value_Str = NULL;
                     Descriptor_Value_Str_UTF16 = NULL;
                     // Get our Descriptor Name.
-                    fread(&Descriptor_Name_Length, sizeof (uint16_t), 1, ASF_File);
+                    i = fread(&Descriptor_Name_Length, sizeof (uint16_t), 1, ASF_File);
                     Descriptor_Name_UTF16 = g_malloc0(Descriptor_Name_Length + 0x10);
-                    fread(Descriptor_Name_UTF16, Descriptor_Name_Length, 1, ASF_File);
+                    i = fread(Descriptor_Name_UTF16, Descriptor_Name_Length, 1, ASF_File);
                     Descriptor_Name = g_utf16_to_utf8((const gunichar2 *) Descriptor_Name_UTF16,
                         Descriptor_Name_Length, NULL, NULL, NULL);
                     // Get our Value Type and Value Length
-                    fread(&Descriptor_Value_Type, sizeof (uint16_t), 1, ASF_File);
-                    fread(&Descriptor_Value_Length, sizeof (uint16_t), 1, ASF_File);
+                    i = fread(&Descriptor_Value_Type, sizeof (uint16_t), 1, ASF_File);
+                    i = fread(&Descriptor_Value_Length, sizeof (uint16_t), 1, ASF_File);
                     switch (Descriptor_Value_Type) {
                         case 0: // String;
                         case 1: // Binary;
                             Descriptor_Value_Str_UTF16 = g_malloc0(Descriptor_Value_Length + 0x10);
-                            fread(Descriptor_Value_Str_UTF16, Descriptor_Value_Length, 1, ASF_File);
+                            i = fread(Descriptor_Value_Str_UTF16, Descriptor_Value_Length, 1, ASF_File);
                             Descriptor_Value_Str = g_utf16_to_utf8((const gunichar2 *) Descriptor_Value_Str_UTF16,
                                 Descriptor_Value_Length, NULL, NULL, NULL);
                             // We have out key=value pair so lets look for our desired  keys 'WM/AlbumTitle', 'WM/Genre' and 'WM/Year'
@@ -682,7 +687,7 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
                         case 5: // WORD
                             if (Descriptor_Value_Length > sizeof (Descriptor_Value))
                                 Descriptor_Value_Length = sizeof (Descriptor_Value);
-                            fread(&Descriptor_Value, Descriptor_Value_Length, 1, ASF_File);
+                            i = fread(&Descriptor_Value, Descriptor_Value_Length, 1, ASF_File);
                             if ((g_ascii_strcasecmp(Descriptor_Name, "WM/Track\0") == 0)) {
                                 trackinformation->tracknumber = Descriptor_Value + 1;
                             } else {
@@ -708,19 +713,19 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
             } else {
                 if (memcmp(&Header_GUID, &ASF_Stream_header, sizeof (GUID)) == 0) {
                     // We have an audio header for the track information.
-                    fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
+                    i = fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
                     ASF_File_Position = ftell(ASF_File);
 
                     // Read in the stream type GUID
-                    fread(&Stream_GUID, sizeof (GUID), 1, ASF_File);
+                    i = fread(&Stream_GUID, sizeof (GUID), 1, ASF_File);
                     if (memcmp(&Stream_GUID, &ASF_Audio_Media_header, sizeof (GUID)) == 0) {
                         // We have an audio header.
                         fseek(ASF_File, 38, SEEK_CUR);
                         // We should be pointing at our audio stream data block.
                         fseek(ASF_File, sizeof (uint16_t), SEEK_CUR); // Skip CODEC ID
-                        fread(&Stream_Channels, sizeof (uint16_t), 1, ASF_File);
+                        i = fread(&Stream_Channels, sizeof (uint16_t), 1, ASF_File);
                         fseek(ASF_File, 4, SEEK_CUR); // Skip Samples per second
-                        fread(&Stream_Bitrate, sizeof (uint32_t), 1, ASF_File);
+                        i = fread(&Stream_Bitrate, sizeof (uint32_t), 1, ASF_File);
 
                         trackinformation->nochannels = Stream_Channels;
                         trackinformation->bitrate = Stream_Bitrate * 8; // This value is in BYTES
@@ -732,11 +737,11 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
                 } else {
                     if (memcmp(&Header_GUID, &ASF_File_Properties_header, sizeof (GUID)) == 0) {
                         // We have a file header for the track information.
-                        fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
+                        i = fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
                         ASF_File_Position = ftell(ASF_File);
                         // Skip File ID, Filesize, Creation Date and Data Packets Count
                         fseek(ASF_File, (sizeof (GUID) + (sizeof (uint64_t) * 3)), SEEK_CUR);
-                        fread(&Stream_Duration, sizeof (uint64_t), 1, ASF_File);
+                        i = fread(&Stream_Duration, sizeof (uint64_t), 1, ASF_File);
                         // Convert from 1/100ths nano sec to millisec.
                         trackinformation->duration = Stream_Duration / 10000;
 
@@ -744,7 +749,7 @@ void get_asf_tags(gchar *filename, LIBMTP_track_t *trackinformation) {
                         fseek(ASF_File, (Object_Size - sizeof (uint64_t) - sizeof (GUID)), SEEK_CUR);
                     } else {
                         // Skip this header;
-                        fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
+                        i = fread(&Object_Size, sizeof (uint64_t), 1, ASF_File);
                         fseek(ASF_File, (Object_Size - sizeof (uint64_t) - sizeof (GUID)), SEEK_CUR);
                     }
                 }

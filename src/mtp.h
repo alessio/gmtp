@@ -2,7 +2,7 @@
  *
  *   File: mtp.h
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2013 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -56,10 +56,13 @@ extern "C" {
     void filesDelete(gchar* filename, uint32_t objectID);
     void filesDownload(gchar* filename, uint32_t objectID);
     gboolean fileExists(gchar* filename);
+    uint32_t getFile(gchar* filename, uint32_t folderID);
     guint32 folderAdd(gchar* foldername);
     void folderDelete(LIBMTP_folder_t* folderptr, guint level);
     void folderDeleteChildrenFiles(guint folderID);
     void folderDownload(gchar * foldername, uint32_t folderID, gboolean isParent);
+    gboolean folderExists(gchar *foldername, uint32_t folderID);
+    uint32_t getFolder(gchar *foldername, uint32_t folderID);
     void albumAddTrackToAlbum(LIBMTP_album_t* albuminfo, LIBMTP_track_t* trackinfo);
     void albumAddArt(guint32 album_id, gchar* filename);
     void albumDeleteArt(guint32 album_id);

@@ -2,7 +2,7 @@
  *
  *   File: main.h
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2013 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -59,9 +59,7 @@ extern "C" {
     // Main Window Widgets.
     GtkWidget *windowMain;
     GtkWidget *scrolledwindowMain;
-    GtkWidget *windowPrefsDialog;
-    GtkWidget *windowPropDialog;
-    GtkWidget *windowPlaylistDialog;
+
     GtkWidget *windowStatusBar;
     GtkWidget *toolbuttonConnect;
     GtkWidget *treeviewFiles;
@@ -106,7 +104,10 @@ extern "C" {
 
     // Common magic numbers.
 
+#define KILOBYTE 1024
 #define MEGABYTE 1048576
+#define GIGABYTE 1073741824
+    
 #define GMTP_REQUIRE_PLAYLIST -2
 #define GMTP_NO_PLAYLIST -1
 #define GMTP_MAX_STRING 8192
