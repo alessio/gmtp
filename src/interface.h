@@ -2,7 +2,7 @@
  *
  *   File: interface.h
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2013 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -109,13 +109,9 @@ extern "C" {
 
     GtkWidget* create_windowMain(void);
     void setWindowTitle(gchar *foldername);
-    GtkWidget* create_windowPreferences(void);
-    GtkWidget* create_windowProperties(void);
     GtkWidget* create_windowMainContextMenu(void);
     GtkWidget* create_windowMainColumnContextMenu(void);
     GtkWidget* create_windowFolderContextMenu(void);
-    GtkWidget* create_windowPlaylist(void);
-    GtkWidget* create_windowFormat(void);
 
     void SetToolbarButtonState(gboolean);
     void statusBarSet(gchar *text);
@@ -158,18 +154,8 @@ extern "C" {
     // Aggreegate function for adding a file to the device.
     void __filesAdd(gchar* filename);
 
-    // Progress Dialog
-    GtkWidget* create_windowProgressDialog(gchar* msg);
-    void displayProgressBar(gchar* msg);
-    void destroyProgressBar(void);
-    void setProgressFilename(gchar* filename_stripped);
-    int fileprogress(const uint64_t sent, const uint64_t total, void const * const data);
-    GtkWidget *progressDialog;
-    gboolean progressDialog_killed;
-
-    // About Dialog box.
-    void displayAbout(void);
-
+    gchar *calculateFriendlySize(const uint64_t value);
+    
     // Error dialog.
     void displayError(gchar* msg);
     void displayInformation(gchar* msg);
@@ -184,52 +170,16 @@ extern "C" {
     gint displayMultiDeviceDialog(void);
     gint displayDeviceStorageDialog(void);
     gchar* displayChangeDeviceNameDialog(gchar* devicename);
-
-    // Set Album Art dialog;
-#define ALBUM_SIZE 96
-
-    void displayAddAlbumArtDialog(void);
-    void AlbumArtUpdateImage(LIBMTP_album_t* selectedAlbum);
-    void AlbumArtSetDefault(void);
-
-    // Playlists
-
-    gint playlist_number;
-    gint comboboxentry_playlist_entries;
-
-    void displayPlaylistDialog(void);
-    void setupTrackList(GtkTreeView *treeviewFiles);
-    void setup_PL_List(GtkTreeView *treeviewFiles);
-    void SetPlaylistButtonState(gboolean state);
-    void setPlayListComboBox(void);
-    void setPlaylistField(gint PlayListID);
-    gchar* displayPlaylistNewDialog(void);
-
-    gboolean playlist_PL_ListClearSelection();
-    GList* playlist_PL_ListGetSelection();
-    gboolean playlist_PL_ListRemove(GList *List);
-    void __playlist_PL_Remove(GtkTreeRowReference *Row);
-
-    GList* playlist_TrackList_GetSelection();
-    gboolean playlist_TrackList_Add(GList *List);
-    void __playlist_TrackList_Add(GtkTreeRowReference *Row);
-
-    gboolean playlist_move_files(gint direction);
-    void __playlist_move_files_up(GtkTreeRowReference *Row);
-    void __playlist_move_files_down(GtkTreeRowReference *Row);
-
-    void playlist_SavePlaylist(gint PlayListID);
-
-    gboolean fileListAddToPlaylist(GList *List, uint32_t PlaylistID);
-    gboolean fileListRemoveFromPlaylist(GList *List, uint32_t PlaylistID);
-    void __fileAddToPlaylist(GtkTreeRowReference *Row, LIBMTP_playlist_t **playlist);
-    void __fileRemoveFromPlaylist(GtkTreeRowReference *Row, LIBMTP_playlist_t **playlist);
-
+   
     // Add track to playlist dialog;
     int32_t displayAddTrackPlaylistDialog(gboolean showNew /* = TRUE */);
 
     // Widget for find toolbar
     GtkWidget *findToolbar;
+    
+    // Parent container for the main toolbar.
+    GtkWidget *handlebox1;
+    GtkWidget *toolbarMain;
 
     // Widgets for menu items;
     GtkWidget *fileConnect;
@@ -252,7 +202,7 @@ extern "C" {
     GtkWidget* cfileAdd;
     GtkWidget* cfileNewFolder;
     GtkWidget *toolbuttonAddFile;
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
     GtkTooltips *tooltipsToolbar;
 #endif
 
@@ -279,6 +229,7 @@ extern "C" {
     GtkWidget *menu_view_genre;
     GtkWidget *menu_view_duration;
     GtkWidget *menu_view_folders;
+    GtkWidget *menu_view_toolbar;
 
     // Column view context menu;
     GtkWidget* cViewSize;
@@ -290,45 +241,6 @@ extern "C" {
     GtkWidget* cViewYear;
     GtkWidget* cViewGenre;
     GtkWidget* cViewDuration;
-
-    // Widgets for preferences buttons;
-    GtkWidget *checkbuttonDeviceConnect;
-    GtkWidget *entryDownloadPath;
-    GtkWidget *entryUploadPath;
-    GtkWidget *checkbuttonDownloadPath;
-    GtkWidget *checkbuttonConfirmFileOp;
-    GtkWidget *checkbuttonConfirmOverWriteFileOp;
-    GtkWidget *checkbuttonAutoAddTrackPlaylist;
-    GtkWidget *checkbuttonIgnorePathInPlaylist;
-    GtkWidget *checkbuttonSuppressAlbumErrors;
-    GtkWidget *checkbuttonAltAccessMethod;
-
-    // AlbumArt Dialog global pointers
-    GtkWidget *AlbumArtDialog;
-    //GtkWidget *AlbumArtFilename;
-    GtkWidget *AlbumArtImage;
-    GtkWidget *buttonAlbumAdd;
-    GtkWidget *buttonAlbumDownload;
-    GtkWidget *buttonAlbumDelete;
-    GtkWidget *textboxAlbumArt;
-
-    // Playlist
-    GtkWidget *treeview_Avail_Files;
-    GtkWidget *treeview_Playlist_Files;
-    GtkWidget *comboboxentry_playlist;
-    GtkListStore *playlist_TrackList;
-    GtkListStore *playlist_PL_List;
-
-    // Buttons for playlist
-    GtkWidget *button_Del_Playlist;
-    GtkWidget *button_Export_Playlist;
-    GtkWidget *button_File_Move_Up;
-    GtkWidget *button_File_Move_Down;
-    GtkWidget *button_Del_File;
-    GtkWidget *button_Add_Files;
-
-    // Widget for formatDevice progress bar.
-    GtkWidget *formatDialog_progressBar1;
 
     // Combobox used in AddTrackPlaylist feature.
     GtkWidget *combobox_AddTrackPlaylist;

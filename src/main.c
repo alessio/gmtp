@@ -2,7 +2,7 @@
  *
  *   File: main.c
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2013 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -23,11 +23,11 @@
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#if GMTP_USE_GTK2
+#if HAVE_GTK3
+#include <gio/gio.h>
+#else 
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
-#else
-#include <gio/gio.h>
 #endif
 #include <libmtp.h>
 #include <libgen.h>
@@ -44,9 +44,6 @@
 
 // Global Widgets needed by various functions.
 GtkWidget *windowMain;
-GtkWidget *windowPrefsDialog;
-GtkWidget *windowPropDialog;
-GtkWidget *windowPlaylistDialog;
 GtkWidget *windowStatusBar;
 GtkWidget *toolbuttonConnect;
 GtkWidget *treeviewFiles;
@@ -95,20 +92,24 @@ gchar *file_image_png = NULL;
 int main(int argc, char *argv[]) {
     setFilePaths(argc, argv);
 
+#if GLIB_CHECK_VERSION(2,32,0)
+    // only need g_thread_init on versions less than 2.32
+#else
     g_thread_init(NULL);
+#endif
 
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
     gtk_set_locale();
 #endif
-    g_set_prgname(PACKAGE_TITLE);
-    g_set_application_name(PACKAGE_TITLE);
+    g_set_prgname(PACKAGE_NAME);
+    g_set_application_name(PACKAGE_NAME);
 
     gtk_init(&argc, &argv);
     
 #ifdef ENABLE_NLS
-    bindtextdomain(PACKAGE, g_strconcat(applicationpath, "/../share/locale", NULL));
-    bind_textdomain_codeset(PACKAGE, "UTF-8");
-    textdomain(PACKAGE);
+    bindtextdomain(PACKAGE_NAME, g_strconcat(applicationpath, "/../share/locale", NULL));
+    bind_textdomain_codeset(PACKAGE_NAME, "UTF-8");
+    textdomain(PACKAGE_NAME);
 #endif
 
     // Initialise libmtp library
@@ -151,7 +152,7 @@ void setFilePaths(int argc, char *argv[]) {
 
     // Set our image locations.
     file_logo_png = g_strdup_printf("%s/../share/gmtp/logo.png", applicationpath);
-    file_icon48_png = g_strdup_printf("%s/../share/gmtp/icon.png", applicationpath);
+    file_icon48_png = g_strdup_printf("%s/../share/gmtp/gmtpicon.png", applicationpath);
     file_icon16_png = g_strdup_printf("%s/../share/gmtp/icon-16.png", applicationpath);
     file_about_png = g_strdup_printf("%s/../share/gmtp/stock-about-16.png", applicationpath);
     file_format_png = g_strdup_printf("%s/../share/gmtp/view-refresh.png", applicationpath);
@@ -182,14 +183,14 @@ gchar *getRuntimePath(int argc, char *argv[]) {
     const char delimit[] = ";:";
     gchar *token;
 
-    if (g_ascii_strcasecmp(PACKAGE, argv[0]) == 0) {
+    if (g_ascii_strcasecmp(PACKAGE_NAME, argv[0]) == 0) {
         // list each directory individually.
         fullpath = g_strdup(getenv("PATH"));
         token = strtok(fullpath, delimit);
         while ((token != NULL) && (foundpath == NULL)) {
             // Now test to see if we have it here...
             filepath = g_strdup(token);
-            filepath = g_strconcat(filepath, "/", PACKAGE, NULL);
+            filepath = g_strconcat(filepath, "/", PACKAGE_NAME, NULL);
             if (access(filepath, F_OK) != -1) {
                 foundpath = g_strdup(token);
             }

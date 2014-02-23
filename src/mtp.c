@@ -2,7 +2,7 @@
  *
  *   File: mtp.c
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2013 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -18,7 +18,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #else
@@ -41,6 +41,7 @@
 #include "prefs.h"
 #include "dnd.h"
 #include "metatag_info.h"
+#include "progress.h"
 
 
 // Array with file extensions matched to internal libmtp file types;
@@ -456,7 +457,7 @@ void deviceRescan() {
     deviceFiles = NULL;
     // Now get started.
     if (DeviceMgr.deviceConnected) {
-        // Get a list of folder on the device.
+        // Get a list of folder on the device. (Note: this may fail on some devices, and we end up with zero folders being listed)
         deviceFolders = LIBMTP_Get_Folder_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
         if (deviceFolders == NULL) {
             LIBMTP_Dump_Errorstack(DeviceMgr.device);
@@ -639,8 +640,13 @@ void filesAdd(gchar* filename) {
     gint ret;
 
     // Maybe something went wrong, so we disconnected. If so, then simple exit....
-    if (DeviceMgr.deviceConnected == FALSE)
+    if (DeviceMgr.deviceConnected == FALSE){
         return;
+    }
+
+    if(progressDialog_killed == TRUE){
+	    return;
+    }
 
     if (stat(filename, &sb) == -1) {
         perror("stat");
@@ -650,13 +656,15 @@ void filesAdd(gchar* filename) {
     filesize = sb.st_size;
     if (filesize > DeviceMgr.devicestorage->FreeSpaceInBytes) {
         g_fprintf(stderr, _("Unable to add %s due to insufficient space: filesize = %llu, freespace = %llu\n"),
-                filename, filesize, DeviceMgr.devicestorage->FreeSpaceInBytes);
+                filename, 
+                (unsigned long long int)filesize, 
+                (unsigned long long int)DeviceMgr.devicestorage->FreeSpaceInBytes);
         displayError(_("Unable to add file due to insufficient space"));
         return;
     }
 
     filename_stripped = basename(filename);
-    displayProgressBar(_("File Upload"));
+    //displayProgressBar(_("File Upload"));
     setProgressFilename(g_strdup(filename_stripped));
 
     // What we need to do is work what type of file we are sending
@@ -664,10 +672,16 @@ void filesAdd(gchar* filename) {
     // use the track send function.
     ret = find_filetype(filename_stripped);
 
-    if ((ret == LIBMTP_FILETYPE_MP3) ||
+    gboolean useTrack = (ret == LIBMTP_FILETYPE_MP3) ||
             (ret == LIBMTP_FILETYPE_OGG) ||
             (ret == LIBMTP_FILETYPE_FLAC) ||
-            (ret == LIBMTP_FILETYPE_WMA)) {
+            (ret == LIBMTP_FILETYPE_WMA);
+    
+    if(Preferences.allmediaasfiles){
+        useTrack = FALSE;
+    }
+    
+    if (useTrack) {
         // We have an MP3/Ogg/FLAC/WMA file.
         trackfile = LIBMTP_new_track_t();
 
@@ -713,7 +727,7 @@ void filesAdd(gchar* filename) {
         if (trackfile->artist == NULL)
             trackfile->artist = g_strdup(_("<Unknown>"));
         if (trackfile->date == NULL) {
-            trackfile->date = g_strdup(_(""));
+            trackfile->date = g_strdup("");
         } else {
             if (strlen(trackfile->date) == 4) {
                 // only have year part, so extend it.
@@ -802,7 +816,7 @@ void filesAdd(gchar* filename) {
     }
 
 
-    destroyProgressBar();
+    //destroyProgressBar();
     // Now update the storage...
     if (DeviceMgr.devicestorage == NULL) {
         if (LIBMTP_Get_Storage(DeviceMgr.device, 0) < 0) {
@@ -887,10 +901,14 @@ void filesDownload(gchar* filename, uint32_t objectID) {
     gchar* fullfilename = NULL;
 
     // Maybe something went wrong, so we disconnected. If so, then simple exit....
-    if (DeviceMgr.deviceConnected == FALSE)
+    if (DeviceMgr.deviceConnected == FALSE){
         return;
+    }
+    if(progressDialog_killed == TRUE){
+	    return;
+    }
 
-    displayProgressBar(_("File download"));
+    //displayProgressBar(_("File download"));
     setProgressFilename(filename);
     // Download the file based on the objectID.
     fullfilename = g_strdup_printf("%s/%s", Preferences.fileSystemDownloadPath->str, filename);
@@ -900,7 +918,7 @@ void filesDownload(gchar* filename, uint32_t objectID) {
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
     }
-    destroyProgressBar();
+    //destroyProgressBar();
     g_free(fullfilename);
 }
 
@@ -1006,7 +1024,7 @@ guint32 folderAdd(gchar* foldername) {
     guint32 res = LIBMTP_Create_Folder(DeviceMgr.device, foldername, currentFolderID, DeviceMgr.devicestorage->id);
     if (res == 0) {
         g_fprintf(stderr, _("Folder creation failed: %s\n"), foldername);
-        displayError(g_strconcat(_("Folder creation failed:"), " <b>", foldername, "</b>", NULL));
+        displayError(g_strconcat(_("Folder creation failed:"), foldername, NULL));
         LIBMTP_Dump_Errorstack(DeviceMgr.device);
         LIBMTP_Clear_Errorstack(DeviceMgr.device);
     }
@@ -1029,7 +1047,7 @@ void folderDelete(LIBMTP_folder_t* folderptr, guint level) {
         // Sanity check for rogue data or exit here operation, that is no child/sibling to work on.
         return;
     }
-    // This is fun, as we have to find all child folder, delete those, as well as all files contained within...
+    // This is fun, as we have to find all child folders, delete those, as well as all files contained within...
     // First iteratate through all child folders and remove those files in those folders.
     // But first we need to get the folder structure pointer based on the objectID, so we know where to start.
     // So now we have our structure to the current select folder, so we need to cycle through all children and remove any files contained within.
@@ -1158,7 +1176,7 @@ void folderDownload(gchar *foldername, uint32_t folderID, gboolean isParent) {
             // Check if file exists?
             if (access(fullfilename, F_OK) != -1) {
                 // We have that file already?
-                if ((Preferences.prompt_overwrite_file_op == TRUE)) {
+                if (Preferences.prompt_overwrite_file_op == TRUE) {
                     if (fileoverwriteop == MTP_ASK) {
                         fileoverwriteop = displayFileOverwriteDialog(tmpFiles->filename);
                     }
@@ -1285,7 +1303,11 @@ gboolean fileExists(gchar* filename) {
     // storage pool, then we do a string compare (since doing a string
     // compare is so much slower than comparing a few numbers).
     LIBMTP_file_t* tmpfile;
-    tmpfile = deviceFiles;
+    if(Preferences.use_alt_access_method){
+        tmpfile = LIBMTP_Get_Files_And_Folders(DeviceMgr.device, DeviceMgr.devicestorage->id, currentFolderID);
+    } else {
+        tmpfile = deviceFiles;
+    }
     while (tmpfile != NULL) {
         // Check for matching folder ID and storage ID.
         if ((tmpfile->parent_id == currentFolderID) && (tmpfile->storage_id == DeviceMgr.devicestorage->id)) {
@@ -1296,6 +1318,109 @@ gboolean fileExists(gchar* filename) {
         tmpfile = tmpfile->next;
     }
     return FALSE;
+}
+
+// ************************************************************************************************
+
+/**
+ * Check to see if this file already exists within the current folder on the device.
+ * @param filename
+ * @return
+ */
+uint32_t getFile(gchar* filename, uint32_t folderID) {
+    // What we have to go is scan the entire file tree looking for
+    // entries in the same folder as the current and the same
+    // storage pool, then we do a string compare (since doing a string
+    // compare is so much slower than comparing a few numbers).
+    LIBMTP_file_t* tmpfile;
+    if(Preferences.use_alt_access_method){
+        tmpfile = LIBMTP_Get_Files_And_Folders(DeviceMgr.device, DeviceMgr.devicestorage->id, folderID);
+    } else {
+        tmpfile = deviceFiles;
+    }
+    while (tmpfile != NULL) {
+        // Check for matching folder ID and storage ID.
+        if ((tmpfile->parent_id == currentFolderID) && (tmpfile->storage_id == DeviceMgr.devicestorage->id)) {
+            // Now test for the file name (do case insensitive cmp for those odd devices);
+            if (g_ascii_strcasecmp(filename, tmpfile->filename) == 0)
+                return tmpfile->item_id;
+        }
+        tmpfile = tmpfile->next;
+    }
+    return -1;
+}
+
+// ************************************************************************************************
+
+
+/**
+ * Determine if the folder name exists in the given folder (based on ID)
+ * @param foldername The name of the folder.
+ * @param folderID The ID of the folder whose contents are to be checked.
+ */
+gboolean folderExists(gchar *foldername, uint32_t folderID ){
+    if(Preferences.use_alt_access_method){
+        LIBMTP_file_t* tmpfile = LIBMTP_Get_Files_And_Folders(DeviceMgr.device, DeviceMgr.devicestorage->id, folderID);
+        while (tmpfile != NULL) {
+            // Check for matching folder ID and storage ID.
+            if ((tmpfile->parent_id == currentFolderID) && (tmpfile->storage_id == DeviceMgr.devicestorage->id)) {
+                // Now test for the file name (do case insensitive cmp for those odd devices);
+                if (g_ascii_strcasecmp(foldername, tmpfile->filename) == 0)
+                    return TRUE;
+            }
+            tmpfile = tmpfile->next;
+        }
+    } else {
+
+        LIBMTP_folder_t* folder = getCurrentFolderPtr(deviceFolders, folderID);
+        if(folder == NULL){
+            return FALSE;
+        }
+        // Scan for child folders with the same name.
+        LIBMTP_folder_t* child = folder->child;
+        while(child != NULL){
+            if (g_ascii_strcasecmp(foldername, child->name) == 0)
+                return TRUE;
+            child = child->sibling;
+        }
+    }
+    return FALSE;
+}
+
+// ************************************************************************************************
+
+/**
+ * Get the folderID based on the folder name that exists in the given folder (based on ID)
+ * @param foldername The name of the folder.
+ * @param folderID The ID of the folder whose contents are to be checked.
+ * @return The ID of the folder.
+ */
+uint32_t getFolder(gchar *foldername, uint32_t folderID){
+    if(Preferences.use_alt_access_method){
+        LIBMTP_file_t* tmpfile = LIBMTP_Get_Files_And_Folders(DeviceMgr.device, DeviceMgr.devicestorage->id, folderID);
+        while (tmpfile != NULL) {
+            // Check for matching folder ID and storage ID.
+            if ((tmpfile->parent_id == currentFolderID) && (tmpfile->storage_id == DeviceMgr.devicestorage->id)) {
+                // Now test for the file name (do case insensitive cmp for those odd devices);
+                if (g_ascii_strcasecmp(foldername, tmpfile->filename) == 0)
+                    return tmpfile->item_id;
+            }
+            tmpfile = tmpfile->next;
+        }
+    } else {
+        LIBMTP_folder_t* folder = getCurrentFolderPtr(deviceFolders, folderID);
+        if(folder == NULL){
+            return FALSE;
+        }
+        // Scan for child folders with the same name.
+        LIBMTP_folder_t* child = folder->child;
+        while(child != NULL){
+            if (g_ascii_strcasecmp(foldername, child->name) == 0)
+                return child->folder_id;
+            child = child->sibling;
+        }
+    }
+    return -1;
 }
 
 // ************************************************************************************************
@@ -1419,8 +1544,13 @@ void albumAddArt(guint32 album_id, gchar* filename) {
         g_free(imagedata);
         return;
     } else {
-        fread(imagedata, filesize, 1, fd);
+        size_t i = fread(imagedata, filesize, 1, fd);
         fclose(fd);
+        if(i != 1 ){
+            g_fprintf(stderr, _("Couldn't open image file %s\n"), filename);
+            g_free(imagedata);
+            return;
+        }
     }
 
     albumart = LIBMTP_new_filesampledata_t();
@@ -1976,15 +2106,32 @@ gchar* getFullFolderPath(uint32_t folderid) {
     uint32_t parent_id = folderid;
     guint stringlength = 0;
     LIBMTP_folder_t* tmpfolder = deviceFolders;
-
-    while (tmpfolder != NULL) {
-        tmpfolder = getCurrentFolderPtr(deviceFolders, parent_id);
-        if (tmpfolder != NULL) {
-            // We have something.
-            tmpfilename = g_strdup_printf("%s/%s", tmpfolder->name, fullfilename);
+    if(!Preferences.use_alt_access_method){
+        // Legacy search since we have a complete folder structure in memory.
+        while (tmpfolder != NULL) {
+            tmpfolder = getCurrentFolderPtr(deviceFolders, parent_id);
+            if (tmpfolder != NULL) {
+                // We have something.
+                tmpfilename = g_strdup_printf("%s/%s", tmpfolder->name, fullfilename);
+                g_free(fullfilename);
+                fullfilename = tmpfilename;
+                parent_id = tmpfolder->parent_id;
+            }
+        }
+        
+       
+    } else {
+        // We are using alt access mode, so we need to manually query the device for
+        // the parent folder.
+        LIBMTP_file_t * f = LIBMTP_Get_Filemetadata(DeviceMgr.device, parent_id);
+        while(f != NULL){
+            // we have the entry
+            tmpfilename = g_strdup_printf("%s/%s", f->filename, fullfilename);
             g_free(fullfilename);
             fullfilename = tmpfilename;
-            parent_id = tmpfolder->parent_id;
+            parent_id = f->parent_id;
+            LIBMTP_destroy_file_t(f);
+            f = LIBMTP_Get_Filemetadata(DeviceMgr.device, parent_id);
         }
     }
     // Add in leading slash if needed
@@ -2030,6 +2177,7 @@ GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchme
     if (Preferences.use_alt_access_method) {
         currentFolderID = 0;
         filesUpateFileList();
+        files = deviceFiles;
         //buildFolderIDs(&folderIDs, deviceFolders);
     }
 
@@ -2041,7 +2189,7 @@ GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchme
         }
         // Search files.
         while (files != NULL) {
-            if ((files->storage_id == DeviceMgr.devicestorage->id)) {
+            if (files->storage_id == DeviceMgr.devicestorage->id) {
                 if (files->filetype == LIBMTP_FILETYPE_FOLDER) {
                     // Add this folder to the list to be searched.
                     folderIDs = g_slist_append(folderIDs, &files->item_id);
@@ -2158,8 +2306,10 @@ GSList *filesSearch(gchar *searchstring, gboolean searchfiles, gboolean searchme
                         break;
                     }
                     currentFolderID = *((uint32_t*) folderIDs->data);
+                    //printf("Searching folder: %d\n", currentFolderID);
                     filesUpateFileList();
                     folderIDs = folderIDs->next;
+                    files = deviceFiles;
                 }
             }
         }

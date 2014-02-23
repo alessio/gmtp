@@ -1,3 +1,18 @@
+
+-- v1.3.5 - 25 Jan 2014
+
+* Move from CVS to git. (what took so long)? No history was imported into the git repository due unusual 
+  artifacts in the CVS repo. The CVS repo will be left for historical records only, but all new
+  development will be done against the git repo.
+* Change to using autotools for build (replaces custom Makefile). GTK version is now autodetected. (GTK3
+  will use gsettings, GTK2 will use gconf backends as before).
++ Update the progress dialog to display friendly sizes instead of sizes in just KB.
++ Added preference to send all media files via the regular file API. Note: updated gconf/gsettings
+  schema. (Android enhancement).
++ Set the progress dialog to be reused for each file being transferred.
++ Fix crash on deleting last playlist on device (GTK3).
++ Correct intermittent issue with Find operation when using Alternate Access Method and Android devices.
+
 -- v1.3.4 - 14 Nov 2012
 + Add new preference to ignore album handling errors (Android enhancement). Note: updated gconf/gsettings
   schema.

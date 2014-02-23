@@ -2,7 +2,7 @@
  *
  *   File: dnd.c
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2013 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -21,7 +21,7 @@
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #else
@@ -39,6 +39,7 @@
 #include "mtp.h"
 #include "prefs.h"
 #include "dnd.h"
+#include "progress.h"
 
 GtkTargetEntry _gmtp_drop_types[] = {
     {"text/plain", 0, GMTP_DROP_PLAINTEXT},
@@ -61,15 +62,15 @@ GtkTargetEntry _gmtp_drop_types[] = {
  */
 void gmtp_drag_data_received(GtkWidget *widget, GdkDragContext *context, gint x, gint y,
         GtkSelectionData *selection_data, guint info, guint time, gpointer user_data) {
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
     if (selection_data->data)
 #else
     if (gtk_selection_data_get_data(selection_data))
 #endif
     {
         GSList* files;
-
-#if GMTP_USE_GTK2
+        displayProgressBar(_("File Upload"));
+#if HAVE_GTK3 == 0
         files = getFilesListURI((gchar *) selection_data->data);
 #else
         files = getFilesListURI((gchar *) gtk_selection_data_get_data(selection_data));
@@ -85,6 +86,7 @@ void gmtp_drag_data_received(GtkWidget *widget, GdkDragContext *context, gint x,
         if (files != NULL) {
             g_slist_foreach(files, (GFunc) __filesAdd, NULL);
         }
+        destroyProgressBar();
         // Now clear the GList;
         g_slist_foreach(files, (GFunc) g_free, NULL);
         g_slist_free(files);
@@ -117,7 +119,7 @@ void gmtpfolders_drag_data_received(GtkWidget * widget, GdkDragContext * context
 
     g_signal_stop_emission_by_name((gpointer) treeviewFolders, "drag-data-received");
 
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
     if (selection_data->data)
 #else
     if (gtk_selection_data_get_data(selection_data))
@@ -132,7 +134,8 @@ void gmtpfolders_drag_data_received(GtkWidget * widget, GdkDragContext * context
             currentFolderID = targetFolderID;
 
             GSList* files;
-#if GMTP_USE_GTK2
+            displayProgressBar(_("File Upload"));
+#if HAVE_GTK3 == 0
             files = getFilesListURI((gchar *) selection_data->data);
 #else
             files = getFilesListURI((gchar *) gtk_selection_data_get_data(selection_data));
@@ -146,8 +149,11 @@ void gmtpfolders_drag_data_received(GtkWidget * widget, GdkDragContext * context
             AlbumErrorIgnore = FALSE;
             // Add the files.
             if (files != NULL) {
+                //displayProgressBar(_("File Upload"));
                 g_slist_foreach(files, (GFunc) __filesAdd, NULL);
+                //destroyProgressBar();
             }
+            destroyProgressBar();
             // Now clear the GList;
             g_slist_foreach(files, (GFunc) g_free, NULL);
             g_slist_free(files);
@@ -181,21 +187,6 @@ void gmtpfolders_drag_motion_received(GtkWidget *widget, GdkDragContext *context
 
         // Highlight the current row...
         gtk_tree_selection_select_path(folderSelection, path);
-
-        // Get our folder ID in to which to drop the file.
-/*
-        GtkTreeModel *sortmodel;
-        GtkTreeIter iter;
-        uint32_t objectID;
-        gchar *filename = NULL;
-        sortmodel = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
-        path = gtk_tree_model_sort_convert_path_to_child_path(GTK_TREE_MODEL_SORT(sortmodel), path);
-        gtk_tree_model_get_iter(GTK_TREE_MODEL(folderList), &iter, path);
-        gtk_tree_model_get(GTK_TREE_MODEL(folderList), &iter, COL_FOL_ID, &objectID,
-                COL_FOL_NAME_HIDDEN, &filename, -1);
-
-        printf("X: %d, Y: %d, Object: %d , Name: %s\n", x, y, objectID, filename);
-*/
 
     }
 }
@@ -279,8 +270,15 @@ void addFilesinFolder(gchar* foldername) {
     // Get just the folder name, as we are given a full absolute path.
     relative_foldername = basename(foldername);
     if (relative_foldername != NULL) {
-        // Add our folder to the mtp device and set our new current working folder ID.
-        currentFolderID = folderAdd(relative_foldername);
+
+        // Determine if the folder already exists in the current location, otherwise create it.
+
+        if(folderExists(relative_foldername, currentFolderID)){
+            currentFolderID = getFolder(relative_foldername, currentFolderID);        
+        } else {
+            // Add our folder to the mtp device and set our new current working folder ID.
+            currentFolderID = folderAdd(relative_foldername);
+        }    
     }
 
     // Start scanning the folder on the filesystem for our new files/folders.

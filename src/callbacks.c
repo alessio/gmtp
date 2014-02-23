@@ -2,7 +2,7 @@
  *
  *   File: callbacks.c
  *
- *   Copyright (C) 2009-2012 Darran Kartaschew
+ *   Copyright (C) 2009-2014 Darran Kartaschew
  *
  *   This file is part of the gMTP package.
  *
@@ -17,7 +17,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <glib/gi18n.h>
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
 #else
@@ -34,8 +34,12 @@
 #include "mtp.h"
 #include "prefs.h"
 #include "dnd.h"
-
-static gboolean formatThreadWorking = TRUE;
+#include "about.h"
+#include "progress.h"
+#include "properties.h"
+#include "preferences.h"
+#include "playlist.h"
+#include "formatdevice.h"
 
 /**
  * on_quit1_activate - Call back for Quit toolbar and menu option.
@@ -43,8 +47,12 @@ static gboolean formatThreadWorking = TRUE;
  * @param user_data
  */
 void on_quit1_activate(GtkMenuItem *menuitem, gpointer user_data) {
+    // Disconnect device.
+    if (DeviceMgr.deviceConnected == TRUE) {
+        on_deviceConnect_activate(NULL, NULL);
+    }
     savePreferences();
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
     gtk_exit(EXIT_SUCCESS);
 #else
     exit(EXIT_SUCCESS);
@@ -62,61 +70,7 @@ void on_about1_activate(GtkMenuItem *menuitem, gpointer user_data) {
     displayAbout();
 } // end on_about1_activate()
 
-// ************************************************************************************************
 
-/**
- * on_deviceProperties_activate - Callback for displaying the device Properties Dialog box.
- * @param menuitem
- * @param user_data
- */
-void on_deviceProperties_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gchar *tmp_string;
-
-    // We confirm our device properties, this should setup the device structure information we use below.
-    deviceProperties();
-
-    // Update the status bar with our information.
-    if (DeviceMgr.storagedeviceID == MTP_DEVICE_SINGLE_STORAGE) {
-        tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
-    } else {
-        if (DeviceMgr.devicestorage->StorageDescription != NULL) {
-            tmp_string = g_strdup_printf(_("Connected to %s (%s) - %d MB free"),
-                    DeviceMgr.devicename->str,
-                    DeviceMgr.devicestorage->StorageDescription,
-                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
-        } else {
-            tmp_string = g_strdup_printf(_("Connected to %s - %d MB free"), DeviceMgr.devicename->str,
-                    (int) (DeviceMgr.devicestorage->FreeSpaceInBytes / MEGABYTE));
-        }
-    }
-    statusBarSet(tmp_string);
-    g_free(tmp_string);
-
-    // No idea how this could come about, but we should take it into account so we don't have a
-    // memleak due to recreating the window multiple times.
-    if (windowPropDialog != NULL) {
-        gtk_widget_hide(windowPropDialog);
-        gtk_widget_destroy(windowPropDialog);
-    }
-
-    // Create and show the dialog box.
-    windowPropDialog = create_windowProperties();
-    gtk_widget_show(GTK_WIDGET(windowPropDialog));
-} // end on_deviceProperties_activate()
-
-// ************************************************************************************************
-
-/**
- * on_quitProp_activate - Callback used to close the Properties Dialog.
- * @param menuitem
- * @param user_data
- */
-void on_quitProp_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gtk_widget_hide(windowPropDialog);
-    gtk_widget_destroy(windowPropDialog);
-    windowPropDialog = NULL;
-} // end on_quitProp_activate()
 
 // ************************************************************************************************
 
@@ -156,8 +110,11 @@ void on_filesAdd_activate(GtkMenuItem *menuitem, gpointer user_data) {
         currentFolderID = (uint32_t) targetFol;
     }
     AlbumErrorIgnore = FALSE;
-    if (files != NULL)
+    if (files != NULL){
+	displayProgressBar(_("File Upload"));
         g_slist_foreach(files, (GFunc) __filesAdd, NULL);
+	destroyProgressBar();
+    }
 
     // Now clear the GList;
     g_slist_foreach(files, (GFunc) g_free, NULL);
@@ -240,11 +197,11 @@ void on_fileMoveFile_activate(GtkMenuItem *menuitem, gpointer user_data) {
     int64_t targetfolder = 0;
 
     // If using alternate connection mode, this is disabled.
-    if(Preferences.use_alt_access_method){
+    if (Preferences.use_alt_access_method) {
         displayInformation(_("The move function is disabled when using the alternate access method for your device."));
         return;
     }
-    
+
     // Let's check to see if we have anything selected in our treeview?
     if ((List = fileListGetSelection()) == NULL) {
         if (folderListGetSelection() != -1) {
@@ -327,7 +284,9 @@ void on_filesDownload_activate(GtkMenuItem *menuitem, gpointer user_data) {
     // Let's check to see if we have anything selected in our treeview?
     if (fileListGetSelection() == NULL) {
         if ((targetfolder = folderListGetSelection()) != -1) {
+            displayProgressBar(_("File download"));
             folderListDownload(folderListGetSelectionName(), targetfolder);
+            destroyProgressBar();
         } else {
             displayInformation(_("No files/folders selected?"));
         }
@@ -335,7 +294,9 @@ void on_filesDownload_activate(GtkMenuItem *menuitem, gpointer user_data) {
     }
 
     // Download the selected files.
+    displayProgressBar(_("File download"));
     fileListDownload(fileListGetSelection());
+    destroyProgressBar();
 } // end on_filesDownload_activate()
 
 // ************************************************************************************************
@@ -416,272 +377,6 @@ void on_deviceConnect_activate(GtkMenuItem *menuitem, gpointer user_data) {
     SetToolbarButtonState(DeviceMgr.deviceConnected);
 } // on_deviceConnect_activate()
 
-// Here is the preferences callbacks and dialog box creation.
-// ************************************************************************************************
-
-/**
- * Callback to show the Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_preferences1_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    // No idea how this could come about, but we should take it into account so we don't have a memleak
-    // due to recreating the window multiple times.
-    if (windowPrefsDialog != NULL) {
-        gtk_widget_hide(windowPrefsDialog);
-        gtk_widget_destroy(windowPrefsDialog);
-    }
-
-    // Create and display the dialog
-    windowPrefsDialog = create_windowPreferences();
-    gtk_widget_show(GTK_WIDGET(windowPrefsDialog));
-
-} // end on_preferences1_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to close the Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_quitPrefs_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gtk_widget_hide(windowPrefsDialog);
-    gtk_widget_destroy(windowPrefsDialog);
-    windowPrefsDialog = NULL;
-} // end on_quitPrefs_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for Auto Connect Device toggle in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsDevice_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonDeviceConnect));
-
-#if GMTP_USE_GTK2
-    if (gconfconnect != NULL)
-        gconf_client_set_bool(gconfconnect, "/apps/gMTP/autoconnectdevice", state, NULL);
-#else
-    if (gsettings_connect != NULL)
-        g_settings_set_boolean(gsettings_connect, "autoconnectdevice", state);
-    g_settings_sync();
-#endif
-} // end on_PrefsDevice_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for Confirm Delete Operations toggle in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsConfirmDelete_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmFileOp));
-
-#if GMTP_USE_GTK2
-    if (gconfconnect != NULL)
-        gconf_client_set_bool(gconfconnect, "/apps/gMTP/confirmFileDelete", state, NULL);
-#else
-    if (gsettings_connect != NULL)
-        g_settings_set_boolean(gsettings_connect, "confirmfiledelete", state);
-    g_settings_sync();
-#endif
-} // end on_PrefsConfirmDelete_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for Ask Download Path Operations toggle in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsAskDownload_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonDownloadPath));
-
-#if GMTP_USE_GTK2
-    if (gconfconnect != NULL)
-        gconf_client_set_bool(gconfconnect, "/apps/gMTP/promptDownloadPath", state, NULL);
-#else
-    if (gsettings_connect != NULL)
-        g_settings_set_boolean(gsettings_connect, "promptdownloadpath", state);
-    g_settings_sync();
-#endif
-} // end on_PrefsAskDownload_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for Ask Download Path Operations toggle in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsAutoAddTrackPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonAutoAddTrackPlaylist));
-
-#if GMTP_USE_GTK2
-    if (gconfconnect != NULL)
-        gconf_client_set_bool(gconfconnect, "/apps/gMTP/autoAddTrackPlaylist", state, NULL);
-#else
-    if (gsettings_connect != NULL)
-        g_settings_set_boolean(gsettings_connect, "autoaddtrackplaylist", state);
-    g_settings_sync();
-#endif
-} // end on_PrefsAutoAddTrackPlaylist_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for Ignore Path in Playlist toggle in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsIgnorePathInPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonIgnorePathInPlaylist));
-
-#if GMTP_USE_GTK2
-    if (gconfconnect != NULL)
-        gconf_client_set_bool(gconfconnect, "/apps/gMTP/ignorepathinplaylist", state, NULL);
-#else
-    if (gsettings_connect != NULL)
-        g_settings_set_boolean(gsettings_connect, "ignorepathinplaylist", state);
-    g_settings_sync();
-#endif
-} // end on_PrefsIgnorePathInPlaylist_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for Suppress Album Errors toggle in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsSuppressAlbumError_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonSuppressAlbumErrors));
-
-#if GMTP_USE_GTK2
-    if (gconfconnect != NULL)
-        gconf_client_set_bool(gconfconnect, "/apps/gMTP/suppressalbumerrors", state, NULL);
-#else
-    if (gsettings_connect != NULL)
-        g_settings_set_boolean(gsettings_connect, "suppressalbumerrors", state);
-    g_settings_sync();
-#endif
-} // end on_PrefsSuppressAlbumError_activate()
-
-
-// ************************************************************************************************
-
-/**
- * Callback for Suppress Album Errors toggle in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsUseAltAccessMethod_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonAltAccessMethod));
-
-#if GMTP_USE_GTK2
-    if (gconfconnect != NULL)
-        gconf_client_set_bool(gconfconnect, "/apps/gMTP/alternateaccessmethod", state, NULL);
-#else
-    if (gsettings_connect != NULL)
-        g_settings_set_boolean(gsettings_connect, "alternateaccessmethod", state);
-    g_settings_sync();
-#endif
-} // end on_PrefsUseAltAccessMethod_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for Confirm Overwrite of File Operations toggle in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsConfirmOverWriteFileOp_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gboolean state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbuttonConfirmOverWriteFileOp));
-
-#if GMTP_USE_GTK2
-    if (gconfconnect != NULL)
-        gconf_client_set_bool(gconfconnect, "/apps/gMTP/promptOverwriteFile", state, NULL);
-#else
-    if (gsettings_connect != NULL)
-        g_settings_set_boolean(gsettings_connect, "promptoverwritefile", state);
-    g_settings_sync();
-#endif
-} // end on_PrefsConfirmOverWriteFileOp_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for setting download path in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsDownloadPath_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    // What we do here is display a find folder dialog, and save the resulting folder into the text wigdet and preferences item.
-    gchar *savepath = NULL;
-    GtkWidget *FileDialog;
-    // First of all, lets set the download path.
-    FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Download to"),
-            GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-            NULL);
-    gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemDownloadPath->str);
-    if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
-        savepath = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
-
-        // Save our download path.
-#if GMTP_USE_GTK2
-        if (gconfconnect != NULL)
-            gconf_client_set_string(gconfconnect, "/apps/gMTP/DownloadPath", savepath, NULL);
-#else
-        if (gsettings_connect != NULL)
-            g_settings_set_string(gsettings_connect, "downloadpath", savepath);
-        g_settings_sync();
-#endif
-        g_free(savepath);
-    }
-    gtk_widget_destroy(FileDialog);
-} // on_PrefsDownloadPath_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback for setting upload path in Preferences Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_PrefsUploadPath_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    // What we do here is display a find folder dialog, and save the resulting folder into the text wigdet and preferences item.
-    gchar *savepath = NULL;
-    GtkWidget *FileDialog;
-    // First of all, lets set the upload path.
-    FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Upload From"),
-            GTK_WINDOW(windowPrefsDialog), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-            NULL);
-    gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemUploadPath->str);
-    if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
-        savepath = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
-
-        // Save our download path.
-#if GMTP_USE_GTK2
-        if (gconfconnect != NULL)
-            gconf_client_set_string(gconfconnect, "/apps/gMTP/UploadPath", savepath, NULL);
-#else
-        if (gsettings_connect != NULL)
-            g_settings_set_string(gsettings_connect, "uploadpath", savepath);
-        g_settings_sync();
-#endif
-        g_free(savepath);
-    }
-    gtk_widget_destroy(FileDialog);
-} //on_PrefsUploadPath_activate()
-
 // ************************************************************************************************
 
 /**
@@ -711,14 +406,14 @@ void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewC
         gtk_tree_model_get(GTK_TREE_MODEL(fileList), &iter, COL_ISFOLDER, &isFolder, COL_FILENAME_ACTUAL, &filename, COL_FILEID, &objectID, -1);
         if (isFolder == FALSE) {
             // Now download the actual file from the MTP device.
-
+            displayProgressBar(_("File download"));
             savepath = g_malloc0(8192);
             // Let's confirm our download path.
             if (Preferences.ask_download_path == TRUE) {
                 FileDialog = gtk_file_chooser_dialog_new(_("Select Path to Download"),
                         GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                        _("_Cancel"), GTK_RESPONSE_CANCEL,
+                        _("_Open"), GTK_RESPONSE_ACCEPT,
                         NULL);
 
                 gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemDownloadPath->str);
@@ -727,31 +422,36 @@ void fileListRowActivated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewC
                     // Save our download path.
                     Preferences.fileSystemDownloadPath = g_string_assign(Preferences.fileSystemDownloadPath, savepath);
                     // We do the deed.
+                    displayProgressBar(_("File download"));
                     filesDownload(filename, objectID);
+                    destroyProgressBar();
                 }
                 gtk_widget_destroy(FileDialog);
             } else {
                 // We do the deed.
+                displayProgressBar(_("File download"));
                 filesDownload(filename, objectID);
+                destroyProgressBar();
             }
+            destroyProgressBar();
             g_free(savepath);
 
         } else {
             // Maintain the stack of folder IDs and names for alt access mode.
-            if(Preferences.use_alt_access_method){
-                if(g_ascii_strcasecmp(filename, "..") == 0){
+            if (Preferences.use_alt_access_method) {
+                if (g_ascii_strcasecmp(filename, "..") == 0) {
                     // going down a level.
                     g_free(g_queue_pop_tail(stackFolderIDs));
                     g_free(g_queue_pop_tail(stackFolderNames));
                 } else {
                     // going up a level
-                    guint *currentFld = g_malloc(sizeof(guint));
+                    guint *currentFld = g_malloc(sizeof (guint));
                     *currentFld = currentFolderID;
                     g_queue_push_tail(stackFolderIDs, currentFld);
                     g_queue_push_tail(stackFolderNames, g_strdup(filename));
                 }
             }
-            
+
             // We have a folder so change to it?
             currentFolderID = objectID;
             on_editFindClose_activate(NULL, NULL);
@@ -926,7 +626,7 @@ void on_folderMoveFolder_activate(GtkMenuItem *menuitem, gpointer user_data) {
 
         // Prompt for the target folder location.
         targetfolder = getTargetFolderLocation();
-        if ((targetfolder == -1)) {
+        if (targetfolder == -1) {
             // If the user didn't select a folder, or the target folder is the current selected folder
             // then do nothing.
             return;
@@ -1082,72 +782,6 @@ void on_editDeviceName_activate(GtkMenuItem *menuitem, gpointer user_data) {
     }
 } // end on_editDeviceName_activate()
 
-// ************************************************************************************************
-
-/**
- * Callback to format the current storage device.
- * @param menuitem
- * @param user_data
- */
-void on_editFormatDevice_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    GtkWidget *dialog;
-    dialog = gtk_message_dialog_new(GTK_WINDOW(windowMain),
-            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-            GTK_MESSAGE_WARNING,
-            GTK_BUTTONS_YES_NO,
-            _("Are you sure you want to format this device?"));
-    gtk_window_set_title(GTK_WINDOW(dialog), _("Format Device"));
-    gint result = gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_hide(GTK_WIDGET(dialog));
-    gtk_widget_destroy(dialog);
-
-    if (result == GTK_RESPONSE_YES) {
-        dialog = create_windowFormat();
-        // Show progress dialog.
-        gtk_widget_show_all(dialog);
-        // Ensure GTK redraws the window.
-
-        formatThreadWorking = TRUE;
-
-        g_thread_create((GThreadFunc) on_editFormatDevice_thread, NULL, FALSE, NULL);
-
-        while (formatThreadWorking) {
-            while (gtk_events_pending())
-                gtk_main_iteration();
-
-            if (formatDialog_progressBar1 != NULL) {
-                gtk_progress_bar_pulse(GTK_PROGRESS_BAR(formatDialog_progressBar1));
-                g_usleep(G_USEC_PER_SEC * 0.1);
-            }
-
-        }
-        // The worker thread has finished so let's continue.
-
-        // Disconnect and reconnect the device.
-        on_deviceConnect_activate(NULL, NULL);
-        // Sleep for 2 secs to allow the device to settle itself
-        g_usleep(G_USEC_PER_SEC * 2);
-        on_deviceConnect_activate(NULL, NULL);
-        // Close progress dialog.
-        gtk_widget_hide(dialog);
-        gtk_widget_destroy(dialog);
-        formatDialog_progressBar1 = NULL;
-    }
-    //
-} // end on_editFormatDevice_activate()
-
-// ************************************************************************************************
-
-/**
- * Worker thread for on_editFormatDevice_activate();
- */
-void on_editFormatDevice_thread(void) {
-    formatStorageDevice();
-    // Add a 5 sec wait so the device has time to settle itself.
-    g_usleep(G_USEC_PER_SEC * 5);
-    formatThreadWorking = FALSE;
-    g_thread_exit(NULL);
-}
 
 // ************************************************************************************************
 
@@ -1278,12 +912,12 @@ void on_editFindClose_activate(GtkMenuItem *menuitem, gpointer user_data) {
     fileListClear();
     folderListClear();
     // Refresh the file listings.
-    
+
     // If using alternate access method, then get our next list of files for the current folder id.
-    if(Preferences.use_alt_access_method){
+    if (Preferences.use_alt_access_method) {
         filesUpateFileList();
     }
-    
+
     fileListAdd();
     folderListAdd(deviceFolders, NULL);
 
@@ -1345,7 +979,10 @@ void on_editFindSearch_activate(GtkMenuItem *menuitem, gpointer user_data) {
     searchstring = g_utf8_strup(gtk_entry_get_text(GTK_ENTRY(FindToolbar_entry_FindText)), -1);
     searchfiles = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FindToolbar_checkbutton_FindFiles));
     searchmeta = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(FindToolbar_checkbutton_TrackInformation));
-
+    // disable search metadata if treatallmediaasfiles or in alternate access mode is set.
+    if(Preferences.allmediaasfiles == TRUE || Preferences.use_alt_access_method == TRUE){
+        searchmeta = FALSE;
+    }
     // Let's start our search.
     searchList = filesSearch(searchstring, searchfiles, searchmeta);
     inFindMode = TRUE;
@@ -1354,498 +991,11 @@ void on_editFindSearch_activate(GtkMenuItem *menuitem, gpointer user_data) {
     g_free(searchstring);
 } // end on_editFindSearch_activate()
 
-// ************************************************************************************************
 
-/**
- * Callback to handle the Add Album Art menu option.
- * @param menuitem
- * @param user_data
- */
-void on_editAddAlbumArt_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    // Get a filename of the album art.
-    displayAddAlbumArtDialog();
-} // end on_editAddAlbumArt_activate()
 
-// ************************************************************************************************
 
-/**
- * Callback to hanlde the Playlist menu/toolbar operations.
- * @param menuitem
- * @param user_data
- */
-void on_editPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    displayPlaylistDialog();
-} // end on_editPlaylist_activate()
 
-// ************************************************************************************************
 
-/**
- * Callback to handle the select file button in the Add Album Art Dialog box.
- * @param button
- * @param user_data
- */
-void on_buttonAlbumArtAdd_activate(GtkWidget *button, gpointer user_data) {
-    // What we do here is display a find folder dialog, and save the resulting folder into the text wigdet and preferences item.
-    //gchar *filename;
-    gchar *filename = NULL;
-    GtkWidget *FileDialog;
-    FileDialog = gtk_file_chooser_dialog_new(_("Select Album Art File"),
-            GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_OPEN,
-            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-            NULL);
-
-    gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(FileDialog), TRUE);
-
-    // Set the default path to be the normal upload folder.
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(FileDialog), Preferences.fileSystemUploadPath->str);
-
-    if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
-        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
-
-        if (filename != NULL) {
-            // Upload the file to the selected album.
-            gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(textboxAlbumArt));
-            gint count = 0;
-            LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
-            LIBMTP_album_t *albuminfo = albumlist;
-
-            while (albuminfo != NULL) {
-                if (count == selected) {
-                    // Found our album, so update the image on the device, then update the display.
-                    albumAddArt(albuminfo->album_id, filename);
-                    AlbumArtUpdateImage(albuminfo);
-                    clearAlbumStruc(albumlist);
-                    g_free(filename);
-                    gtk_widget_destroy(FileDialog);
-                    return;
-                }
-                // Next album_entry
-                albuminfo = albuminfo->next;
-                count++;
-            }
-            // Set a default image as we didn't find our album.
-            AlbumArtUpdateImage(NULL);
-            clearAlbumStruc(albumlist);
-
-            g_free(filename);
-        }
-    }
-    gtk_widget_destroy(FileDialog);
-} // end on_buttonAlbumArtAdd_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle removal of associated album art.
- * @param button
- * @param user_data
- */
-void on_buttonAlbumArtDelete_activate(GtkWidget *button, gpointer user_data) {
-
-    // Send a blank representation.
-    gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(textboxAlbumArt));
-    gint count = 0;
-    LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
-    LIBMTP_album_t *albuminfo = albumlist;
-
-    while (albuminfo != NULL) {
-        if (count == selected) {
-            // Found our album, so update the image on the device, then update the display.
-            albumDeleteArt(albuminfo->album_id);
-            AlbumArtUpdateImage(NULL);
-            clearAlbumStruc(albumlist);
-            return;
-        }
-        // Next album_entry
-        albuminfo = albuminfo->next;
-        count++;
-    }
-    // Set a default image as we didn't find our album.
-    AlbumArtUpdateImage(NULL);
-    clearAlbumStruc(albumlist);
-
-} // end on_buttonAlbumArtDelete_activate()
-
-// ************************************************************************************************
-
-/**
- * Retrieve the album art and attempt to save the file.
- * @param button
- * @param user_data
- */
-void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
-    FILE* fd;
-    gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(textboxAlbumArt));
-    gint count = 0;
-    GtkWidget *FileDialog = NULL;
-    gchar *filename = NULL;
-    LIBMTP_filesampledata_t *imagedata = NULL;
-    LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
-    LIBMTP_album_t *albuminfo = albumlist;
-
-    // Scan our albums, looking for the correct one.
-    while (albuminfo != NULL) {
-        if (count == selected) {
-            // Found our album, let's get our data..
-            imagedata = albumGetArt(albuminfo);
-            if (imagedata != NULL) {
-
-                FileDialog = gtk_file_chooser_dialog_new(_("Save Album Art File"),
-                        GTK_WINDOW(AlbumArtDialog), GTK_FILE_CHOOSER_ACTION_SAVE,
-                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                        GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-                        NULL);
-
-                gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(FileDialog), TRUE);
-
-                // Set the default path to be the normal download folder.
-                gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(FileDialog),
-                        Preferences.fileSystemDownloadPath->str);
-
-                // Set a default name to be the album.JPG
-                gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(FileDialog),
-                        g_strdup_printf("%s.jpg", albuminfo->name));
-
-                if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
-                    filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
-                    if (filename != NULL) {
-                        // The user has selected a file to save as, so do the deed.
-                        fd = fopen(filename, "w");
-                        if (fd == NULL) {
-                            g_fprintf(stderr, _("Couldn't save image file %s\n"), filename);
-                            displayError(_("Couldn't save image file\n"));
-                        } else {
-                            fwrite(imagedata->data, imagedata->size, 1, fd);
-                            fclose(fd);
-                        }
-                        g_free(filename);
-                    }
-                }
-                // Clean up our image data and dialog.
-                LIBMTP_destroy_filesampledata_t(imagedata);
-                gtk_widget_destroy(FileDialog);
-            }
-            clearAlbumStruc(albumlist);
-            return;
-        }
-        // Next album_entry
-        albuminfo = albuminfo->next;
-        count++;
-    }
-    // Set a default image as we didn't find our album.
-    clearAlbumStruc(albumlist);
-    gtk_widget_destroy(FileDialog);
-} // end on_buttonAlbumArtDownload_activate()
-
-// ************************************************************************************************
-
-/**
- * Update the Album Image in the Add Album Art Dialog Box.
- * @param menuitem
- * @param user_data
- */
-void on_albumtextbox_activate(GtkComboBox *combobox, gpointer user_data) {
-    gint selected = gtk_combo_box_get_active(combobox);
-    gint count = 0;
-    LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
-    LIBMTP_album_t *albuminfo = albumlist;
-
-    while (albuminfo != NULL) {
-        if (count == selected) {
-            AlbumArtUpdateImage(albuminfo);
-            clearAlbumStruc(albumlist);
-            return;
-        }
-        // Text the album_entry
-        albuminfo = albuminfo->next;
-        count++;
-    }
-    // Set a default image
-    AlbumArtUpdateImage(NULL);
-    clearAlbumStruc(albumlist);
-}
-
-// Playlist Callbacks.
-// ************************************************************************************************
-
-/**
- * Callback to handle closing the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_quitPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    // Save our current selected playlist!
-    if (devicePlayLists != NULL)
-        playlist_SavePlaylist(playlist_number);
-    // Kill our window
-    gtk_widget_hide(windowPlaylistDialog);
-    gtk_widget_destroy(windowPlaylistDialog);
-    windowPlaylistDialog = NULL;
-    // Do a device rescan to show the new playlists in the file window
-    deviceRescan();
-} // end on_quitPlaylist_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the new Playlist button in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_NewPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    //g_printf("Clicked on new playlist button\n");
-    gchar *playlistname = NULL;
-
-    // Save our current selected playlist!
-    if (devicePlayLists != NULL)
-        playlist_SavePlaylist(playlist_number);
-
-    playlistname = displayPlaylistNewDialog();
-    if (playlistname != NULL) {
-        // Add in playlist to MTP device.
-        playlistAdd(playlistname);
-        // Refresh our playlist information.
-        devicePlayLists = getPlaylists();
-        gtk_list_store_clear(GTK_LIST_STORE(playlist_PL_List));
-        // Add it to our combobox
-
-#if GMTP_USE_GTK2
-        gtk_combo_box_append_text(GTK_COMBO_BOX(comboboxentry_playlist), g_strdup(playlistname));
-#else
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboboxentry_playlist), g_strdup(playlistname));
-#endif
-        g_free(playlistname);
-
-        // Set the active combobox item.
-        comboboxentry_playlist_entries++;
-        playlist_number = comboboxentry_playlist_entries - 1;
-        gtk_combo_box_set_active(GTK_COMBO_BOX(comboboxentry_playlist), comboboxentry_playlist_entries - 1);
-        SetPlaylistButtonState(TRUE);
-        setPlaylistField(playlist_number);
-    }
-} // end on_Playlist_NewPlaylistButton_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the Import Playlist button in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_ImportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    //g_printf("Clicked on new playlist button\n");
-    gchar *playlistfilename = NULL;
-    gchar *playlistname = NULL;
-    GtkWidget *FileDialog;
-    GtkFileFilter *OpenFormFilter, *OpenFormFilter2;
-
-    // Save our current selected playlist!
-    if (devicePlayLists != NULL)
-        playlist_SavePlaylist(playlist_number);
-
-    // Get our filename...
-
-    FileDialog = gtk_file_chooser_dialog_new(_("Select Playlist to Import"),
-            GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_OPEN,
-            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-            NULL);
-    gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(FileDialog), FALSE);
-    OpenFormFilter = gtk_file_filter_new();
-    gtk_file_filter_add_pattern(OpenFormFilter, "*.m3u");
-    gtk_file_filter_set_name(OpenFormFilter, "m3u Playlists");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(FileDialog), OpenFormFilter);
-    OpenFormFilter2 = gtk_file_filter_new();
-    gtk_file_filter_add_pattern(OpenFormFilter2, "*");
-    gtk_file_filter_set_name(OpenFormFilter2, "All Files");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(FileDialog), OpenFormFilter2);
-
-    if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
-        playlistfilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
-    }
-
-    gtk_widget_hide(FileDialog);
-    gtk_widget_destroy(FileDialog);
-
-    if (playlistfilename != NULL) {
-        // Add in playlist to MTP device.
-        playlistname = playlistImport(playlistfilename);
-
-        // If our name is NULL, then the import failed...
-        if (playlistname != NULL) {
-            // Refresh our playlist information.
-            devicePlayLists = getPlaylists();
-            gtk_list_store_clear(GTK_LIST_STORE(playlist_PL_List));
-            // Add it to our combobox
-
-#if GMTP_USE_GTK2
-            gtk_combo_box_append_text(GTK_COMBO_BOX(comboboxentry_playlist), g_strdup(playlistname));
-#else
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboboxentry_playlist), g_strdup(playlistname));
-#endif
-
-            // Set the active combobox item.
-            comboboxentry_playlist_entries++;
-            playlist_number = comboboxentry_playlist_entries - 1;
-            gtk_combo_box_set_active(GTK_COMBO_BOX(comboboxentry_playlist), comboboxentry_playlist_entries - 1);
-            SetPlaylistButtonState(TRUE);
-            setPlaylistField(playlist_number);
-
-            // Clean up fields.
-            g_free(playlistname);
-        } else {
-            // Let the user know the import failed.
-            g_fprintf(stderr, _("The playlist failed to import correctly.\n"));
-            displayError(_("The playlist failed to import correctly.\n"));
-        }
-        // Clean up fields.
-        g_free(playlistfilename);
-    }
-} // end on_Playlist_ImportPlaylistButton_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the Export Playlist button in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_ExportPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    gchar *playlistfilename = NULL;
-    GtkWidget *FileDialog;
-
-    // Save our current selected playlist!
-    if (devicePlayLists != NULL)
-        playlist_SavePlaylist(playlist_number);
-
-    gint PlayListID = gtk_combo_box_get_active(GTK_COMBO_BOX(comboboxentry_playlist));
-
-    if (PlayListID != -1) {
-        // We have something selected so lets do the dance.
-        LIBMTP_playlist_t* tmpplaylist = devicePlayLists;
-        if (PlayListID > 0) {
-            while (PlayListID--)
-                if (tmpplaylist->next != NULL)
-                    tmpplaylist = tmpplaylist->next;
-        }
-        // We should be in the correct playlist LIBMTP structure.
-
-        playlistfilename = g_strdup_printf("%s.%s", tmpplaylist->name, "m3u");
-
-        FileDialog = gtk_file_chooser_dialog_new(_("Save as..."),
-                GTK_WINDOW(windowMain), GTK_FILE_CHOOSER_ACTION_SAVE,
-                GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                NULL);
-        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(FileDialog), playlistfilename);
-
-        if (gtk_dialog_run(GTK_DIALOG(FileDialog)) == GTK_RESPONSE_ACCEPT) {
-            playlistfilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(FileDialog));
-        }
-
-        gtk_widget_hide(FileDialog);
-        gtk_widget_destroy(FileDialog);
-
-        if (playlistfilename != NULL) {
-            playlistExport(playlistfilename, tmpplaylist);
-            g_free(playlistfilename);
-        }
-    }
-} // end on_Playlist_ExportPlaylistButton_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the Delete Playlist button in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_DelPlaylistButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
-
-    gint PlayListID = gtk_combo_box_get_active(GTK_COMBO_BOX(comboboxentry_playlist));
-
-    if (PlayListID != -1) {
-        // We have something selected so lets do the dance.
-        LIBMTP_playlist_t* tmpplaylist = devicePlayLists;
-        if (PlayListID > 0) {
-            while (PlayListID--)
-                if (tmpplaylist->next != NULL)
-                    tmpplaylist = tmpplaylist->next;
-        }
-        // We should be in the correct playlist LIBMTP structure.
-        playlistDelete(tmpplaylist);
-        // Clear the PL list view box
-        gtk_list_store_clear(GTK_LIST_STORE(playlist_PL_List));
-        // Rebuild the playlist structure and combobox.
-        devicePlayLists = getPlaylists();
-        setPlayListComboBox();
-    }
-} // end on_Playlist_DelPlaylistButton_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the Delete Track button in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_DelFileButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    if (playlist_PL_ListGetSelection() == NULL)
-        return;
-    playlist_PL_ListRemove(playlist_PL_ListGetSelection());
-} // end on_Playlist_DelFileButton_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the Add Track button in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_AddFileButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    //g_printf("Clicked on add file in playlist button\n");
-    if (playlist_TrackList_GetSelection() == NULL)
-        return;
-    playlist_TrackList_Add(playlist_TrackList_GetSelection());
-} // end on_Playlist_AddFileButton_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the Move Track Up button in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_FileUpButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    playlist_move_files(-1);
-} // end on_Playlist_FileUpButton_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the Move Track Down button in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_FileDownButton_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    playlist_move_files(1);
-} // end on_Playlist_FileDownButton_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle the change of Playlist selection in the Playlist editor dialog.
- * @param menuitem
- * @param user_data
- */
-void on_Playlist_Combobox_activate(GtkComboBox *combobox, gpointer user_data) {
-    // Save our current selected playlist
-    playlist_SavePlaylist(playlist_number);
-    // Get our new playlist ID, and display the contents of it.
-    playlist_number = gtk_combo_box_get_active(GTK_COMBO_BOX(comboboxentry_playlist));
-    setPlaylistField(playlist_number);
-} // end on_Playlist_Combobox_activate()
 
 // ************************************************************************************************
 
@@ -1855,7 +1005,7 @@ void on_Playlist_Combobox_activate(GtkComboBox *combobox, gpointer user_data) {
  * @param user_data
  */
 void on_view_activate(GtkMenuItem *menuitem, gpointer user_data) {
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
     gchar *gconf_path = NULL;
     gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem));
     // Main menu.
@@ -1869,6 +1019,7 @@ void on_view_activate(GtkMenuItem *menuitem, gpointer user_data) {
     if ((void *) menuitem == (void *) menu_view_genre) gconf_path = g_strdup("/apps/gMTP/viewGenre");
     if ((void *) menuitem == (void *) menu_view_duration) gconf_path = g_strdup("/apps/gMTP/viewDuration");
     if ((void *) menuitem == (void *) menu_view_folders) gconf_path = g_strdup("/apps/gMTP/viewFolders");
+    if ((void *) menuitem == (void *) menu_view_toolbar) gconf_path = g_strdup("/apps/gMTP/viewtoolbar");
     // context menu
     if ((void *) menuitem == (void *) cViewSize) gconf_path = g_strdup("/apps/gMTP/viewFileSize");
     if ((void *) menuitem == (void *) cViewType) gconf_path = g_strdup("/apps/gMTP/viewFileType");
@@ -1898,7 +1049,7 @@ void on_view_activate(GtkMenuItem *menuitem, gpointer user_data) {
     if ((void *) menuitem == (void *) menu_view_genre) gsetting_path = g_strdup("viewgenre");
     if ((void *) menuitem == (void *) menu_view_duration) gsetting_path = g_strdup("viewduration");
     if ((void *) menuitem == (void *) menu_view_folders) gsetting_path = g_strdup("viewfolders");
-
+    if ((void *) menuitem == (void *) menu_view_toolbar) gsetting_path = g_strdup("viewtoolbar");
     //context menu.
     if ((void *) menuitem == (void *) cViewSize) gsetting_path = g_strdup("viewfilesize");
     if ((void *) menuitem == (void *) cViewType) gsetting_path = g_strdup("viewfiletype");
@@ -1917,33 +1068,6 @@ void on_view_activate(GtkMenuItem *menuitem, gpointer user_data) {
     }
 #endif
 } // end on_view_activate()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle when a user closes the Progress Dialog box, via the X button.
- * @param window
- * @param user_data
- */
-void on_progressDialog_Close(GtkWidget *window, gpointer user_data) {
-    // Set the global flag that the user has done it.
-    progressDialog_killed = TRUE;
-} // end on_progressDialog_Close()
-
-// ************************************************************************************************
-
-/**
- * Callback to handle when a user presses the Cancel button in the Progress Dialog box
- * @param window
- * @param user_data
- */
-void on_progressDialog_Cancel(GtkWidget *button, gpointer user_data) {
-    // Set the global flag that the user has done it.
-    progressDialog_killed = TRUE;
-    // Destroy the dialog box.
-    gtk_widget_hide(progressDialog);
-    gtk_widget_destroy(progressDialog);
-} // end on_progressDialog_Cancel()
 
 
 // ************************************************************************************************
@@ -1965,7 +1089,7 @@ void on_TrackPlaylist_NewPlaylistButton_activate(GtkWidget *button, gpointer use
         devicePlayLists = getPlaylists();
 
         // Add it to our combobox
-#if GMTP_USE_GTK2
+#if HAVE_GTK3 == 0
         gtk_combo_box_append_text(GTK_COMBO_BOX(combobox_AddTrackPlaylist), g_strdup(playlistname));
 #else
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox_AddTrackPlaylist), g_strdup(playlistname));
@@ -1975,52 +1099,6 @@ void on_TrackPlaylist_NewPlaylistButton_activate(GtkWidget *button, gpointer use
         // Set the active combobox item.
         combobox_entries = gtk_tree_model_iter_n_children(gtk_combo_box_get_model(GTK_COMBO_BOX(combobox_AddTrackPlaylist)), NULL);
         gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_AddTrackPlaylist), combobox_entries - 1);
-    }
-}
-
-
-// ************************************************************************************************
-
-/**
- * Callback to handle adding file to playlist.
- * @param menuitem
- * @param user_data
- */
-void on_fileAddToPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    // Let's check to see if we have anything selected in our treeview?
-    if (fileListGetSelection() == NULL) {
-        displayInformation(_("No files/folders selected?"));
-        return;
-    }
-    // Display the select playlist dialog;
-    int32_t addTrackPlaylistID = displayAddTrackPlaylistDialog(TRUE);
-
-    // Now add the actual files from the MTP device.
-    if (addTrackPlaylistID != GMTP_NO_PLAYLIST) {
-        fileListAddToPlaylist(fileListGetSelection(), addTrackPlaylistID);
-    }
-}
-
-
-// ************************************************************************************************
-
-/**
- * Callback to handle removing file from playlist.
- * @param menuitem
- * @param user_data
- */
-void on_fileRemoveFromPlaylist_activate(GtkMenuItem *menuitem, gpointer user_data) {
-    // Let's check to see if we have anything selected in our treeview?
-    if (fileListGetSelection() == NULL) {
-        displayInformation(_("No files/folders selected?"));
-        return;
-    }
-    // Display the select playlist dialog;
-    int32_t addTrackPlaylistID = displayAddTrackPlaylistDialog(FALSE);
-
-    // Now remove the actual files from the MTP device.
-    if (addTrackPlaylistID != GMTP_NO_PLAYLIST) {
-        fileListRemoveFromPlaylist(fileListGetSelection(), addTrackPlaylistID);
     }
 }
 
