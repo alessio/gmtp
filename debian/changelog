@@ -2,6 +2,9 @@ gmtp (1.3.5-1) unstable; urgency=low
 
   * New upstream release.
   * Switch to autoreconf, don't purge ~-files under po/
+  * Build-dep on libgcon2-dev to support alternative GTK-2.0 builds.
+  * No need to remove gmtp.schemas anymore, the new buildsystem manages
+    it all properly.
   * Fix watch file. (Closes: #739847)
   * Bump Standards.
   * Update copyright holders information.
