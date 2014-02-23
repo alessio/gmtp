@@ -11,7 +11,7 @@ Build-Depends:
  libmtp-dev,
  libvorbis-dev,
  pkg-config
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: http://gmtp.sourceforge.net/
 Vcs-Git: git://anonscm.debian.org/collab-maint/gmtp.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/gmtp.git
