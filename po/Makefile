@@ -11,7 +11,7 @@
 # Origin: gettext-0.16
 
 PACKAGE = gmtp
-VERSION = 1.3.5
+VERSION = 1.3.6
 PACKAGE_BUGREPORT = chewy509@mailcity.com
 
 SHELL = /bin/sh
@@ -61,10 +61,10 @@ MSGINIT = msginit
 MSGCONV = msgconv
 MSGFILTER = msgfilter
 
-POFILES =  da.po de.po en_AU.po es.po fr.po it.po
-GMOFILES =  da.gmo de.gmo en_AU.gmo es.gmo fr.gmo it.gmo
-UPDATEPOFILES =  da.po-update de.po-update en_AU.po-update es.po-update fr.po-update it.po-update
-DUMMYPOFILES =  da.nop de.nop en_AU.nop es.nop fr.nop it.nop
+POFILES =  da.po de.po en_AU.po es.po fr.po it.po ru.po
+GMOFILES =  da.gmo de.gmo en_AU.gmo es.gmo fr.gmo it.gmo ru.gmo
+UPDATEPOFILES =  da.po-update de.po-update en_AU.po-update es.po-update fr.po-update it.po-update ru.po-update
+DUMMYPOFILES =  da.nop de.nop en_AU.nop es.nop fr.nop it.nop ru.nop
 DISTFILES.common = Makefile.in.in remove-potcdate.sin \
 $(DISTFILES.common.extra1) $(DISTFILES.common.extra2) $(DISTFILES.common.extra3)
 DISTFILES = $(DISTFILES.common) Makevars POTFILES.in \
@@ -87,7 +87,7 @@ POTFILES = \
      ../src/progress.c \
      ../src/properties.c
 
-CATALOGS =  da.gmo de.gmo en_AU.gmo es.gmo fr.gmo it.gmo
+CATALOGS =  da.gmo de.gmo en_AU.gmo es.gmo fr.gmo it.gmo ru.gmo
 
 # Makevars gets inserted here. (Don't remove this line!)
 # Makefile variables for PO directory in any package using GNU gettext.

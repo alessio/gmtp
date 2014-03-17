@@ -59,11 +59,13 @@ void displayAbout(void) {
         "Darran Kartaschew (chewy509@mailcity.com)",
         "\nTranslations",
         "English - Darran Kartaschew",
+        "English (Australia) - Darran Kartaschew",
         "Italian - Francesca Ciceri",
         "French - 'Coug'",
         "German - Laurenz Kamp",
         "Spanish - Google Translate",
         "Danish - Cai Andersen",
+        "Russian - PuppyRus Linux team",
         NULL
     };
     dialog = gtk_about_dialog_new();
