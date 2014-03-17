@@ -1,4 +1,8 @@
 
+-- v1.3.6 - 10 Mar 2014
+
++ Add Russian Translation
+
 -- v1.3.5 - 25 Jan 2014
 
 * Move from CVS to git. (what took so long)? No history was imported into the git repository due unusual 

@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gmtp 1.3.5\n"
+"Project-Id-Version: gmtp 1.3.6\n"
 "Report-Msgid-Bugs-To: chewy509@mailcity.com\n"
-"POT-Creation-Date: 2014-01-24 09:10+1000\n"
+"POT-Creation-Date: 2014-03-11 19:47+1000\n"
 "PO-Revision-Date: 2014-01-17 12:45+1000\n"
 "Last-Translator: \n"
 "Language-Team: chewy509@mailcity.com\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Language: de\n"
 "X-Generator: Poedit 1.6.3\n"
 
-#: src/about.c:75 src/about.c:148
+#: src/about.c:77 src/about.c:150
 msgid ""
 "A simple MTP Client for Solaris 10\n"
 "and other UNIX / UNIX-like systems\n"
@@ -25,20 +25,20 @@ msgstr ""
 "Ein einfacher MTP-Client für Solaris 10\n"
 "und andere UNIX/UNIX-ähnlichen Systeme\n"
 
-#: src/about.c:106
+#: src/about.c:108
 msgid "translator-credits"
 msgstr "Laurenz Kamp"
 
-#: src/about.c:114
+#: src/about.c:116
 msgid "About gMTP"
 msgstr "Über gMTP"
 
-#: src/about.c:116 src/albumart.c:78 src/preferences.c:427
+#: src/about.c:118 src/albumart.c:78 src/preferences.c:427
 #: src/properties.c:603
 msgid "_Close"
 msgstr "_Schließen"
 
-#: src/about.c:160
+#: src/about.c:162
 msgid ""
 "<small>Copyright 2009-2014, Darran Kartaschew</small>\n"
 "<small>Released under the BSD License</small>"

@@ -11,7 +11,7 @@
 # Origin: gettext-0.16
 
 PACKAGE = gmtp
-VERSION = 1.3.5
+VERSION = 1.3.6
 PACKAGE_BUGREPORT = chewy509@mailcity.com
 
 SHELL = /bin/sh
