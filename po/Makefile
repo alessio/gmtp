@@ -11,7 +11,7 @@
 # Origin: gettext-0.16
 
 PACKAGE = gmtp
-VERSION = 1.3.6
+VERSION = 1.3.7
 PACKAGE_BUGREPORT = chewy509@mailcity.com
 
 SHELL = /bin/sh
@@ -28,32 +28,32 @@ datadir = ${datarootdir}
 localedir = ${datarootdir}/locale
 gettextsrcdir = $(datadir)/gettext/po
 
-INSTALL = /usr/bin/ginstall -c
+INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 
 # We use $(mkdir_p).
 # In automake <= 1.9.x, $(mkdir_p) is defined either as "mkdir -p --" or as
 # "$(mkinstalldirs)" or as "$(install_sh) -d". For these automake versions,
-# ${SHELL} /home/darran/Projects/gmtp-code/config/install-sh does not start with $(SHELL), so we add it.
-# In automake >= 1.10, /usr/bin/gmkdir -p is derived from ${MKDIR_P}, which is defined
+# ${SHELL} /home/darran/git/gmtp-code/config/install-sh does not start with $(SHELL), so we add it.
+# In automake >= 1.10, /usr/bin/mkdir -p is derived from ${MKDIR_P}, which is defined
 # either as "/path/to/mkdir -p" or ".../install-sh -c -d". For these automake
 # versions, $(mkinstalldirs) and $(install_sh) are unused.
-mkinstalldirs = $(SHELL) ${SHELL} /home/darran/Projects/gmtp-code/config/install-sh -d
-install_sh = $(SHELL) ${SHELL} /home/darran/Projects/gmtp-code/config/install-sh
-MKDIR_P = /usr/bin/gmkdir -p
-mkdir_p = /usr/bin/gmkdir -p
+mkinstalldirs = $(SHELL) ${SHELL} /home/darran/git/gmtp-code/config/install-sh -d
+install_sh = $(SHELL) ${SHELL} /home/darran/git/gmtp-code/config/install-sh
+MKDIR_P = /usr/bin/mkdir -p
+mkdir_p = /usr/bin/mkdir -p
 
-GMSGFMT_ = /usr/bin/gmsgfmt
-GMSGFMT_no = /usr/bin/gmsgfmt
-GMSGFMT_yes = /usr/bin/gmsgfmt
+GMSGFMT_ = /usr/bin/msgfmt
+GMSGFMT_no = /usr/bin/msgfmt
+GMSGFMT_yes = /usr/bin/msgfmt
 GMSGFMT = $(GMSGFMT_$(USE_MSGCTXT))
-MSGFMT_ = /usr/gnu/bin/msgfmt
-MSGFMT_no = /usr/gnu/bin/msgfmt
-MSGFMT_yes = /usr/gnu/bin/msgfmt
+MSGFMT_ = /usr/bin/msgfmt
+MSGFMT_no = /usr/bin/msgfmt
+MSGFMT_yes = /usr/bin/msgfmt
 MSGFMT = $(MSGFMT_$(USE_MSGCTXT))
-XGETTEXT_ = /usr/gnu/bin/xgettext
-XGETTEXT_no = /usr/gnu/bin/xgettext
-XGETTEXT_yes = /usr/gnu/bin/xgettext
+XGETTEXT_ = /usr/bin/xgettext
+XGETTEXT_no = /usr/bin/xgettext
+XGETTEXT_yes = /usr/bin/xgettext
 XGETTEXT = $(XGETTEXT_$(USE_MSGCTXT))
 MSGMERGE = msgmerge
 MSGMERGE_UPDATE = /usr/bin/msgmerge --update

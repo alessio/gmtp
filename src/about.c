@@ -60,7 +60,7 @@ void displayAbout(void) {
         "\nTranslations",
         "English - Darran Kartaschew",
         "English (Australia) - Darran Kartaschew",
-        "Italian - Francesca Ciceri",
+        "Italian - Francesca Ciceri, Fabio Castelli (Muflone)",
         "French - 'Coug'",
         "German - Laurenz Kamp",
         "Spanish - Google Translate",

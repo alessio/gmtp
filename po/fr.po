@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gmtp 1.3.6\n"
 "Report-Msgid-Bugs-To: chewy509@mailcity.com\n"
-"POT-Creation-Date: 2014-03-11 19:47+1000\n"
+"POT-Creation-Date: 2014-07-25 20:52+1000\n"
 "PO-Revision-Date: 2014-01-17 12:47+1000\n"
 "Last-Translator: \n"
 "Language-Team: chewy509@mailcity.com\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr\n"
 "X-Generator: Poedit 1.6.3\n"
 
 #: src/about.c:77 src/about.c:150
@@ -214,8 +214,8 @@ msgstr "Impossible de déplacer le dossier sélectionné?\n"
 msgid "Unable to move the selected folder underneath itself?\n"
 msgstr "Impossible de déplacer le dossier sélectionné sous lui-même?\n"
 
-#: src/callbacks.c:775 src/mtp.c:272 src/mtp.c:280 src/mtp.c:297 src/mtp.c:305
-#: src/mtp.c:313 src/mtp.c:321 src/mtp.c:334
+#: src/callbacks.c:775 src/mtp.c:272 src/mtp.c:297 src/mtp.c:305 src/mtp.c:313
+#: src/mtp.c:321
 msgid "N/A"
 msgstr "Non applicable"
 
@@ -683,11 +683,11 @@ msgstr "Rescan: Comment ai-je été appelé?\n"
 #: src/mtp.c:658
 #, c-format
 msgid ""
-"Unable to add %s due to insufficient space: filesize = %llu, freespace = %"
-"llu\n"
+"Unable to add %s due to insufficient space: filesize = %llu, freespace = "
+"%llu\n"
 msgstr ""
-"Impossible d'ajouter %s car l'espace est insuffisant: taille du fichier = %"
-"llu, espace libre  = %llu\n"
+"Impossible d'ajouter %s car l'espace est insuffisant: taille du fichier = "
+"%llu, espace libre  = %llu\n"
 
 #: src/mtp.c:662
 msgid "Unable to add file due to insufficient space"
@@ -1159,14 +1159,6 @@ msgstr "<b>Stockage:</b>"
 msgid "<b>Supported Formats:</b>"
 msgstr "<b>Formats supportés:</b>"
 
-#: src/properties.c:359
-msgid "<b>Secure Time:</b>"
-msgstr "<b>Temps sécuritaire:</b>"
-
-#: src/properties.c:372
-msgid "<b>Sync Partner:</b>"
-msgstr "<b>Partenaire de synchronisation:</b>"
-
 #: src/properties.c:449
 msgid "<b>Vendor:</b>"
 msgstr "<b>Vendeur:</b>"
@@ -1195,6 +1187,12 @@ msgstr "<b>Situation Bus:</b>"
 #, c-format
 msgid "%d MB (free) / %d MB (total)"
 msgstr "%d Mo (libre) / %d Mo (total)"
+
+#~ msgid "<b>Secure Time:</b>"
+#~ msgstr "<b>Temps sécuritaire:</b>"
+
+#~ msgid "<b>Sync Partner:</b>"
+#~ msgstr "<b>Partenaire de synchronisation:</b>"
 
 #~ msgid "Quit"
 #~ msgstr "Quitter"

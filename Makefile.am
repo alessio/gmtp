@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
-EXTRA_DIST = autogen.sh web po images misc pkginfo prototype postinstall
+EXTRA_DIST = autogen.sh po images misc pkginfo prototype postinstall
 SUBDIRS = src po images misc
 
 sysv-pkg: all 

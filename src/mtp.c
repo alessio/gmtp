@@ -186,8 +186,8 @@ guint deviceConnect() {
         DeviceMgr.modelname = NULL;
         DeviceMgr.serialnumber = NULL;
         DeviceMgr.deviceversion = NULL;
-        DeviceMgr.syncpartner = NULL;
-        DeviceMgr.sectime = NULL;
+        //DeviceMgr.syncpartner = NULL;
+        //DeviceMgr.sectime = NULL;
         DeviceMgr.devcert = NULL;
         DeviceMgr.Vendor = NULL;
         DeviceMgr.Product = NULL;
@@ -228,8 +228,8 @@ guint deviceDisconnect() {
         if (DeviceMgr.modelname != NULL) g_string_free(DeviceMgr.modelname, TRUE);
         if (DeviceMgr.serialnumber != NULL) g_string_free(DeviceMgr.serialnumber, TRUE);
         if (DeviceMgr.deviceversion != NULL) g_string_free(DeviceMgr.deviceversion, TRUE);
-        if (DeviceMgr.syncpartner != NULL) g_string_free(DeviceMgr.syncpartner, TRUE);
-        if (DeviceMgr.sectime != NULL) g_string_free(DeviceMgr.sectime, TRUE);
+        //if (DeviceMgr.syncpartner != NULL) g_string_free(DeviceMgr.syncpartner, TRUE);
+        //if (DeviceMgr.sectime != NULL) g_string_free(DeviceMgr.sectime, TRUE);
         if (DeviceMgr.devcert != NULL) g_string_free(DeviceMgr.devcert, TRUE);
         if (DeviceMgr.Vendor != NULL) g_string_free(DeviceMgr.Vendor, TRUE);
         if (DeviceMgr.Product != NULL) g_string_free(DeviceMgr.Product, TRUE);
@@ -275,13 +275,13 @@ void deviceProperties() {
             g_free(tmp_string);
         }
         // Sync Partner
-        tmp_string = LIBMTP_Get_Syncpartner(DeviceMgr.device);
-        if (tmp_string == NULL) {
-            DeviceMgr.syncpartner = g_string_new(_("N/A"));
-        } else {
-            DeviceMgr.syncpartner = g_string_new(tmp_string);
-            g_free(tmp_string);
-        }
+ //       tmp_string = LIBMTP_Get_Syncpartner(DeviceMgr.device);
+ //       if (tmp_string == NULL) {
+ //           DeviceMgr.syncpartner = g_string_new(_("N/A"));
+ //       } else {
+ //           DeviceMgr.syncpartner = g_string_new(tmp_string);
+ //           g_free(tmp_string);
+ //       }
         // Battery Level
         ret = LIBMTP_Get_Batterylevel(DeviceMgr.device, &DeviceMgr.maxbattlevel, &DeviceMgr.currbattlevel);
         if (ret != 0) {
@@ -324,16 +324,16 @@ void deviceProperties() {
             g_free(tmp_string);
         }
         // Secure Time
-        ret = LIBMTP_Get_Secure_Time(DeviceMgr.device, &tmp_string);
-        if (ret == 0 && tmp_string != NULL) {
-            // tmp_string is a XML fragment, and we need just the date/time out of it.
-            DeviceMgr.sectime = g_string_new(tmp_string);
-            g_free(tmp_string);
-        } else {
-            // Silently ignore - there may be devices not supporting secure time.
-            DeviceMgr.sectime = g_string_new(_("N/A"));
-            LIBMTP_Clear_Errorstack(DeviceMgr.device);
-        }
+ //       ret = LIBMTP_Get_Secure_Time(DeviceMgr.device, &tmp_string);
+ //       if (ret == 0 && tmp_string != NULL) {
+ //           // tmp_string is a XML fragment, and we need just the date/time out of it.
+ //           DeviceMgr.sectime = g_string_new(tmp_string);
+ //           g_free(tmp_string);
+ //       } else {
+ //           // Silently ignore - there may be devices not supporting secure time.
+ //           DeviceMgr.sectime = g_string_new(_("N/A"));
+ //          LIBMTP_Clear_Errorstack(DeviceMgr.device);
+ //       }
 
         // Storage.
         if (DeviceMgr.devicestorage == NULL) {

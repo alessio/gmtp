@@ -76,12 +76,12 @@ GtkWidget* create_windowProperties() {
     GtkWidget *label17;
     GtkWidget *label25;
     GtkWidget *label18;
-    GtkWidget *label19;
-    GtkWidget *label16;
+    //GtkWidget *label19;
+    //GtkWidget *label16;
     GtkWidget *labelStorage;
     GtkWidget *labelSupportedFormat;
-    GtkWidget *labelSecTime;
-    GtkWidget *labelSyncPartner;
+    //GtkWidget *labelSecTime;
+    //GtkWidget *labelSyncPartner;
     GtkWidget *label2;
     GtkWidget *alignment1;
     GtkWidget *table1;
@@ -355,31 +355,31 @@ GtkWidget* create_windowProperties() {
     gtk_widget_show(label50);
 
 
-    label19 = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label19), _("<b>Secure Time:</b>"));
-    gtk_widget_show(label19);
-#if HAVE_GTK3 == 0
-    gtk_table_attach(GTK_TABLE(table2), label19, 0, 1, 8, 9,
-            (GtkAttachOptions) (GTK_FILL),
-            (GtkAttachOptions) (0), 0, 0);
-#else
-    gtk_grid_attach(GTK_GRID(table2), label19, 0, 8, 1, 1);
-#endif
-    gtk_label_set_justify(GTK_LABEL(label19), GTK_JUSTIFY_RIGHT);
-    gtk_misc_set_alignment(GTK_MISC(label19), 0, 1);
+//    label19 = gtk_label_new(NULL);
+//    gtk_label_set_markup(GTK_LABEL(label19), _("<b>Secure Time:</b>"));
+//    gtk_widget_show(label19);
+//#if HAVE_GTK3 == 0
+//    gtk_table_attach(GTK_TABLE(table2), label19, 0, 1, 8, 9,
+//            (GtkAttachOptions) (GTK_FILL),
+//            (GtkAttachOptions) (0), 0, 0);
+//#else
+//    gtk_grid_attach(GTK_GRID(table2), label19, 0, 8, 1, 1);
+//#endif
+//    gtk_label_set_justify(GTK_LABEL(label19), GTK_JUSTIFY_RIGHT);
+//    gtk_misc_set_alignment(GTK_MISC(label19), 0, 1);
 
-    label16 = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label16), _("<b>Sync Partner:</b>"));
-    gtk_widget_show(label16);
-#if HAVE_GTK3 == 0
-    gtk_table_attach(GTK_TABLE(table2), label16, 0, 1, 9, 10,
-            (GtkAttachOptions) (GTK_FILL),
-            (GtkAttachOptions) (0), 0, 0);
-#else
-    gtk_grid_attach(GTK_GRID(table2), label16, 0, 9, 1, 1);
-#endif
-    gtk_label_set_justify(GTK_LABEL(label16), GTK_JUSTIFY_RIGHT);
-    gtk_misc_set_alignment(GTK_MISC(label16), 0, 1);
+//    label16 = gtk_label_new(NULL);
+//    gtk_label_set_markup(GTK_LABEL(label16), _("<b>Sync Partner:</b>"));
+//    gtk_widget_show(label16);
+//#if HAVE_GTK3 == 0
+//    gtk_table_attach(GTK_TABLE(table2), label16, 0, 1, 9, 10,
+//            (GtkAttachOptions) (GTK_FILL),
+//            (GtkAttachOptions) (0), 0, 0);
+//#else
+//    gtk_grid_attach(GTK_GRID(table2), label16, 0, 9, 1, 1);
+//#endif
+//    gtk_label_set_justify(GTK_LABEL(label16), GTK_JUSTIFY_RIGHT);
+//    gtk_misc_set_alignment(GTK_MISC(label16), 0, 1);
 
     labelStorage = gtk_label_new(("label30"));
     gtk_widget_show(labelStorage);
@@ -405,28 +405,28 @@ GtkWidget* create_windowProperties() {
     gtk_label_set_line_wrap(GTK_LABEL(labelSupportedFormat), FALSE);
     gtk_misc_set_alignment(GTK_MISC(labelSupportedFormat), 0, 0.5);
 
-    labelSecTime = gtk_label_new(("label32"));
-    gtk_widget_show(labelSecTime);
-#if HAVE_GTK3 == 0
-    gtk_table_attach(GTK_TABLE(table2), labelSecTime, 1, 2, 8, 9,
-            (GtkAttachOptions) (GTK_FILL),
-            (GtkAttachOptions) (0), 0, 0);
-#else
-    gtk_grid_attach(GTK_GRID(table2), labelSecTime, 1, 8, 1, 1);
-#endif
-    gtk_label_set_line_wrap(GTK_LABEL(labelSecTime), TRUE);
-    gtk_misc_set_alignment(GTK_MISC(labelSecTime), 0, 0.5);
+//    labelSecTime = gtk_label_new(("label32"));
+//    gtk_widget_show(labelSecTime);
+//#if HAVE_GTK3 == 0
+//    gtk_table_attach(GTK_TABLE(table2), labelSecTime, 1, 2, 8, 9,
+//            (GtkAttachOptions) (GTK_FILL),
+//            (GtkAttachOptions) (0), 0, 0);
+//#else
+//    gtk_grid_attach(GTK_GRID(table2), labelSecTime, 1, 8, 1, 1);
+//#endif
+//    gtk_label_set_line_wrap(GTK_LABEL(labelSecTime), TRUE);
+//    gtk_misc_set_alignment(GTK_MISC(labelSecTime), 0, 0.5);
 
-    labelSyncPartner = gtk_label_new(("label33"));
-    gtk_widget_show(labelSyncPartner);
-#if HAVE_GTK3 == 0
-    gtk_table_attach(GTK_TABLE(table2), labelSyncPartner, 1, 2, 9, 10,
-            (GtkAttachOptions) (GTK_FILL),
-            (GtkAttachOptions) (0), 0, 0);
-#else
-    gtk_grid_attach(GTK_GRID(table2), labelSyncPartner, 1, 9, 1, 1);
-#endif
-    gtk_misc_set_alignment(GTK_MISC(labelSyncPartner), 0, 0.5);
+//    labelSyncPartner = gtk_label_new(("label33"));
+//    gtk_widget_show(labelSyncPartner);
+//#if HAVE_GTK3 == 0
+//    gtk_table_attach(GTK_TABLE(table2), labelSyncPartner, 1, 2, 9, 10,
+//            (GtkAttachOptions) (GTK_FILL),
+//            (GtkAttachOptions) (0), 0, 0);
+//#else
+//    gtk_grid_attach(GTK_GRID(table2), labelSyncPartner, 1, 9, 1, 1);
+//#endif
+//    gtk_misc_set_alignment(GTK_MISC(labelSyncPartner), 0, 0.5);
 
     // Start the Raw Device Pane.
 #if HAVE_GTK3 == 0
@@ -667,8 +667,8 @@ GtkWidget* create_windowProperties() {
     gtk_label_set_text(GTK_LABEL(labelSupportedFormat), tmp_string2->str);
     g_string_free(tmp_string2, TRUE);
 
-    gtk_label_set_text(GTK_LABEL(labelSecTime), DeviceMgr.sectime->str);
-    gtk_label_set_text(GTK_LABEL(labelSyncPartner), DeviceMgr.syncpartner->str);
+    //gtk_label_set_text(GTK_LABEL(labelSecTime), DeviceMgr.sectime->str);
+    //gtk_label_set_text(GTK_LABEL(labelSyncPartner), DeviceMgr.syncpartner->str);
 
     // This is our raw information.
     gtk_label_set_text(GTK_LABEL(labelDeviceVendor), DeviceMgr.Vendor->str);
