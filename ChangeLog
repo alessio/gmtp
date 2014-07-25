@@ -1,3 +1,9 @@
+-- v1.3.7 - 24 Jul 2014
+
++ Update Italian translation, thank you to Muflone.
+* Remove query for Secure Time. Most devices no longer support the call, and some devices have been 
+  found to crash when running query. 
+* Remove "/web" folder from source distribution.
 
 -- v1.3.6 - 10 Mar 2014
 

@@ -13,12 +13,14 @@ d none share/locale/fr 0755 root root
 d none share/locale/it 0755 root root
 d none share/locale/da 0755 root root
 d none share/locale/de 0755 root root
+d none share/locale/ru 0755 root root
 d none share/locale/en_AU 0755 root root
 d none share/locale/es/LC_MESSAGES 0755 root root
 d none share/locale/fr/LC_MESSAGES 0755 root root
 d none share/locale/it/LC_MESSAGES 0755 root root
 d none share/locale/da/LC_MESSAGES 0755 root root
 d none share/locale/de/LC_MESSAGES 0755 root root
+d none share/locale/ru/LC_MESSAGES 0755 root root
 d none share/locale/en_AU/LC_MESSAGES 0755 root root
 f none bin/gmtp=src/gmtp 0755 root root
 f none share/gmtp/gmtpicon.png=images/gmtpicon.png 0644 root root
@@ -46,4 +48,5 @@ f none share/locale/fr/LC_MESSAGES/gmtp.mo=po/fr.gmo 0644 root root
 f none share/locale/it/LC_MESSAGES/gmtp.mo=po/it.gmo 0644 root root
 f none share/locale/da/LC_MESSAGES/gmtp.mo=po/da.gmo 0644 root root
 f none share/locale/de/LC_MESSAGES/gmtp.mo=po/de.gmo 0644 root root
+f none share/locale/ru/LC_MESSAGES/gmtp.mo=po/ru.gmo 0644 root root
 f none share/locale/en_AU/LC_MESSAGES/gmtp.mo=po/en_AU.gmo 0644 root root

@@ -37,8 +37,8 @@ extern "C" {
         GString *modelname;
         GString *serialnumber;
         GString *deviceversion;
-        GString *syncpartner;
-        GString *sectime;
+        //GString *syncpartner;
+        //GString *sectime;
         GString *devcert;
 
         // Raw device

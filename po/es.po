@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gmtp 1.3.6\n"
 "Report-Msgid-Bugs-To: chewy509@mailcity.com\n"
-"POT-Creation-Date: 2014-03-11 19:47+1000\n"
+"POT-Creation-Date: 2014-07-25 20:52+1000\n"
 "PO-Revision-Date: 2014-01-17 12:47+1000\n"
 "Last-Translator: \n"
 "Language-Team: chewy509@mailcity.com\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: es\n"
 "X-Generator: Poedit 1.6.3\n"
 
 #: src/about.c:77 src/about.c:150
@@ -214,8 +214,8 @@ msgstr "No se puede mover la carpeta seleccionada?\n"
 msgid "Unable to move the selected folder underneath itself?\n"
 msgstr "No se puede mover la carpeta seleccionada por debajo de sí mismo?\n"
 
-#: src/callbacks.c:775 src/mtp.c:272 src/mtp.c:280 src/mtp.c:297 src/mtp.c:305
-#: src/mtp.c:313 src/mtp.c:321 src/mtp.c:334
+#: src/callbacks.c:775 src/mtp.c:272 src/mtp.c:297 src/mtp.c:305 src/mtp.c:313
+#: src/mtp.c:321
 msgid "N/A"
 msgstr "N/A"
 
@@ -681,8 +681,8 @@ msgstr "Volver a explorar: ¿Cómo me llaman?\n"
 #: src/mtp.c:658
 #, c-format
 msgid ""
-"Unable to add %s due to insufficient space: filesize = %llu, freespace = %"
-"llu\n"
+"Unable to add %s due to insufficient space: filesize = %llu, freespace = "
+"%llu\n"
 msgstr ""
 "No se puede añadir %s debido a la falta de espacio: %llu = tamaño del "
 "archivo, %llu = espacio libre\n"
@@ -1155,14 +1155,6 @@ msgstr "<b>Almacenamiento:</b>"
 msgid "<b>Supported Formats:</b>"
 msgstr "<b>Formatos:</b>"
 
-#: src/properties.c:359
-msgid "<b>Secure Time:</b>"
-msgstr "<b>Asegure Tiempo:</b>"
-
-#: src/properties.c:372
-msgid "<b>Sync Partner:</b>"
-msgstr "<b>Sincronización Partner:</b>"
-
 #: src/properties.c:449
 msgid "<b>Vendor:</b>"
 msgstr "<b>Proveedor:</b>"
@@ -1191,6 +1183,12 @@ msgstr "<b>Autobús Ubicación:</b>"
 #, c-format
 msgid "%d MB (free) / %d MB (total)"
 msgstr "%d MB (gratis) / %d MB (total)"
+
+#~ msgid "<b>Secure Time:</b>"
+#~ msgstr "<b>Asegure Tiempo:</b>"
+
+#~ msgid "<b>Sync Partner:</b>"
+#~ msgstr "<b>Sincronización Partner:</b>"
 
 #~ msgid "Quit"
 #~ msgstr "Salir"
