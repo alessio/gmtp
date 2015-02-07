@@ -16,5 +16,6 @@ fi
 autoreconf --force --install --verbose
 
 cd $olddir
+chmod +x configure
 test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"
 

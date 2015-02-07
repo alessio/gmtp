@@ -59,6 +59,11 @@ GtkWidget *buttonAlbumDownload;
 GtkWidget *buttonAlbumDelete;
 GtkWidget *textboxAlbumArt;
 
+enum {
+  COLUMN_STRING,
+  COLUMN_INT,
+  N_COLUMNS
+};
 
 // ************************************************************************************************
 
@@ -109,11 +114,27 @@ void displayAddAlbumArtDialog(void) {
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 
     // Now create the combo box.
-#if HAVE_GTK3 == 0
-    textboxAlbumArt = gtk_combo_box_new_text();
-#else
-    textboxAlbumArt = gtk_combo_box_text_new();
-#endif
+    GtkListStore *store = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT);
+    gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), COLUMN_STRING, GTK_SORT_ASCENDING);
+    GtkTreeIter iter;
+    textboxAlbumArt = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+  
+//  combobox = gtk.ComboBox(liststore)
+//  cell = gtk.CellRendererText()
+//  combobox.pack_start(cell, True)
+//  combobox.add_attribute(cell, 'text', 0)  
+
+    GtkCellRenderer *cell = gtk_cell_renderer_text_new ();
+  // The following call causes the default cell area for combo boxes,
+  // a GtkCellAreaBox, to be instantiated
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (textboxAlbumArt), cell, TRUE);
+  gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT (textboxAlbumArt), cell, "text", COLUMN_STRING);
+    
+//#if HAVE_GTK3 == 0
+//    textboxAlbumArt = gtk_combo_box_new_text();
+//#else
+//    textboxAlbumArt = gtk_combo_box_text_new();
+//#endif
     gtk_widget_show(textboxAlbumArt);
     gtk_box_pack_start(GTK_BOX(hbox), textboxAlbumArt, TRUE, TRUE, 0);
     // Now add in our selection strings.
@@ -131,12 +152,19 @@ void displayAddAlbumArtDialog(void) {
 
     album_orig = albuminfo;
     while (albuminfo != NULL) {
-        if (albuminfo->name != NULL)
-#if HAVE_GTK3 == 0
-            gtk_combo_box_append_text(GTK_COMBO_BOX(textboxAlbumArt), albuminfo->name);
-#else
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(textboxAlbumArt), albuminfo->name);
-#endif
+        if (albuminfo->name != NULL){
+            // Add a new row to the model
+            gtk_list_store_append (store, &iter);
+            gtk_list_store_set (store, &iter,
+                              COLUMN_STRING, albuminfo->name,
+                              COLUMN_INT, albuminfo->album_id,
+                              -1);
+        }
+//#if HAVE_GTK3 == 0
+//            gtk_combo_box_append_text(GTK_COMBO_BOX(textboxAlbumArt), albuminfo->name);
+//#else
+//            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(textboxAlbumArt), albuminfo->name);
+//#endif
         albuminfo = albuminfo->next;
     }
     // End add selection.
@@ -187,7 +215,8 @@ void displayAddAlbumArtDialog(void) {
     gtk_widget_set_sensitive(GTK_WIDGET(buttonAlbumDownload), FALSE);
 
     // Now, update the stock image with one from the selected album.
-    AlbumArtUpdateImage(album_orig);
+    //AlbumArtUpdateImage(album_orig);
+    on_albumtextbox_activate(NULL, NULL);
 
     g_signal_connect((gpointer) textboxAlbumArt, "changed",
             G_CALLBACK(on_albumtextbox_activate),
@@ -334,13 +363,19 @@ void on_buttonAlbumArtAdd_activate(GtkWidget *button, gpointer user_data) {
 
         if (filename != NULL) {
             // Upload the file to the selected album.
-            gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(textboxAlbumArt));
-            gint count = 0;
+            GtkTreeModel *list_store = gtk_combo_box_get_model(GTK_COMBO_BOX(textboxAlbumArt));
+            GtkTreeIter iter;
+            gtk_combo_box_get_active_iter(GTK_COMBO_BOX(textboxAlbumArt), &iter);
+            gint selected = 0;
+            gtk_tree_model_get (list_store, &iter,
+                          COLUMN_INT, &selected,
+                          -1);
+            
             LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
             LIBMTP_album_t *albuminfo = albumlist;
 
             while (albuminfo != NULL) {
-                if (count == selected) {
+                if (albuminfo->album_id == selected) {
                     // Found our album, so update the image on the device, then update the display.
                     albumAddArt(albuminfo->album_id, filename);
                     AlbumArtUpdateImage(albuminfo);
@@ -351,7 +386,6 @@ void on_buttonAlbumArtAdd_activate(GtkWidget *button, gpointer user_data) {
                 }
                 // Next album_entry
                 albuminfo = albuminfo->next;
-                count++;
             }
             // Set a default image as we didn't find our album.
             AlbumArtUpdateImage(NULL);
@@ -373,13 +407,19 @@ void on_buttonAlbumArtAdd_activate(GtkWidget *button, gpointer user_data) {
 void on_buttonAlbumArtDelete_activate(GtkWidget *button, gpointer user_data) {
 
     // Send a blank representation.
-    gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(textboxAlbumArt));
-    gint count = 0;
+    GtkTreeModel *list_store = gtk_combo_box_get_model(GTK_COMBO_BOX(textboxAlbumArt));
+    GtkTreeIter iter;
+    gtk_combo_box_get_active_iter(GTK_COMBO_BOX(textboxAlbumArt), &iter);
+    gint selected = 0;
+    gtk_tree_model_get (list_store, &iter,
+                  COLUMN_INT, &selected,
+                  -1);
+                          
     LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
     LIBMTP_album_t *albuminfo = albumlist;
 
     while (albuminfo != NULL) {
-        if (count == selected) {
+        if (albuminfo->album_id == selected) {
             // Found our album, so update the image on the device, then update the display.
             albumDeleteArt(albuminfo->album_id);
             AlbumArtUpdateImage(NULL);
@@ -388,7 +428,6 @@ void on_buttonAlbumArtDelete_activate(GtkWidget *button, gpointer user_data) {
         }
         // Next album_entry
         albuminfo = albuminfo->next;
-        count++;
     }
     // Set a default image as we didn't find our album.
     AlbumArtUpdateImage(NULL);
@@ -405,8 +444,14 @@ void on_buttonAlbumArtDelete_activate(GtkWidget *button, gpointer user_data) {
  */
 void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
     FILE* fd;
-    gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(textboxAlbumArt));
-    gint count = 0;
+    GtkTreeModel *list_store = gtk_combo_box_get_model(GTK_COMBO_BOX(textboxAlbumArt));
+    GtkTreeIter iter;
+    gtk_combo_box_get_active_iter(GTK_COMBO_BOX(textboxAlbumArt), &iter);
+    gint selected = 0;
+    gtk_tree_model_get (list_store, &iter,
+                  COLUMN_INT, &selected,
+                  -1);
+                  
     GtkWidget *FileDialog = NULL;
     gchar *filename = NULL;
     LIBMTP_filesampledata_t *imagedata = NULL;
@@ -415,7 +460,7 @@ void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
 
     // Scan our albums, looking for the correct one.
     while (albuminfo != NULL) {
-        if (count == selected) {
+        if (albuminfo->album_id == selected) {
             // Found our album, let's get our data..
             imagedata = albumGetArt(albuminfo);
             if (imagedata != NULL) {
@@ -460,7 +505,6 @@ void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
         }
         // Next album_entry
         albuminfo = albuminfo->next;
-        count++;
     }
     // Set a default image as we didn't find our album.
     clearAlbumStruc(albumlist);
@@ -475,20 +519,25 @@ void on_buttonAlbumArtDownload_activate(GtkWidget *button, gpointer user_data) {
  * @param user_data
  */
 void on_albumtextbox_activate(GtkComboBox *combobox, gpointer user_data) {
-    gint selected = gtk_combo_box_get_active(combobox);
-    gint count = 0;
+    GtkTreeModel *list_store = gtk_combo_box_get_model(GTK_COMBO_BOX(textboxAlbumArt));
+    GtkTreeIter iter;
+    gtk_combo_box_get_active_iter(GTK_COMBO_BOX(textboxAlbumArt), &iter);
+    gint selected = 0;
+    gtk_tree_model_get (list_store, &iter,
+                  COLUMN_INT, &selected,
+                  -1);
+                  
     LIBMTP_album_t *albumlist = LIBMTP_Get_Album_List_For_Storage(DeviceMgr.device, DeviceMgr.devicestorage->id);
     LIBMTP_album_t *albuminfo = albumlist;
 
     while (albuminfo != NULL) {
-        if (count == selected) {
+        if (albuminfo->album_id == selected) {
             AlbumArtUpdateImage(albuminfo);
             clearAlbumStruc(albumlist);
             return;
         }
         // Text the album_entry
         albuminfo = albuminfo->next;
-        count++;
     }
     // Set a default image
     AlbumArtUpdateImage(NULL);

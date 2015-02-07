@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gmtp 1.3.6\n"
 "Report-Msgid-Bugs-To: chewy509@mailcity.com\n"
-"POT-Creation-Date: 2014-07-25 20:52+1000\n"
+"POT-Creation-Date: 2015-01-12 16:46+1000\n"
 "PO-Revision-Date: 2014-07-14 01:08+0200\n"
 "Last-Translator: Fabio Castelli (Muflone) <webreg@vbsimple.net>\n"
 "Language-Team: Italian\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/about.c:77 src/about.c:150
+#: src/about.c:78 src/about.c:151
 msgid ""
 "A simple MTP Client for Solaris 10\n"
 "and other UNIX / UNIX-like systems\n"
@@ -24,22 +24,22 @@ msgstr ""
 "Un semplice client MTP per Solaris 10\n"
 "e altri sistemi UNIX / simil UNIX\n"
 
-#: src/about.c:108
+#: src/about.c:109
 msgid "translator-credits"
 msgstr ""
 "Francesca Ciceri\n"
 "Fabio Castelli"
 
-#: src/about.c:116
+#: src/about.c:117
 msgid "About gMTP"
 msgstr "Informazioni su gMTP"
 
-#: src/about.c:118 src/albumart.c:78 src/preferences.c:427
+#: src/about.c:119 src/albumart.c:83 src/preferences.c:427
 #: src/properties.c:603
 msgid "_Close"
 msgstr "_Chiudi"
 
-#: src/about.c:162
+#: src/about.c:163
 msgid ""
 "<small>Copyright 2009-2014, Darran Kartaschew</small>\n"
 "<small>Released under the BSD License</small>"
@@ -47,15 +47,15 @@ msgstr ""
 "<small>Copyright 2009-2014, Darran Kartaschew</small>\n"
 "<small>Rilasciato sotto licenza BSD</small>"
 
-#: src/albumart.c:76 src/interface.c:346 src/interface.c:546
+#: src/albumart.c:81 src/interface.c:346 src/interface.c:546
 msgid "Album Art"
 msgstr "Copertina d'album"
 
-#: src/albumart.c:106
+#: src/albumart.c:111
 msgid "Album:"
 msgstr "Album:"
 
-#: src/albumart.c:124
+#: src/albumart.c:145
 msgid ""
 "No Albums available to set Album Art with. Either:\n"
 "1. You have no music files uploaded?\n"
@@ -71,23 +71,23 @@ msgstr ""
 "creato automaticamente per te gli album o il supporto ai metadati per quei "
 "file?\n"
 
-#: src/albumart.c:175
+#: src/albumart.c:203
 msgid "Upload"
 msgstr "Caricare"
 
-#: src/albumart.c:179
+#: src/albumart.c:207
 msgid "Remove"
 msgstr "Rimuovere"
 
-#: src/albumart.c:184 src/interface.c:526
+#: src/albumart.c:212 src/interface.c:526
 msgid "Download"
 msgstr "Scaricare"
 
-#: src/albumart.c:321
+#: src/albumart.c:350
 msgid "Select Album Art File"
 msgstr "Seleziona file copertina d'album "
 
-#: src/albumart.c:323 src/albumart.c:425 src/callbacks.c:415
+#: src/albumart.c:352 src/albumart.c:470 src/callbacks.c:415
 #: src/interface.c:1422 src/interface.c:1973 src/interface.c:2015
 #: src/interface.c:2513 src/interface.c:2573 src/interface.c:2636
 #: src/interface.c:3163 src/interface.c:3360 src/playlist.c:953
@@ -96,27 +96,27 @@ msgstr "Seleziona file copertina d'album "
 msgid "_Cancel"
 msgstr "A_nnulla"
 
-#: src/albumart.c:324 src/callbacks.c:416 src/interface.c:1423
+#: src/albumart.c:353 src/callbacks.c:416 src/interface.c:1423
 #: src/interface.c:1974 src/interface.c:2016 src/playlist.c:1387
 #: src/playlist.c:1474 src/preferences.c:728 src/preferences.c:763
 msgid "_Open"
 msgstr "_Apri"
 
 # ##########################################
-#: src/albumart.c:423
+#: src/albumart.c:468
 msgid "Save Album Art File"
 msgstr "Salva file copertina d'album"
 
-#: src/albumart.c:426
+#: src/albumart.c:471
 msgid "_Save"
 msgstr "_Salva"
 
-#: src/albumart.c:445
+#: src/albumart.c:490
 #, c-format
 msgid "Couldn't save image file %s\n"
 msgstr "Impossibile salvare il file immagine %s\n"
 
-#: src/albumart.c:446
+#: src/albumart.c:491
 msgid "Couldn't save image file\n"
 msgstr "Impossibile salvare il file immagine\n"
 
