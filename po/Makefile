@@ -11,7 +11,7 @@
 # Origin: gettext-0.16
 
 PACKAGE = gmtp
-VERSION = 1.3.7
+VERSION = 1.3.9
 PACKAGE_BUGREPORT = chewy509@mailcity.com
 
 SHELL = /bin/sh
@@ -34,12 +34,12 @@ INSTALL_DATA = ${INSTALL} -m 644
 # We use $(mkdir_p).
 # In automake <= 1.9.x, $(mkdir_p) is defined either as "mkdir -p --" or as
 # "$(mkinstalldirs)" or as "$(install_sh) -d". For these automake versions,
-# ${SHELL} /home/darran/git/gmtp-code/config/install-sh does not start with $(SHELL), so we add it.
+# ${SHELL} /home/darran/Projects/gmtp-code/config/install-sh does not start with $(SHELL), so we add it.
 # In automake >= 1.10, /usr/bin/mkdir -p is derived from ${MKDIR_P}, which is defined
 # either as "/path/to/mkdir -p" or ".../install-sh -c -d". For these automake
 # versions, $(mkinstalldirs) and $(install_sh) are unused.
-mkinstalldirs = $(SHELL) ${SHELL} /home/darran/git/gmtp-code/config/install-sh -d
-install_sh = $(SHELL) ${SHELL} /home/darran/git/gmtp-code/config/install-sh
+mkinstalldirs = $(SHELL) ${SHELL} /home/darran/Projects/gmtp-code/config/install-sh -d
+install_sh = $(SHELL) ${SHELL} /home/darran/Projects/gmtp-code/config/install-sh
 MKDIR_P = /usr/bin/mkdir -p
 mkdir_p = /usr/bin/mkdir -p
 
@@ -61,10 +61,10 @@ MSGINIT = msginit
 MSGCONV = msgconv
 MSGFILTER = msgfilter
 
-POFILES =  da.po de.po en_AU.po es.po fr.po it.po ru.po
-GMOFILES =  da.gmo de.gmo en_AU.gmo es.gmo fr.gmo it.gmo ru.gmo
-UPDATEPOFILES =  da.po-update de.po-update en_AU.po-update es.po-update fr.po-update it.po-update ru.po-update
-DUMMYPOFILES =  da.nop de.nop en_AU.nop es.nop fr.nop it.nop ru.nop
+POFILES =  da.po de.po en_AU.po es.po fr.po it.po ru.po pt_BR.po
+GMOFILES =  da.gmo de.gmo en_AU.gmo es.gmo fr.gmo it.gmo ru.gmo pt_BR.gmo
+UPDATEPOFILES =  da.po-update de.po-update en_AU.po-update es.po-update fr.po-update it.po-update ru.po-update pt_BR.po-update
+DUMMYPOFILES =  da.nop de.nop en_AU.nop es.nop fr.nop it.nop ru.nop pt_BR.nop
 DISTFILES.common = Makefile.in.in remove-potcdate.sin \
 $(DISTFILES.common.extra1) $(DISTFILES.common.extra2) $(DISTFILES.common.extra3)
 DISTFILES = $(DISTFILES.common) Makevars POTFILES.in \
@@ -87,7 +87,7 @@ POTFILES = \
      ../src/progress.c \
      ../src/properties.c
 
-CATALOGS =  da.gmo de.gmo en_AU.gmo es.gmo fr.gmo it.gmo ru.gmo
+CATALOGS =  da.gmo de.gmo en_AU.gmo es.gmo fr.gmo it.gmo ru.gmo pt_BR.gmo
 
 # Makevars gets inserted here. (Don't remove this line!)
 # Makefile variables for PO directory in any package using GNU gettext.

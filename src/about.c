@@ -66,19 +66,20 @@ void displayAbout(void) {
         "Spanish - Google Translate",
         "Danish - Cai Andersen",
         "Russian - PuppyRus Linux team",
+        "Brazilian Portuguese - Rafael Ferreira",
         NULL
     };
     dialog = gtk_about_dialog_new();
     gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME);
     gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
     gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
-            "Copyright 2009-2014, Darran Kartaschew\nReleased under the BSD License");
+            "Copyright 2009-2015, Darran Kartaschew\nReleased under the BSD License");
     gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
             _("A simple MTP Client for Solaris 10\nand other UNIX / UNIX-like systems\n"));
     gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(dialog),
             "gMTP License\n"
             "------------\n\n"
-            "Copyright (C) 2009-2014, Darran Kartaschew.\n"
+            "Copyright (C) 2009-2015, Darran Kartaschew.\n"
             "All rights reserved.\n\n"
             "Redistribution and use in source and binary forms, with or without "
             "modification, are permitted provided that the following conditions are met:\n\n"
