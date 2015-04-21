@@ -23,7 +23,7 @@ Architecture: any
 Depends:
  ${misc:Depends},
  ${shlibs:Depends}
-Description: simple MP3 player client for MTP based devices
+Description: simple file transfer program for MTP based devices
  gMTP is a simple and light-weight interface to the features provided
  by libmtp, which allows users to manage the files stored on any MTP
  music player supported by the libraries, including those with
